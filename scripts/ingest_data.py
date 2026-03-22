@@ -1,7 +1,7 @@
 """
 scripts/ingest_data.py
 ======================
-Run this script once to load, chunk, and index all your source documents.
+Run this script once to load, chunk, embed, and index all your source documents.
 Re-run it whenever you add new documents to data/raw/.
 
 Usage (from the project root):
@@ -10,11 +10,12 @@ Usage (from the project root):
 What this script does:
     1. Loads documents from data/raw/ (PDFs, markdown, text files)
     2. Chunks them into smaller pieces using SentenceSplitter
-    3. [Phase 3] Embeds chunks using sentence-transformers
-    4. [Phase 3] Stores embeddings in ChromaDB
+    3. Embeds chunks using sentence-transformers (all-MiniLM-L6-v2)
+    4. Stores embeddings in ChromaDB for fast retrieval
 
-For now (Phase 2), Steps 1 and 2 are implemented.
-Steps 3 and 4 are stubbed out until Phase 3.
+Note:
+    If you want to re-index from scratch (e.g., after changing chunk_size),
+    delete the data/chroma_db/ folder first, then re-run this script.
 """
 
 import sys
@@ -69,18 +70,38 @@ def main():
     logger.info(f"Created {chunk_stats['total_nodes']} chunks")
     logger.info(f"Average chunk size: {chunk_stats['avg_chunk_length']} characters")
 
-    # ── Step 3: Embed + index (Phase 3) ───────
+    # ── Step 3: Embed + store in ChromaDB ──────
     logger.info("")
-    logger.info("STEP 3: Embedding + indexing (Phase 3 — not yet implemented)")
-    logger.info("  → Come back here after completing Phase 3")
+    logger.info("STEP 3: Embedding chunks + storing in ChromaDB...")
+    logger.info("  (first run downloads the embedding model ~80 MB)")
 
-    # ── Step 4: Summary ───────────────────────
+    from src.indexing.vector_store import build_index_from_nodes
+
+    index = build_index_from_nodes(nodes)
+
+    # ── Step 4: Verify ─────────────────────────
+    logger.info("")
+    logger.info("STEP 4: Verifying index...")
+
+    from src.indexing.vector_store import load_existing_index
+
+    verify_index = load_existing_index()
+    if verify_index is not None:
+        logger.info("Index verification passed ✅")
+    else:
+        logger.error("Index verification FAILED — ChromaDB appears empty")
+        sys.exit(1)
+
+    # ── Summary ────────────────────────────────
     logger.info("")
     logger.info("=" * 50)
-    logger.info("Phase 2 Complete! ✅")
-    logger.info(f"  Documents loaded: {stats['total_documents']}")
-    logger.info(f"  Chunks created:   {chunk_stats['total_nodes']}")
-    logger.info("Next step: implement Phase 3 (vector store + embeddings)")
+    logger.info("Ingestion Complete! ✅")
+    logger.info(f"  Documents loaded:  {stats['total_documents']}")
+    logger.info(f"  Chunks created:    {chunk_stats['total_nodes']}")
+    logger.info(f"  Vectors stored:    {chunk_stats['total_nodes']}")
+    logger.info(f"  ChromaDB location: ./data/chroma_db/")
+    logger.info("")
+    logger.info("Next step: Phase 4 — build the RAG query pipeline")
     logger.info("=" * 50)
 
 
