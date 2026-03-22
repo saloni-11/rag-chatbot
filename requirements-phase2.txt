@@ -1,0 +1,15 @@
+# ─── Phase 2: Data Ingestion (loader + chunker) ─────
+# These are lightweight — safe to install together (~200 MB)
+
+# RAG Framework (core + file readers for SimpleDirectoryReader)
+llama-index-core==0.10.68
+llama-index-readers-file==0.1.33
+
+# Document Processing
+pypdf==4.3.1
+beautifulsoup4==4.12.3
+
+# Utilities
+python-dotenv==1.0.1
+loguru==0.7.2
+pydantic==2.8.2

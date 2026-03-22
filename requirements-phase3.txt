@@ -1,0 +1,10 @@
+# ─── Phase 3: Vector Store + Embeddings ─────────────
+# Install ON TOP of Phase 2 requirements
+# ⚠️  sentence-transformers pulls in torch (~2 GB) — close other apps first
+# TIP: install torch CPU-only first to save ~1.5 GB:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+llama-index-vector-stores-chroma==0.1.10
+llama-index-embeddings-huggingface==0.2.3
+chromadb==0.5.5
+sentence-transformers==3.0.1

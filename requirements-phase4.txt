@@ -1,0 +1,7 @@
+# ─── Phase 4: RAG Pipeline + LLM ────────────────────
+# Install ON TOP of Phase 2 + 3 requirements
+# Lightweight — Groq is an API, no local model needed
+
+llama-index-llms-groq==0.1.4
+groq==0.9.0
+tenacity==8.5.0
