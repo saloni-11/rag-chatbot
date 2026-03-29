@@ -1,56 +1,45 @@
 """
-RAG Pipeline — Phase 4: RAG Core with LlamaIndex
-==================================================
-This is the brain of the chatbot. It connects three things:
-  1. Your ChromaDB vector store (where the embedded chunks live)
-  2. The Groq LLM (which generates natural language answers)
-  3. LlamaIndex's query engine (which orchestrates retrieval + generation)
+RAG Pipeline — Phase 5 Update
+==============================
+Updated to integrate guardrails between the retrieval and LLM steps.
 
-How a query flows through the pipeline:
-  ┌─────────────────────────────────────────────────────┐
-  │ User asks: "What is self-attention?"                │
-  │                                                     │
-  │ Step 1: Embed the question                          │
-  │   → "What is self-attention?" becomes a 384-dim     │
-  │     vector using the same MiniLM model              │
-  │                                                     │
-  │ Step 2: Retrieve similar chunks from ChromaDB       │
-  │   → ChromaDB compares the question vector against   │
-  │     all 77 stored vectors using cosine similarity   │
-  │   → Returns the top-k most similar chunks           │
-  │     (default k=3, meaning 3 chunks)                 │
-  │                                                     │
-  │ Step 3: Build a prompt                              │
-  │   → LlamaIndex assembles: system prompt + retrieved │
-  │     chunks + user question into one LLM prompt      │
-  │                                                     │
-  │ Step 4: Send to Groq LLM                            │
-  │   → Groq runs llama3-8b-8192 and returns an answer  │
-  │   → The answer is grounded in the retrieved chunks  │
-  └─────────────────────────────────────────────────────┘
+The query flow is now:
 
-Why Groq?
-  Groq provides free API access to open-source LLMs with extremely fast
-  inference. We're using llama3-8b-8192 which is good enough for a
-  chatbot and keeps costs at zero.
+  User Question
+      │
+      ▼
+  [Scope Check] ──── out of scope ──→ "Ask about AI/ML..."
+      │ in scope
+      ▼
+  [Retrieve chunks from ChromaDB]
+      │
+      ▼
+  [Confidence Check] ── low confidence ──→ "I don't have enough info..."
+      │ passed
+      ▼
+  [Filter low-quality chunks]
+      │
+      ▼
+  [Send filtered chunks + question to Groq LLM]
+      │
+      ▼
+  [Return answer + sources]
 
-What is top_k?
-  When retrieving chunks, top_k controls how many chunks to fetch.
-  - top_k=3: focused answers, less context, faster
-  - top_k=5: broader answers, more context, slightly slower
-  - top_k=10: very broad, risks including irrelevant chunks
-  3 is a good default. You can tune this based on answer quality.
+Why do we split retrieval and synthesis?
+  In Phase 4, we used RetrieverQueryEngine which bundles retrieval + LLM
+  into one call. That's convenient but means we can't inspect or filter
+  the retrieved chunks before they reach the LLM.
 
-What is similarity_top_k vs top_k?
-  Same thing — LlamaIndex calls it similarity_top_k in the retriever
-  config. It means "return the top k most similar chunks."
+  Now we call the retriever and synthesizer separately so we can insert
+  guardrail checks in between. This is a common pattern in production
+  RAG systems — you almost always want to inspect/filter/rerank retrieved
+  chunks before passing them to the LLM.
 """
 
 import os
 from typing import Optional
 
 from llama_index.core import Settings, VectorStoreIndex
-from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core.response_synthesizers import get_response_synthesizer
 from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.llms.groq import Groq
@@ -58,31 +47,25 @@ from loguru import logger
 
 from src.indexing.embeddings import get_embedding_model
 from src.indexing.vector_store import load_existing_index
-from src.rag.guardrails import SYSTEM_PROMPT
+from src.rag.guardrails import SYSTEM_PROMPT, Guardrails
 
 
 # ── Default config ───────────────────────────────────
 DEFAULT_MODEL = "llama-3.1-8b-instant"
 DEFAULT_TOP_K = 3
-DEFAULT_TEMPERATURE = 0.1  # low = more deterministic/factual answers
+DEFAULT_TEMPERATURE = 0.1
 
 
 class RAGPipeline:
     """
-    The main RAG query pipeline.
+    The main RAG query pipeline with guardrails.
 
     Usage:
         pipeline = RAGPipeline()
         result = pipeline.query("What is the transformer architecture?")
         print(result["answer"])
         print(result["sources"])
-
-    What happens when you call query():
-        1. Your question is embedded (text → vector)
-        2. ChromaDB retrieves the top_k most similar chunks
-        3. Those chunks + your question are sent to Groq's LLM
-        4. The LLM generates an answer grounded in those chunks
-        5. You get back the answer + the source chunks used
+        print(result["guardrail_action"])  # "passed", "scope_rejected", etc.
     """
 
     def __init__(
@@ -91,16 +74,6 @@ class RAGPipeline:
         top_k: int = DEFAULT_TOP_K,
         temperature: float = DEFAULT_TEMPERATURE,
     ):
-        """
-        Initialise the RAG pipeline.
-
-        Args:
-            model:       Groq model name (llama3-8b-8192 is the free tier default)
-            top_k:       number of chunks to retrieve per query
-            temperature: LLM creativity (0.0 = deterministic, 1.0 = creative)
-                         We keep it low (0.1) because we want factual answers,
-                         not creative writing.
-        """
         self.model = model
         self.top_k = top_k
         self.temperature = temperature
@@ -111,21 +84,18 @@ class RAGPipeline:
 
     def _setup(self):
         """
-        Wire together: embedding model + LLM + vector store + query engine.
+        Wire together all components.
 
-        This is where LlamaIndex's abstractions shine — it handles the
-        orchestration of retrieval → prompt building → LLM call for you.
+        Key change from Phase 4:
+          We no longer use RetrieverQueryEngine (which bundles everything).
+          Instead we keep the retriever and synthesizer as separate objects
+          so we can run guardrails between them.
         """
-        # ── 1. Load the embedding model ──────────
-        # Same model used during ingestion — MUST be the same, otherwise
-        # the question vector would be in a different "space" than the
-        # stored chunk vectors, and similarity search would return garbage.
+        # ── 1. Embedding model ───────────────────
         embed_model = get_embedding_model()
         Settings.embed_model = embed_model
 
-        # ── 2. Set up the Groq LLM ──────────────
-        # The API key is read from the GROQ_API_KEY environment variable.
-        # If it's not set, this will raise an error.
+        # ── 2. Groq LLM ─────────────────────────
         api_key = os.getenv("GROQ_API_KEY")
         if not api_key:
             raise ValueError(
@@ -141,9 +111,7 @@ class RAGPipeline:
         Settings.llm = self.llm
         logger.info(f"LLM: {self.model} (temperature={self.temperature})")
 
-        # ── 3. Load the vector store index ───────
-        # This connects to ChromaDB and loads the existing embeddings.
-        # No re-embedding happens here — it's just reading from disk.
+        # ── 3. Vector store index ────────────────
         self.index = load_existing_index()
         if self.index is None:
             raise RuntimeError(
@@ -151,77 +119,114 @@ class RAGPipeline:
                 "  python scripts/ingest_data.py"
             )
 
-        # ── 4. Build the query engine ────────────
-        # The query engine combines:
-        #   - Retriever: fetches top_k similar chunks from ChromaDB
-        #   - Response synthesizer: builds the prompt and calls the LLM
-        #
-        # "compact" mode means: stuff all retrieved chunks into a single
-        # prompt (as opposed to "refine" which calls the LLM once per chunk
-        # and iteratively refines the answer — slower but sometimes better
-        # for very long contexts).
-        retriever = VectorIndexRetriever(
+        # ── 4. Retriever (separate from synthesizer) ─
+        # The retriever ONLY fetches chunks — it doesn't call the LLM.
+        # This lets us inspect and filter chunks before the LLM sees them.
+        self.retriever = VectorIndexRetriever(
             index=self.index,
             similarity_top_k=self.top_k,
         )
 
-        response_synthesizer = get_response_synthesizer(
+        # ── 5. Response synthesizer (calls the LLM) ─
+        # "compact" stuffs all chunks into one prompt.
+        # The system prompt template tells the LLM how to behave.
+        self.synthesizer = get_response_synthesizer(
             llm=self.llm,
             response_mode="compact",
-            # This is the system prompt that tells the LLM how to behave.
-            # It instructs the model to only answer from the provided context.
             text_qa_template=SYSTEM_PROMPT,
         )
 
-        self.query_engine = RetrieverQueryEngine(
-            retriever=retriever,
-            response_synthesizer=response_synthesizer,
-        )
+        # ── 6. Guardrails ────────────────────────
+        # Initialises scope checking (pre-computes reference embeddings).
+        self.guardrails = Guardrails()
 
-        logger.info(f"Query engine ready (top_k={self.top_k})")
+        logger.info(f"Query engine ready (top_k={self.top_k}, with guardrails)")
 
     def query(self, question: str) -> dict:
         """
-        Ask a question and get a grounded answer.
-
-        Args:
-            question: the user's question (natural language string)
+        Ask a question with full guardrail protection.
 
         Returns:
             dict with:
-                - "answer":  the LLM's response (grounded in retrieved chunks)
-                - "sources": list of source chunks used, each with:
-                    - "text": the chunk content
-                    - "file_name": which document it came from
-                    - "score": similarity score (higher = more relevant)
-
-        What happens internally:
-            1. question → embedding model → 384-dim vector
-            2. vector → ChromaDB → top_k most similar chunks
-            3. chunks + question → Groq LLM → answer
+                - "answer":           the response text
+                - "sources":          list of source chunks used
+                - "guardrail_action": what happened
+                    "passed"             → normal RAG answer
+                    "scope_rejected"     → question was out of scope
+                    "low_confidence"     → retrieved chunks weren't relevant
+                    "empty_query"        → user sent blank input
         """
         if not question.strip():
-            return {"answer": "Please ask a question.", "sources": []}
+            return {
+                "answer": "Please ask a question.",
+                "sources": [],
+                "guardrail_action": "empty_query",
+            }
 
         logger.info(f"Query: {question}")
 
-        # LlamaIndex handles the full flow: embed → retrieve → synthesize
-        response = self.query_engine.query(question)
+        # ── Layer 1: Scope check ─────────────────
+        # Is this question about AI/ML/Data Analytics?
+        # If not, reject immediately without hitting ChromaDB or Groq.
+        in_scope, scope_message = self.guardrails.check_scope(question)
+        if not in_scope:
+            logger.info("Guardrail: scope rejected")
+            return {
+                "answer": scope_message,
+                "sources": [],
+                "guardrail_action": "scope_rejected",
+            }
 
-        # Extract source information from the response
-        sources = []
-        for node in response.source_nodes:
-            sources.append({
-                "text": node.node.text[:500],  # first 500 chars of the chunk
-                "file_name": node.node.metadata.get("file_name", "unknown"),
-                "score": round(node.score, 4) if node.score else None,
-            })
+        # ── Retrieve chunks from ChromaDB ────────
+        # This embeds the question and fetches the top_k most similar chunks.
+        # No LLM call happens here — just vector similarity search.
+        source_nodes = self.retriever.retrieve(question)
 
-        logger.info(f"Answer generated from {len(sources)} sources")
-        for s in sources:
-            logger.debug(f"  → {s['file_name']} (score: {s['score']})")
+        # ── Layer 2 + 3: Confidence check + filtering ─
+        # Are the chunks relevant enough? Filter out low-quality ones.
+        passed, filtered_nodes, confidence_message = (
+            self.guardrails.check_confidence(source_nodes)
+        )
+        if not passed:
+            logger.info("Guardrail: low confidence")
+            return {
+                "answer": confidence_message,
+                "sources": self._format_sources(source_nodes),
+                "guardrail_action": "low_confidence",
+            }
+
+        # ── Send to LLM ─────────────────────────
+        # Only the filtered (high-quality) chunks go to the LLM.
+        # The synthesizer builds the prompt from the system template +
+        # filtered chunks + question, then calls Groq.
+        response = self.synthesizer.synthesize(
+            question,
+            nodes=filtered_nodes,
+        )
+
+        logger.info(
+            f"Answer generated from {len(filtered_nodes)} sources "
+            f"(filtered from {len(source_nodes)})"
+        )
 
         return {
             "answer": str(response),
-            "sources": sources,
+            "sources": self._format_sources(filtered_nodes),
+            "guardrail_action": "passed",
         }
+
+    def _format_sources(self, nodes) -> list:
+        """
+        Format source nodes into a clean list of dicts.
+
+        Extracts just the useful information — text preview, filename,
+        and similarity score — from LlamaIndex's NodeWithScore objects.
+        """
+        sources = []
+        for node in nodes:
+            sources.append({
+                "text": node.node.text[:500],
+                "file_name": node.node.metadata.get("file_name", "unknown"),
+                "score": round(node.score, 4) if node.score else None,
+            })
+        return sources
