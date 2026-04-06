@@ -16,10 +16,10 @@ User Query
                        │                    │
                  [Guardrails]        [LlamaIndex RAG]
                  - scope check            │
-                 - hallucination   ┌──────┴──────┐
-                   prevention      │             │
-                              [ChromaDB]    [Groq LLM]
-                              Vector Store  (llama3-8b-8192)
+                 - confidence      ┌──────┴──────┐
+                   threshold       │             │
+                 - source filter  [ChromaDB]  [Groq LLM]
+                              Vector Store  (llama3.1-8b-instant)
                                    │
                             [Embeddings]
                    (sentence-transformers/all-MiniLM-L6-v2)
@@ -33,10 +33,10 @@ User Query
 |---|---|---|
 | RAG Framework | LlamaIndex | Chosen over LangChain for deeper RAG learning |
 | Vector Store | ChromaDB | Free, local, persistent |
-| LLM | Groq API (llama3-8b-8192) | Free tier, fast inference |
+| LLM | Groq API (llama-3.1-8b-instant) | Free tier, fast inference |
 | Embeddings | sentence-transformers/all-MiniLM-L6-v2 | Runs locally, free |
 | Backend API | FastAPI + Uvicorn | With Pydantic schemas |
-| Frontend | React (Vite + Tailwind CSS) | Replaced Streamlit for portfolio impact |
+| Frontend | React (Vite + Tailwind CSS) | Chat UI with source panel |
 | CI/CD | GitHub Actions | Industry standard pipelines |
 | Deployment | HuggingFace Spaces | Free tier |
 | Evaluation | RAGAS | Phase 10 |
@@ -50,58 +50,72 @@ User Query
 ```
 rag-chatbot/
 ├── .github/
-│   └── workflows/           # GitHub Actions CI/CD
+│   └── workflows/              # GitHub Actions CI/CD
 ├── .gitignore
+├── .env.example                # Environment variable template
 ├── README.md
-├── .env.example             # Environment variable template
 │
-├── requirements.txt         # Full deps (Docker / deployment)
-├── requirements-phase2.txt  # Phase 2: data ingestion only
-├── requirements-phase3.txt  # Phase 3: embeddings + vector store
-├── requirements-phase4.txt  # Phase 4: RAG + Groq LLM
-├── requirements-phase6.txt  # Phase 6: FastAPI backend
-├── requirements-dev.txt     # Dev/test dependencies
-│
-├── docker/
-│   ├── Dockerfile           # App container
-│   └── docker-compose.yml   # Local dev orchestration
+├── requirements.txt            # Full deps (Docker / deployment)
+├── requirements-phase2.txt     # Phase 2: data ingestion only
+├── requirements-phase3.txt     # Phase 3: embeddings + vector store
+├── requirements-phase4.txt     # Phase 4: RAG + Groq LLM
+├── requirements-phase6.txt     # Phase 6: FastAPI backend
+├── requirements-dev.txt        # Dev/test dependencies
 │
 ├── data/
-│   ├── raw/                 # Source documents (PDFs, MD files)
-│   └── processed/           # Chunked/processed data (gitignored)
+│   ├── raw/                    # Source documents (PDFs, MD files)
+│   └── chroma_db/              # ChromaDB vector store (gitignored)
 │
 ├── src/
+│   ├── __init__.py
 │   ├── ingestion/
-│   │   ├── loader.py        # Document loaders (PDF, MD, text)
-│   │   └── chunker.py       # Chunking strategies (SentenceSplitter)
+│   │   ├── __init__.py
+│   │   ├── loader.py           # Document loaders (PDF, MD, text)
+│   │   └── chunker.py          # Chunking strategies (SentenceSplitter)
 │   ├── indexing/
-│   │   ├── embeddings.py    # Embedding model setup
-│   │   └── vector_store.py  # ChromaDB operations
+│   │   ├── __init__.py
+│   │   ├── embeddings.py       # Embedding model setup (all-MiniLM-L6-v2)
+│   │   └── vector_store.py     # ChromaDB operations
 │   ├── rag/
-│   │   ├── pipeline.py      # LlamaIndex RAG pipeline
-│   │   └── guardrails.py    # Source grounding & guardrails
+│   │   ├── __init__.py
+│   │   ├── pipeline.py         # RAG query pipeline (orchestrator)
+│   │   └── guardrails.py       # Scope check, confidence threshold, source filtering
 │   ├── api/
-│   │   ├── main.py          # FastAPI app entry point
-│   │   ├── routes.py        # API endpoints
-│   │   └── schemas.py       # Pydantic request/response models
+│   │   ├── __init__.py
+│   │   ├── main.py             # FastAPI app entry point + CORS + lifespan
+│   │   ├── routes.py           # API endpoints (/api/query, /api/health)
+│   │   └── schemas.py          # Pydantic request/response models
 │   └── evaluation/
-│       └── ragas_eval.py    # RAG evaluation with RAGAS
+│       ├── __init__.py
+│       └── ragas_eval.py       # RAG evaluation with RAGAS (Phase 10)
 │
-├── frontend/                # React app (Vite + Tailwind CSS)
-│   ├── src/
+├── frontend/                   # React app (Vite + Tailwind CSS)
+│   ├── index.html
+│   ├── vite.config.js          # Vite config with Tailwind + API proxy
 │   ├── package.json
-│   └── vite.config.js
+│   └── src/
+│       ├── main.jsx            # React entry point
+│       ├── index.css           # Tailwind import + custom styles
+│       ├── App.jsx             # Main chat application
+│       └── components/
+│           ├── ChatMessage.jsx # Chat message bubble component
+│           └── SourcePanel.jsx # Retrieved sources side panel
 │
 ├── tests/
 │   ├── test_ingestion.py
 │   ├── test_rag.py
 │   └── test_api.py
 │
+├── docker/
+│   ├── Dockerfile              # App container
+│   └── docker-compose.yml      # Local dev orchestration
+│
 ├── docs/
-│   └── architecture.md      # Detailed architecture notes
+│   └── architecture.md         # Detailed architecture notes
 │
 └── scripts/
-    └── ingest_data.py       # One-time data ingestion script
+    ├── ingest_data.py          # Data ingestion pipeline
+    └── test_rag.py             # Interactive RAG testing script
 ```
 
 ---
@@ -112,11 +126,11 @@ rag-chatbot/
 |---|---|---|---|
 | 1 | Project setup, GitHub repo, dev environment | Git flow, project structure | ✅ |
 | 2 | Data ingestion pipeline | Document loaders, chunking strategies | ✅ |
-| 3 | Vector store + embeddings | ChromaDB, sentence-transformers | ⬜ |
-| 4 | RAG core with LlamaIndex | LlamaIndex query engine, retrieval | ⬜ |
-| 5 | Guardrails implementation | Source grounding, prompt engineering | ⬜ |
-| 6 | FastAPI backend | REST APIs, Pydantic, async Python | ⬜ |
-| 7 | React frontend | Vite, Tailwind CSS, API integration | ⬜ |
+| 3 | Vector store + embeddings | ChromaDB, sentence-transformers | ✅ |
+| 4 | RAG core with LlamaIndex | LlamaIndex query engine, retrieval | ✅ |
+| 5 | Guardrails implementation | Scope checking, confidence thresholds, source filtering | ✅ |
+| 6 | FastAPI backend | REST APIs, Pydantic, async Python, CORS | ✅ |
+| 7 | React frontend | Vite, Tailwind CSS, component composition, API integration | ✅ |
 | 8 | Docker + CI/CD | Dockerfile, GitHub Actions pipelines | ⬜ |
 | 9 | Deploy to HuggingFace Spaces | Cloud deployment | ⬜ |
 | 10 | RAG Evaluation with RAGAS | Faithfulness, relevancy metrics | ⬜ |
@@ -127,7 +141,7 @@ rag-chatbot/
 
 ### Quick start (phased installation)
 
-Dependencies are split into per-phase files to keep installs lightweight. Install only what your current phase needs.
+Dependencies are split into per-phase files to keep installs lightweight.
 
 ```bash
 # 1. Clone the repo
@@ -138,47 +152,49 @@ cd rag-chatbot
 conda create -n ragbot python=3.12 -y
 conda activate ragbot
 
-# 3. Install Phase 2 dependencies (~200 MB)
+# 3. Install dependencies (phase by phase)
 pip install -r requirements-phase2.txt
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install -r requirements-phase3.txt
+pip install -r requirements-phase4.txt
+pip install -r requirements-phase6.txt
 
 # 4. Set up environment variables
 cp .env.example .env
-# Edit .env and add your GROQ_API_KEY
+# Edit .env and add:
+#   GROQ_API_KEY=your-key-here
+#   HF_HUB_OFFLINE=1
 
 # 5. Add source documents to data/raw/
 #    (PDFs, markdown, or text files about AI/ML topics)
 
 # 6. Run data ingestion
 python scripts/ingest_data.py
+
+# 7. Install frontend dependencies
+cd frontend
+npm install
+cd ..
 ```
 
-### Installing further phases
+### Running the app
+
+You need two terminals running simultaneously:
 
 ```bash
-# Phase 3 — embeddings + vector store (~2.5 GB, includes PyTorch)
-# TIP: install CPU-only PyTorch first to save ~1.5 GB:
-#   pip install torch --index-url https://download.pytorch.org/whl/cpu
-pip install -r requirements-phase3.txt
-
-# Phase 4 — RAG pipeline + Groq LLM
-pip install -r requirements-phase4.txt
-
-# Phase 6 — FastAPI backend
-pip install -r requirements-phase6.txt
-
-# Dev/test tools
-pip install -r requirements-dev.txt
-```
-
-### Running the app (once all phases are built)
-
-```bash
-# Terminal 1: FastAPI backend
+# Terminal 1: FastAPI backend (from project root)
 uvicorn src.api.main:app --reload
 
-# Terminal 2: React frontend
-cd frontend && npm run dev
+# Terminal 2: React frontend (from frontend folder)
+cd frontend
+npm run dev
 ```
+
+Then open `http://localhost:5173/` in your browser.
+
+### API documentation
+
+With the backend running, visit `http://localhost:8000/docs` for the interactive Swagger UI.
 
 ---
 
@@ -213,11 +229,11 @@ Metrics tracked: **Faithfulness**, **Answer Relevancy**, **Context Precision**, 
 
 ## 🔒 Guardrails
 
-This chatbot implements:
-- **Scope guardrail** — only answers AI/ML/Data Analytics questions
-- **Source grounding** — responses cite retrieved document chunks
-- **Hallucination prevention** — answers constrained to retrieved context only
-- **Confidence threshold** — low-confidence retrievals return a fallback response
+This chatbot implements three layers of protection:
+
+- **Scope guardrail** — uses embedding similarity against reference AI/ML phrases to reject off-topic questions before hitting the LLM (saves API calls)
+- **Confidence threshold** — checks retrieval similarity scores and returns a fallback response if the best chunk isn't relevant enough
+- **Source filtering** — removes low-scoring chunks before sending to the LLM, so it only sees high-quality context
 
 ---
 

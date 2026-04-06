@@ -18,6 +18,10 @@ data/chroma_db/
 # ─── Processed Data (re-generated) ───────────
 data/processed/
 
+# ─── Frontend ────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+
 # ─── IDE ─────────────────────────────────────
 .vscode/
 .idea/
