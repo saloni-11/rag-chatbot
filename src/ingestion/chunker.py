@@ -44,7 +44,7 @@ class DocumentChunker:
     """
 
     def __init__(self, chunk_size: int = 512, chunk_overlap: int = 50):
-        self.chunk_size    = chunk_size
+        self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
 
         # SentenceSplitter is the node parser we'll use.
@@ -110,27 +110,26 @@ class DocumentChunker:
         if not nodes:
             return {"total_nodes": 0}
 
-        lengths     = [len(node.text) for node in nodes]
+        lengths = [len(node.text) for node in nodes]
         total_chars = sum(lengths)
-        avg_chars   = total_chars // len(nodes)
-        min_chars   = min(lengths)
-        max_chars   = max(lengths)
+        avg_chars = total_chars // len(nodes)
+        min_chars = min(lengths)
+        max_chars = max(lengths)
 
         # Count unique source files
-        source_files = list({
-            node.metadata.get("file_name", "unknown")
-            for node in nodes
-        })
+        source_files = list(
+            {node.metadata.get("file_name", "unknown") for node in nodes}
+        )
 
         stats = {
-            "total_nodes":       len(nodes),
-            "total_characters":  total_chars,
-            "avg_chunk_length":  avg_chars,
-            "min_chunk_length":  min_chars,
-            "max_chunk_length":  max_chars,
-            "source_files":      source_files,
+            "total_nodes": len(nodes),
+            "total_characters": total_chars,
+            "avg_chunk_length": avg_chars,
+            "min_chunk_length": min_chars,
+            "max_chunk_length": max_chars,
+            "source_files": source_files,
             "chunk_size_tokens": self.chunk_size,
-            "chunk_overlap":     self.chunk_overlap,
+            "chunk_overlap": self.chunk_overlap,
         }
 
         logger.info("Chunking stats:")

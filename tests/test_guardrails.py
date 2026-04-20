@@ -29,14 +29,14 @@ What is @pytest.fixture?
   from the same known state.
 """
 
+from unittest.mock import MagicMock, patch
+
 import numpy as np
 import pytest
-from unittest.mock import patch, MagicMock
-
-from llama_index.core.schema import TextNode, NodeWithScore
-
+from llama_index.core.schema import NodeWithScore, TextNode
 
 # ── Helpers ──────────────────────────────────────────
+
 
 def make_mock_embedding(dim=384, seed=42):
     """Create a deterministic fake embedding vector."""
@@ -52,6 +52,7 @@ def make_node_with_score(text, file_name, score):
 
 
 # ── Fixtures ─────────────────────────────────────────
+
 
 @pytest.fixture
 def guardrails():
@@ -72,15 +73,15 @@ def guardrails():
         # Return fake embeddings for the reference phrases
         # (called during Guardrails.__init__)
         from src.rag.guardrails import SCOPE_REFERENCE_PHRASES
+
         num_refs = len(SCOPE_REFERENCE_PHRASES)
-        fake_ref_embeddings = [
-            make_mock_embedding(seed=i) for i in range(num_refs)
-        ]
+        fake_ref_embeddings = [make_mock_embedding(seed=i) for i in range(num_refs)]
         mock_model.get_text_embedding_batch.return_value = fake_ref_embeddings
 
         mock_get_model.return_value = mock_model
 
         from src.rag.guardrails import Guardrails
+
         g = Guardrails()
         g._embed_model = mock_model
 
@@ -88,6 +89,7 @@ def guardrails():
 
 
 # ── Scope Check Tests ────────────────────────────────
+
 
 class TestScopeCheck:
     """Tests for the scope checking guardrail (Layer 1)."""
@@ -98,9 +100,7 @@ class TestScopeCheck:
 
         # Return an embedding very similar to one of the reference phrases
         # by returning the first reference embedding itself
-        mock_model.get_query_embedding.return_value = (
-            g._reference_matrix[0].tolist()
-        )
+        mock_model.get_query_embedding.return_value = g._reference_matrix[0].tolist()
 
         in_scope, message = g.check_scope("What is backpropagation?")
 
@@ -128,9 +128,7 @@ class TestScopeCheck:
         g, mock_model = guardrails
 
         # Even for an empty-like query, the embedding model is called
-        mock_model.get_query_embedding.return_value = (
-            make_mock_embedding(seed=999)
-        )
+        mock_model.get_query_embedding.return_value = make_mock_embedding(seed=999)
 
         # Should not crash — returns either True or False
         in_scope, message = g.check_scope("   ")
@@ -138,6 +136,7 @@ class TestScopeCheck:
 
 
 # ── Confidence Check Tests ───────────────────────────
+
 
 class TestConfidenceCheck:
     """Tests for the confidence and source filtering guardrails (Layers 2+3)."""
@@ -190,6 +189,7 @@ class TestConfidenceCheck:
         assert len(filtered) < len(nodes)
         # All remaining chunks should meet the minimum score
         from src.rag.guardrails import SOURCE_MIN_SCORE
+
         for node in filtered:
             assert node.score >= SOURCE_MIN_SCORE
 
@@ -217,6 +217,7 @@ class TestConfidenceCheck:
 
 
 # ── Cosine Similarity Tests ──────────────────────────
+
 
 class TestCosineSimilarity:
     """Tests for the cosine similarity helper method."""
@@ -256,11 +257,13 @@ class TestCosineSimilarity:
         g, _ = guardrails
 
         vec = np.array([1.0, 0.0, 0.0])
-        matrix = np.array([
-            [1.0, 0.0, 0.0],
-            [0.0, 1.0, 0.0],
-            [-1.0, 0.0, 0.0],
-        ])
+        matrix = np.array(
+            [
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [-1.0, 0.0, 0.0],
+            ]
+        )
 
         sims = g._cosine_similarity(vec, matrix)
         assert len(sims) == 3

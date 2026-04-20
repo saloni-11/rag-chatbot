@@ -65,7 +65,11 @@ class DocumentLoader:
         # Check if there are any matching files
         matching_files = []
         for ext in extensions:
-            matching_files.extend(self.data_dir.rglob(f"*{ext}") if recursive else self.data_dir.glob(f"*{ext}"))
+            matching_files.extend(
+                self.data_dir.rglob(f"*{ext}")
+                if recursive
+                else self.data_dir.glob(f"*{ext}")
+            )
 
         if not matching_files:
             raise ValueError(
@@ -133,8 +137,10 @@ class DocumentLoader:
             return {"total_documents": 0}
 
         total_chars = sum(len(doc.text) for doc in documents)
-        avg_chars   = total_chars // len(documents)
-        file_names  = list({doc.metadata.get("file_name", "unknown") for doc in documents})
+        avg_chars = total_chars // len(documents)
+        file_names = list(
+            {doc.metadata.get("file_name", "unknown") for doc in documents}
+        )
 
         return {
             "total_documents": len(documents),

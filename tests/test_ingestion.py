@@ -34,14 +34,15 @@ Why test edge cases?
   where real bugs hide, and interviewers love asking about them.
 """
 
-import pytest
 from pathlib import Path
 
-from src.ingestion.loader import DocumentLoader
-from src.ingestion.chunker import DocumentChunker
+import pytest
 
+from src.ingestion.chunker import DocumentChunker
+from src.ingestion.loader import DocumentLoader
 
 # ── Fixtures ─────────────────────────────────────────
+
 
 @pytest.fixture
 def sample_data_dir(tmp_path):
@@ -87,6 +88,7 @@ def empty_data_dir(tmp_path):
 
 # ── DocumentLoader Tests ─────────────────────────────
 
+
 class TestDocumentLoader:
     """Tests for the DocumentLoader class."""
 
@@ -125,9 +127,7 @@ class TestDocumentLoader:
     def test_load_single_file(self, sample_data_dir):
         """Should load a specific single file."""
         loader = DocumentLoader(data_dir=str(sample_data_dir))
-        documents = loader.load_single_file(
-            str(sample_data_dir / "sample.txt")
-        )
+        documents = loader.load_single_file(str(sample_data_dir / "sample.txt"))
 
         assert len(documents) == 1
         assert "machine learning" in documents[0].text.lower()
@@ -157,6 +157,7 @@ class TestDocumentLoader:
 
 
 # ── DocumentChunker Tests ────────────────────────────
+
 
 class TestDocumentChunker:
     """Tests for the DocumentChunker class."""

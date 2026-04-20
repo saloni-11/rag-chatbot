@@ -1,0 +1,4 @@
+[flake8]
+max-line-length = 100
+ignore = E501,W503,E203
+exclude = frontend,node_modules,.git,__pycache__,data

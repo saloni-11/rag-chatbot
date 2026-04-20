@@ -30,12 +30,13 @@ Why mock the pipeline?
   of the ML components.
 """
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from fastapi.testclient import TestClient
 
-
 # ── Fixtures ─────────────────────────────────────────
+
 
 @pytest.fixture
 def mock_pipeline():
@@ -93,6 +94,7 @@ def client(mock_pipeline):
 
 # ── Root Endpoint Tests ──────────────────────────────
 
+
 class TestRootEndpoint:
     """Tests for GET /"""
 
@@ -116,6 +118,7 @@ class TestRootEndpoint:
 
 
 # ── Health Endpoint Tests ────────────────────────────
+
 
 class TestHealthEndpoint:
     """Tests for GET /api/health"""
@@ -148,6 +151,7 @@ class TestHealthEndpoint:
 
 
 # ── Query Endpoint Tests ─────────────────────────────
+
 
 class TestQueryEndpoint:
     """Tests for POST /api/query"""

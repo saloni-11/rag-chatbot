@@ -49,7 +49,6 @@ from src.indexing.embeddings import get_embedding_model
 from src.indexing.vector_store import load_existing_index
 from src.rag.guardrails import SYSTEM_PROMPT, Guardrails
 
-
 # ── Default config ───────────────────────────────────
 DEFAULT_MODEL = "llama-3.1-8b-instant"
 DEFAULT_TOP_K = 3
@@ -184,8 +183,8 @@ class RAGPipeline:
 
         # ── Layer 2 + 3: Confidence check + filtering ─
         # Are the chunks relevant enough? Filter out low-quality ones.
-        passed, filtered_nodes, confidence_message = (
-            self.guardrails.check_confidence(source_nodes)
+        passed, filtered_nodes, confidence_message = self.guardrails.check_confidence(
+            source_nodes
         )
         if not passed:
             logger.info("Guardrail: low confidence")
@@ -224,9 +223,11 @@ class RAGPipeline:
         """
         sources = []
         for node in nodes:
-            sources.append({
-                "text": node.node.text[:500],
-                "file_name": node.node.metadata.get("file_name", "unknown"),
-                "score": round(node.score, 4) if node.score else None,
-            })
+            sources.append(
+                {
+                    "text": node.node.text[:500],
+                    "file_name": node.node.metadata.get("file_name", "unknown"),
+                    "score": round(node.score, 4) if node.score else None,
+                }
+            )
         return sources

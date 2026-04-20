@@ -24,7 +24,6 @@ Why all-MiniLM-L6-v2?
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from loguru import logger
 
-
 # ── Model name (used everywhere so define once) ──────
 DEFAULT_EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 EMBEDDING_DIMENSION = 384  # this model outputs 384-dim vectors

@@ -57,9 +57,9 @@ from loguru import logger
 from src.indexing.embeddings import get_embedding_model
 
 # ── Thresholds (tune these based on testing) ─────────
-SCOPE_THRESHOLD = 0.3       # minimum similarity to any reference phrase
+SCOPE_THRESHOLD = 0.3  # minimum similarity to any reference phrase
 CONFIDENCE_THRESHOLD = 0.55  # minimum similarity of the BEST retrieved chunk
-SOURCE_MIN_SCORE = 0.35     # minimum similarity to include a chunk as context
+SOURCE_MIN_SCORE = 0.35  # minimum similarity to include a chunk as context
 
 
 # ── Reference phrases for scope checking ─────────────
@@ -81,7 +81,6 @@ SCOPE_REFERENCE_PHRASES = [
     "overfitting regularization",
     "gradient descent backpropagation",
     "loss function objective function",
-
     # NLP / Transformers (your current papers)
     "natural language processing",
     "transformer architecture attention mechanism",
@@ -90,21 +89,18 @@ SCOPE_REFERENCE_PHRASES = [
     "word embeddings word2vec",
     "tokenization text processing",
     "encoder decoder sequence to sequence",
-
     # Data Analytics
     "data analytics statistical analysis",
     "feature engineering data preprocessing",
     "exploratory data analysis visualization",
     "hypothesis testing p-value",
     "A/B testing experimental design",
-
     # ML Operations
     "model evaluation metrics accuracy precision recall",
     "cross validation train test split",
     "hyperparameter tuning grid search",
     "bias variance tradeoff",
     "confusion matrix ROC curve",
-
     # General AI
     "artificial intelligence",
     "reinforcement learning reward policy",
@@ -172,9 +168,7 @@ class Guardrails:
                 in_scope=False, message="Sorry..."   → return message to user
         """
         # Embed the question
-        question_embedding = np.array(
-            self._embed_model.get_query_embedding(question)
-        )
+        question_embedding = np.array(self._embed_model.get_query_embedding(question))
 
         # Compute cosine similarity against all reference phrases
         # Cosine similarity = dot product of normalised vectors
@@ -224,10 +218,14 @@ class Guardrails:
                 passed=False → filtered_nodes is empty, message="I don't have..."
         """
         if not source_nodes:
-            return False, [], (
-                "I couldn't find any relevant information in my sources. "
-                "Try rephrasing your question or asking about a topic "
-                "covered in the source documents."
+            return (
+                False,
+                [],
+                (
+                    "I couldn't find any relevant information in my sources. "
+                    "Try rephrasing your question or asking about a topic "
+                    "covered in the source documents."
+                ),
             )
 
         # Get the best similarity score
@@ -245,11 +243,15 @@ class Guardrails:
                 f"Low confidence (best={best_score:.4f} "
                 f"< threshold={CONFIDENCE_THRESHOLD})"
             )
-            return False, [], (
-                "I don't have enough relevant information in my sources to "
-                "answer this confidently. The documents I have don't seem to "
-                "cover this specific topic in enough detail. Try asking about "
-                "concepts from the Attention/Transformer or BERT papers."
+            return (
+                False,
+                [],
+                (
+                    "I don't have enough relevant information in my sources to "
+                    "answer this confidently. The documents I have don't seem to "
+                    "cover this specific topic in enough detail. Try asking about "
+                    "concepts from the Attention/Transformer or BERT papers."
+                ),
             )
 
         # Layer 3: Filter out low-quality chunks
@@ -269,10 +271,14 @@ class Guardrails:
 
         # Edge case: all chunks were filtered out
         if not filtered:
-            return False, [], (
-                "I found some potentially related information, but none of it "
-                "was relevant enough to give you a reliable answer. "
-                "Could you rephrase your question?"
+            return (
+                False,
+                [],
+                (
+                    "I found some potentially related information, but none of it "
+                    "was relevant enough to give you a reliable answer. "
+                    "Could you rephrase your question?"
+                ),
             )
 
         return True, filtered, None
@@ -300,9 +306,7 @@ class Guardrails:
         # Normalise the vector
         vector_norm = vector / (np.linalg.norm(vector) + 1e-10)
         # Normalise each row of the matrix
-        matrix_norms = matrix / (
-            np.linalg.norm(matrix, axis=1, keepdims=True) + 1e-10
-        )
+        matrix_norms = matrix / (np.linalg.norm(matrix, axis=1, keepdims=True) + 1e-10)
         # Dot product of normalised vectors = cosine similarity
         return matrix_norms @ vector_norm
 

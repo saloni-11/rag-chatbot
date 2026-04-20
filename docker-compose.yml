@@ -1,0 +1,32 @@
+# ============================================================
+# docker-compose.yml — Local development orchestration
+# ============================================================
+# Runs the full app with one command: docker-compose up --build
+#
+# WHY DOCKER COMPOSE?
+#   The Dockerfile builds a single container. Docker Compose
+#   configures HOW to run it — port mapping, environment variables,
+#   volume mounts, etc. Think of the Dockerfile as the blueprint
+#   and docker-compose.yml as the run instructions.
+#
+# WHAT IS A VOLUME MOUNT?
+#   The 'volumes' section maps a folder on your laptop to a folder
+#   inside the container. This means:
+#   - data/raw/ on your laptop IS data/raw/ inside the container
+#   - If you add a new PDF, the container sees it immediately
+#   - ChromaDB data persists even if the container is destroyed
+# ============================================================
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      # Persist ChromaDB data across container restarts
+      - ./data:/app/data
+    restart: unless-stopped

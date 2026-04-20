@@ -33,8 +33,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-
 # ── Request Models ───────────────────────────────────
+
 
 class QueryRequest(BaseModel):
     """
@@ -56,6 +56,7 @@ class QueryRequest(BaseModel):
 
 # ── Response Models ──────────────────────────────────
 
+
 class SourceChunk(BaseModel):
     """
     A single source chunk that contributed to the answer.
@@ -64,12 +65,8 @@ class SourceChunk(BaseModel):
     it lets them verify the answer is grounded in real documents.
     """
 
-    text: str = Field(
-        description="Preview of the chunk content (first 500 chars)"
-    )
-    file_name: str = Field(
-        description="Name of the source document"
-    )
+    text: str = Field(description="Preview of the chunk content (first 500 chars)")
+    file_name: str = Field(description="Name of the source document")
     score: Optional[float] = Field(
         default=None,
         description="Similarity score (0-1, higher = more relevant)",
@@ -87,9 +84,7 @@ class QueryResponse(BaseModel):
       - "empty_query":     user sent a blank question
     """
 
-    answer: str = Field(
-        description="The generated answer"
-    )
+    answer: str = Field(description="The generated answer")
     sources: List[SourceChunk] = Field(
         default_factory=list,
         description="Source chunks used to generate the answer",
@@ -110,12 +105,8 @@ class HealthResponse(BaseModel):
     the platform restarts the container.
     """
 
-    status: str = Field(
-        description="Service status: 'healthy' or 'unhealthy'"
-    )
-    model: str = Field(
-        description="The LLM model being used"
-    )
+    status: str = Field(description="Service status: 'healthy' or 'unhealthy'")
+    model: str = Field(description="The LLM model being used")
     index_loaded: bool = Field(
         description="Whether the ChromaDB index is loaded and ready"
     )

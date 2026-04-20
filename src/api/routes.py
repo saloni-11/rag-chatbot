@@ -62,6 +62,7 @@ def set_pipeline(pipeline: RAGPipeline):
 
 # ── Endpoints ────────────────────────────────────────
 
+
 @router.post(
     "/query",
     response_model=QueryResponse,
