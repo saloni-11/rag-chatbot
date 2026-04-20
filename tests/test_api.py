@@ -83,7 +83,7 @@ def client(mock_pipeline):
     The rule: patch where the thing LIVES, not where it's used.
     """
     with patch("src.rag.pipeline.RAGPipeline", return_value=mock_pipeline):
-        from src.api.main import app
+        from docker.src.api.main import app
         from src.api.routes import set_pipeline
 
         set_pipeline(mock_pipeline)
