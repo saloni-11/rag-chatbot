@@ -37,7 +37,8 @@ User Query
 | Embeddings | sentence-transformers/all-MiniLM-L6-v2 | Runs locally, free |
 | Backend API | FastAPI + Uvicorn | With Pydantic schemas |
 | Frontend | React (Vite + Tailwind CSS) | Chat UI with source panel |
-| CI/CD | GitHub Actions | Industry standard pipelines |
+| Containerisation | Docker + Docker Compose | Multi-stage build, health check |
+| CI/CD | GitHub Actions | Lint → test → Docker build pipeline |
 | Deployment | HuggingFace Spaces | Free tier |
 | Evaluation | RAGAS | Phase 10 |
 | Testing | Pytest | With coverage |
@@ -102,13 +103,13 @@ rag-chatbot/
 │           └── SourcePanel.jsx # Retrieved sources side panel
 │
 ├── tests/
+│   ├── conftest.py             # Shared pytest fixtures
 │   ├── test_ingestion.py
-│   ├── test_rag.py
+│   ├── test_guardrails.py
 │   └── test_api.py
 │
-├── docker/
-│   ├── Dockerfile              # App container
-│   └── docker-compose.yml      # Local dev orchestration
+├── Dockerfile                  # Multi-stage build (Node → Python)
+├── docker-compose.yml          # Local dev orchestration
 │
 ├── docs/
 │   └── architecture.md         # Detailed architecture notes
@@ -131,7 +132,7 @@ rag-chatbot/
 | 5 | Guardrails implementation | Scope checking, confidence thresholds, source filtering | ✅ |
 | 6 | FastAPI backend | REST APIs, Pydantic, async Python, CORS | ✅ |
 | 7 | React frontend | Vite, Tailwind CSS, component composition, API integration | ✅ |
-| 8 | Docker + CI/CD | Dockerfile, GitHub Actions pipelines | ⬜ |
+| 8 | Docker + CI/CD | Dockerfile, GitHub Actions pipelines | ✅ |
 | 9 | Deploy to HuggingFace Spaces | Cloud deployment | ⬜ |
 | 10 | RAG Evaluation with RAGAS | Faithfulness, relevancy metrics | ⬜ |
 
