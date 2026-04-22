@@ -33,7 +33,7 @@ logger.add(
 
 def main():
     print("=" * 50)
-    print("RAG Chatbot — Interactive Test (Phase 5)")
+    print("AI/ML Study Companion — Interactive Test")
     print("=" * 50)
     print("Loading pipeline... (first run takes ~10 seconds)\n")
 
@@ -41,7 +41,7 @@ def main():
 
     pipeline = RAGPipeline()
 
-    print("\nReady! Ask questions about your AI/ML documents.")
+    print("\nReady! Ask questions about your AI/ML study materials.")
     print("Commands: 'sources' (see chunks), 'quit' (exit)\n")
     print("-" * 50)
 

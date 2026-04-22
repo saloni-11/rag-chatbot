@@ -1,6 +1,6 @@
-# 🤖 AI/ML Interview Prep RAG Chatbot
+# 🤖 AI/ML Study Companion
 
-A production-grade Retrieval-Augmented Generation (RAG) chatbot for AI and Data Analytics interview preparation. Built with **LlamaIndex**, **ChromaDB**, **Groq LLM**, **FastAPI**, and a **React** frontend — deployed on **HuggingFace Spaces** with **GitHub Actions** CI/CD.
+A production-grade Retrieval-Augmented Generation (RAG) chatbot for AI and Data Analytics learning. Built with **LlamaIndex**, **ChromaDB**, **Groq LLM**, **FastAPI**, and a **React** frontend — deployed on **HuggingFace Spaces** with **GitHub Actions** CI/CD.
 
 ---
 

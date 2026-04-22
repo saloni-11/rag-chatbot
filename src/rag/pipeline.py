@@ -37,9 +37,8 @@ Why do we split retrieval and synthesis?
 """
 
 import os
-from typing import Optional
 
-from llama_index.core import Settings, VectorStoreIndex
+from llama_index.core import Settings
 from llama_index.core.response_synthesizers import get_response_synthesizer
 from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.llms.groq import Groq

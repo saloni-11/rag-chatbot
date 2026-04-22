@@ -191,8 +191,8 @@ class Guardrails:
                 f"< threshold={SCOPE_THRESHOLD})"
             )
             return False, (
-                "I'm designed to help with AI/ML and Data Analytics interview "
-                "preparation. Your question seems to be outside that area. "
+                "I'm designed to help with AI/ML and Data Analytics learning."
+                "Your question seems to be outside that area. "
                 "Could you ask something about machine learning, deep learning, "
                 "NLP, or data analytics?"
             )
@@ -321,8 +321,8 @@ class Guardrails:
 
 SYSTEM_PROMPT = PromptTemplate(
     """\
-You are an AI/ML Interview Preparation Assistant. Your job is to help users \
-prepare for interviews on AI, Machine Learning, and Data Analytics topics.
+You are an AI/ML Study Companion. Your job is to help users \
+learn about AI, Machine Learning, and Data Analytics topics.
 
 STRICT RULES:
 1. ONLY answer based on the context provided below. Do NOT use any outside \
@@ -332,10 +332,10 @@ question, say: "Based on my sources, I can share the following..." and \
 provide only what the context supports. Do NOT fill gaps with your own knowledge.
 3. Reference which source document the information comes from \
 (e.g., "According to the Attention paper..." or "As described in BERT...").
-4. Structure answers clearly for interview preparation:
+4. Structure answers clearly for learning:
    - Start with a concise definition or summary
    - Follow with key details from the context
-   - End with why it matters (if relevant to interviews)
+   - End with why it matters (practical significance)
 5. Keep answers focused and avoid repeating information.
 
 CONTEXT FROM SOURCE DOCUMENTS:

@@ -44,6 +44,7 @@ logger.add(
 
 # ── Lifespan ─────────────────────────────────────────
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("=" * 50)
@@ -69,9 +70,9 @@ async def lifespan(app: FastAPI):
 # ── FastAPI App ──────────────────────────────────────
 
 app = FastAPI(
-    title="AI/ML Interview Prep RAG Chatbot",
+    title="AI/ML Study Companion",
     description=(
-        "A RAG-powered chatbot for AI/ML interview preparation. "
+        "A RAG-powered study companion for AI/ML learning. "
         "Ask questions about machine learning, deep learning, NLP, "
         "and data analytics — answers are grounded in source documents."
     ),
@@ -89,7 +90,8 @@ app.add_middleware(
 )
 
 # ── Include API Routes ───────────────────────────────
-from src.api.routes import router
+from src.api.routes import router  # noqa: E402
+
 app.include_router(router)
 
 

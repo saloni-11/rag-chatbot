@@ -34,8 +34,6 @@ Why test edge cases?
   where real bugs hide, and interviewers love asking about them.
 """
 
-from pathlib import Path
-
 import pytest
 
 from src.ingestion.chunker import DocumentChunker

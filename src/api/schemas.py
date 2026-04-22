@@ -49,7 +49,7 @@ class QueryRequest(BaseModel):
         ...,
         min_length=1,
         max_length=1000,
-        description="The question to ask the RAG chatbot",
+        description="The question to ask the study companion",
         examples=["What is self-attention in transformers?"],
     )
 

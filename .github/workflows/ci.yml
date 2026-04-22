@@ -116,4 +116,4 @@ jobs:
       # Build the Docker image to verify it compiles
       # (doesn't push anywhere — just verifies the build works)
       - name: Build Docker image
-        run: docker build -t rag-chatbot:ci .
+        run: docker build -t study-companion:ci .

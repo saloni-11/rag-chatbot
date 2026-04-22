@@ -32,7 +32,7 @@ from llama_index.core.schema import TextNode
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from loguru import logger
 
-from src.indexing.embeddings import EMBEDDING_DIMENSION, get_embedding_model
+from src.indexing.embeddings import get_embedding_model
 
 # ── Defaults ─────────────────────────────────────────
 DEFAULT_PERSIST_DIR = "./data/chroma_db"

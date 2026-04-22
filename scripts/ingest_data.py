@@ -41,7 +41,7 @@ logger.add(
 
 def main():
     logger.info("=" * 50)
-    logger.info("RAG Chatbot — Data Ingestion Pipeline")
+    logger.info("AI/ML Study Companion — Data Ingestion Pipeline")
     logger.info("=" * 50)
 
     # ── Step 1: Load documents ─────────────────
