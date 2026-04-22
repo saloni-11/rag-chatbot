@@ -319,7 +319,8 @@ class Guardrails:
 #   - Explicit instruction to say which document info came from
 #   - Instruction to structure answers in an interview-friendly way
 
-SYSTEM_PROMPT = PromptTemplate("""\
+SYSTEM_PROMPT = PromptTemplate(
+    """\
 You are an AI/ML Study Companion. Your job is to help users \
 learn about AI, Machine Learning, and Data Analytics topics.
 
@@ -345,4 +346,5 @@ CONTEXT FROM SOURCE DOCUMENTS:
 USER QUESTION: {query_str}
 
 ANSWER:
-""")
+"""
+)
