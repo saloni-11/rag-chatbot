@@ -53,7 +53,7 @@ jobs:
 
       # Install linting tools only (fast — no ML dependencies)
       - name: Install linting tools
-        run: pip install black isort flake8
+        run: pip install black==24.8.0 isort flake8
 
       # Check formatting with black (--check = don't modify, just report)
       - name: Check black formatting
