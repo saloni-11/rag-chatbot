@@ -3,17 +3,33 @@ import ChatMessage from "./components/ChatMessage";
 import SourcePanel from "./components/SourcePanel";
 
 async function askQuestion(question) {
-  const response = await fetch("/api/query", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question }),
-  });
+  // AbortController lets us cancel the fetch after a timeout.
+  // Without this, a hung backend would leave the user staring
+  // at the loading dots forever.
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
 
-  if (!response.ok) {
-    throw new Error("API error: " + response.status);
+  try {
+    const response = await fetch("/api/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error("API error: " + response.status);
+    }
+
+    return response.json();
+  } catch (err) {
+    if (err.name === "AbortError") {
+      throw new Error("Request timed out. The server took too long to respond.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeout);
   }
-
-  return response.json();
 }
 
 const SUGGESTED_QUESTIONS = [
@@ -85,10 +101,12 @@ export default function App() {
         setActiveSources(null);
       }
     } catch (error) {
+      const isTimeout = error.message.includes("timed out");
       const errorMessage = {
         role: "bot",
-        content:
-          "Sorry, I couldn't reach the server. Make sure the FastAPI backend is running: uvicorn src.api.main:app --reload",
+        content: isTimeout
+          ? "The request timed out. The server might be waking up — please try again in a moment."
+          : "Sorry, I couldn't reach the server. Make sure the FastAPI backend is running: uvicorn src.api.main:app --reload",
         guardrailAction: "error",
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -112,7 +130,6 @@ export default function App() {
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
       <div className="flex flex-1 flex-col">
-        {/* Header */}
         <header className="border-b border-slate-200/80 bg-white/80 backdrop-blur-sm px-6 py-3.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -149,7 +166,6 @@ export default function App() {
           </div>
         </header>
 
-        {/* Chat area */}
         <div className="chat-scrollbar flex-1 overflow-y-auto px-4 py-6">
           {messages.length === 0 && (
             <div className="flex h-full flex-col items-center justify-center text-center px-4">
@@ -233,7 +249,6 @@ export default function App() {
           <div ref={chatEndRef} />
         </div>
 
-        {/* Input area */}
         <div className="border-t border-slate-200/80 bg-white/80 backdrop-blur-sm px-4 py-4">
           <div className="mx-auto flex max-w-3xl items-center gap-3">
             <input

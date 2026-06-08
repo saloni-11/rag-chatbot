@@ -1,23 +1,5 @@
 """
-FastAPI App — Phase 8 Update
-==============================
-Updated to serve the React frontend's built files in production.
-
-In development:
-  You run two servers — Vite (:5173) serves the frontend,
-  FastAPI (:8000) serves the API. Vite proxies API calls.
-
-In production (Docker):
-  There's no Vite server. FastAPI serves BOTH:
-    - /api/* routes → RAG pipeline (as before)
-    - Everything else → React's built static files (index.html, JS, CSS)
-
-  The React build (npm run build) outputs to frontend/dist/.
-  We mount that folder with FastAPI's StaticFiles middleware.
-
-How to run:
-  Dev:        uvicorn src.api.main:app --reload
-  Production: docker-compose up --build
+FastAPI App — with production logging and static file serving
 """
 
 import sys
@@ -30,25 +12,34 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
 
-# ── Setup ────────────────────────────────────────────
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 load_dotenv()
 
+# ── Logging setup ────────────────────────────────────
 logger.remove()
 logger.add(
     sys.stdout,
     format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | {message}",
     level="INFO",
 )
-
-
-# ── Lifespan ─────────────────────────────────────────
+# File logging — JSON format for structured log analysis.
+# Rotates at 10 MB, keeps 7 days of history.
+# This gives you an audit trail of every query and guardrail action.
+log_dir = Path("logs")
+log_dir.mkdir(exist_ok=True)
+logger.add(
+    str(log_dir / "app.log"),
+    rotation="10 MB",
+    retention="7 days",
+    serialize=True,
+    level="INFO",
+)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("=" * 50)
-    logger.info("Starting RAG Chatbot API server...")
+    logger.info("Starting AI/ML Study Companion API server...")
     logger.info("=" * 50)
 
     from src.api.routes import set_pipeline
@@ -60,14 +51,12 @@ async def lifespan(app: FastAPI):
         logger.info("RAG Pipeline initialised and injected into routes")
     except Exception as e:
         logger.error(f"Failed to initialise pipeline: {e}")
-        logger.error("Server will start but /api/query will return 500")
+        logger.error("Server will start but /api/query will return 503")
 
     yield
 
-    logger.info("Shutting down RAG Chatbot API server")
+    logger.info("Shutting down AI/ML Study Companion API server")
 
-
-# ── FastAPI App ──────────────────────────────────────
 
 app = FastAPI(
     title="AI/ML Study Companion",
@@ -80,7 +69,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# ── CORS Middleware ──────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -89,26 +77,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Include API Routes ───────────────────────────────
 from src.api.routes import router  # noqa: E402
 
 app.include_router(router)
 
 
-# ── Root Endpoint ────────────────────────────────────
 @app.get("/", tags=["root"])
 async def root():
     return {
-        "message": "AI/ML Interview Prep RAG Chatbot API",
+        "message": "AI/ML Study Companion API",
         "docs": "/docs",
         "health": "/api/health",
     }
 
 
-# ── Serve React Frontend (production only) ───────────
-# In Docker, the built React files live in frontend/dist/.
-# We mount them AFTER the API routes so /api/* takes priority.
-# The 'html=True' flag means requests to '/' serve index.html.
+# Serve React frontend in production (Docker)
 frontend_dist = Path(__file__).parent.parent.parent / "frontend" / "dist"
 if frontend_dist.exists():
     app.mount(

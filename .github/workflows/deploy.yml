@@ -1,0 +1,75 @@
+# ============================================================
+# .github/workflows/deploy.yml — Deploy to HuggingFace Spaces
+# ============================================================
+# Runs after CI passes on the main branch.
+# Pushes the repo to HuggingFace Spaces, which triggers a rebuild.
+#
+# REQUIRED GITHUB SECRETS (set in repo Settings → Secrets):
+#   HF_TOKEN     — HuggingFace access token (from hf.co/settings/tokens)
+#   GROQ_API_KEY — Groq API key (for the deployed app)
+#
+# HOW IT WORKS:
+#   1. CI pipeline (ci.yml) runs lint → test → Docker build
+#   2. If CI passes AND the push was to main, this workflow triggers
+#   3. It clones the repo and pushes it to HuggingFace's git remote
+#   4. HuggingFace detects the Dockerfile and builds + deploys
+#   5. The app is live at huggingface.co/spaces/<HF_USERNAME>/study-companion
+# ============================================================
+
+name: Deploy to HuggingFace Spaces
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types: [completed]
+    branches: [main]
+
+# Only allow one deploy at a time (cancel in-progress if new push arrives)
+concurrency:
+  group: hf-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    # Only deploy if CI passed (not on failure)
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history needed for git push
+
+      - name: Set up Git for HuggingFace push
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      # Push the repo to HuggingFace Spaces.
+      # HF Spaces has its own git repo at:
+      #   https://huggingface.co/spaces/<username>/study-companion
+      # We add it as a remote and force-push main to it.
+      # The HF_TOKEN authenticates the push.
+      - name: Push to HuggingFace Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git remote add hf https://salonisamant01/study-companion:${HF_TOKEN}@huggingface.co/spaces/salonisamant01/study-companion/study-companion
+          git push hf main --force
+
+      # Set the Groq API key as a Space secret so the deployed
+      # container can access it as an environment variable.
+      # This uses HuggingFace's API to set secrets on the Space.
+      - name: Set HuggingFace Space secrets
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          pip install huggingface_hub
+          python -c "
+          from huggingface_hub import HfApi
+          api = HfApi(token='${HF_TOKEN}')
+          api.add_space_secret('salonisamant01/study-companion', 'GROQ_API_KEY', '${GROQ_API_KEY}')
+          print('GROQ_API_KEY secret set on HuggingFace Space')
+          "

@@ -47,6 +47,7 @@ Tuning guide:
   If answers hallucinate                  → raise CONFIDENCE_THRESHOLD
 """
 
+import os
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -57,9 +58,9 @@ from loguru import logger
 from src.indexing.embeddings import get_embedding_model
 
 # ── Thresholds (tune these based on testing) ─────────
-SCOPE_THRESHOLD = 0.3  # minimum similarity to any reference phrase
-CONFIDENCE_THRESHOLD = 0.55  # minimum similarity of the BEST retrieved chunk
-SOURCE_MIN_SCORE = 0.35  # minimum similarity to include a chunk as context
+SCOPE_THRESHOLD = float(os.getenv("SCOPE_THRESHOLD", "0.3"))
+CONFIDENCE_THRESHOLD = float(os.getenv("CONFIDENCE_THRESHOLD", "0.55"))
+SOURCE_MIN_SCORE = float(os.getenv("SOURCE_MIN_SCORE", "0.35"))
 
 
 # ── Reference phrases for scope checking ─────────────

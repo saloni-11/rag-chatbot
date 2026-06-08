@@ -1,4 +1,16 @@
+---
+title: AI/ML Study Companion
+emoji: 🤖
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_port: 8000
+pinned: false
+---
+
 # 🤖 AI/ML Study Companion
+
+[![CI](https://github.com/saloni-11/rag-chatbot/actions/workflows/ci.yml/badge.svg)](https://github.com/saloni-11/rag-chatbot/actions/workflows/ci.yml)
 
 A production-grade Retrieval-Augmented Generation (RAG) chatbot for AI and Data Analytics learning. Built with **LlamaIndex**, **ChromaDB**, **Groq LLM**, **FastAPI**, and a **React** frontend — deployed on **HuggingFace Spaces** with **GitHub Actions** CI/CD.
 
