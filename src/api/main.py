@@ -82,16 +82,10 @@ from src.api.routes import router  # noqa: E402
 app.include_router(router)
 
 
-@app.get("/", tags=["root"])
-async def root():
-    return {
-        "message": "AI/ML Study Companion API",
-        "docs": "/docs",
-        "health": "/api/health",
-    }
-
-
-# Serve React frontend in production (Docker)
+# Serve React frontend in production (Docker), or show API info in development.
+# In Docker, 'npm run build' creates frontend/dist/ — so if that folder exists,
+# we serve the React app at '/'. If it doesn't exist (local dev), we show a
+# simple JSON endpoint instead (the React app is served by Vite on :5173).
 frontend_dist = Path(__file__).parent.parent.parent / "frontend" / "dist"
 if frontend_dist.exists():
     app.mount(
@@ -100,3 +94,12 @@ if frontend_dist.exists():
         name="frontend",
     )
     logger.info(f"Serving frontend from {frontend_dist}")
+else:
+
+    @app.get("/", tags=["root"])
+    async def root():
+        return {
+            "message": "AI/ML Study Companion API",
+            "docs": "/docs",
+            "health": "/api/health",
+        }
