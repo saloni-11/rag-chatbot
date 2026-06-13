@@ -49,14 +49,31 @@ jobs:
       # Push the repo to HuggingFace Spaces.
       # HF Spaces has its own git repo at:
       #   https://huggingface.co/spaces/<username>/study-companion
-      # We add it as a remote and force-push main to it.
-      # The HF_TOKEN authenticates the push.
+      #
+      # HF rejects binary files (e.g. PDFs) pushed as regular git blobs.
+      # The fix: use Git LFS, which HF Spaces supports natively.
+      # We also use an orphan branch so HF doesn't scan historical commits
+      # that added the PDFs as regular blobs (HF checks all refs, not just HEAD).
       - name: Push to HuggingFace Spaces
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
+          sudo apt-get install -y git-lfs
+          git lfs install --local
+
           git remote add hf https://salonisamant01:${HF_TOKEN}@huggingface.co/spaces/salonisamant01/study-companion
-          git push hf main --force
+
+          # Orphan branch has no history, so HF won't see historical commits
+          # that contain PDFs as regular git blobs.
+          git checkout --orphan hf-deploy
+          git rm -r --cached . --quiet
+
+          # Mark PDFs as LFS objects — HF will pull them during Docker build.
+          git lfs track "*.pdf"
+          git add -A
+          git commit -m "Deploy to HuggingFace Spaces"
+
+          git push hf hf-deploy:main --force
 
       # Set the Groq API key as a Space secret so the deployed
       # container can access it as an environment variable.
