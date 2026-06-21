@@ -1,0 +1,7 @@
+# ─── Phase 10: RAG Evaluation with RAGAS ────
+# Install ON TOP of previous phase requirements
+# ⚠️  datasets pulls in pyarrow (~200 MB)
+
+ragas==0.2.15
+datasets==2.21.0
+langchain-groq==0.1.9

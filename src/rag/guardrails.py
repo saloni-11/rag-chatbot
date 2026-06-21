@@ -107,6 +107,16 @@ SCOPE_REFERENCE_PHRASES = [
     "reinforcement learning reward policy",
     "computer vision image classification",
     "generative AI large language models",
+    # RAG & Information Retrieval
+    "retrieval augmented generation RAG",
+    "vector database embeddings retrieval",
+    "document chunking text splitting",
+    # Topics from your papers
+    "generative adversarial networks GANs",
+    "residual connections skip connections deep networks",
+    "few-shot learning in-context learning",
+    "language model pre-training fine-tuning",
+    "data-centric AI benchmarks",
 ]
 
 

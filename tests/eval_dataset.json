@@ -1,0 +1,22 @@
+[
+  {
+    "question": "What is the transformer architecture?",
+    "ground_truth": "The Transformer is a model architecture that relies entirely on self-attention mechanisms, dispensing with recurrence and convolutions. It consists of an encoder and decoder, each composed of stacked layers with multi-head self-attention and position-wise fully connected feed-forward networks."
+  },
+  {
+    "question": "What is self-attention and why is it important?",
+    "ground_truth": "Self-attention is a mechanism that relates different positions of a single sequence to compute a representation. It allows each position to attend to all positions in the previous layer, enabling the model to capture long-range dependencies more effectively than recurrent architectures."
+  },
+  {
+    "question": "What is BERT and how does it differ from previous models?",
+    "ground_truth": "BERT (Bidirectional Encoder Representations from Transformers) is a language model that uses bidirectional self-attention, unlike previous models like GPT which use left-to-right (unidirectional) attention. BERT is pre-trained using masked language modeling and next sentence prediction objectives."
+  },
+  {
+    "question": "What is retrieval-augmented generation (RAG)?",
+    "ground_truth": "Retrieval-Augmented Generation (RAG) is an approach that combines retrieval of relevant documents from a knowledge base with language model generation. The retrieved documents provide grounding context that the LLM uses to generate more accurate and factual responses."
+  },
+  {
+    "question": "What is the scaled dot-product attention mechanism?",
+    "ground_truth": "Scaled dot-product attention computes attention weights by taking the dot product of queries with keys, dividing by the square root of the key dimension for scaling, applying a softmax function to obtain weights, and then computing a weighted sum of the values. The scaling factor prevents the dot products from growing too large for high-dimensional keys."
+  }
+]
