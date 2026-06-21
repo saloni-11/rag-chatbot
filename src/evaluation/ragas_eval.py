@@ -96,9 +96,7 @@ def run_pipeline_on_dataset(dataset: list) -> list:
 
         if not context_list:
             context_list = ["No relevant context retrieved."]
-            logger.warning(
-                f"    Guardrail: {result['guardrail_action']} — no contexts"
-            )
+            logger.warning(f"    Guardrail: {result['guardrail_action']} — no contexts")
 
         # Create a RAGAS sample for this question
         sample = SingleTurnSample(
@@ -162,9 +160,12 @@ def evaluate_with_ragas(samples: list) -> dict:
       - LangchainLLMWrapper for non-OpenAI LLMs
     """
     from ragas import EvaluationDataset, evaluate
-    from ragas.metrics import (FactualCorrectness, Faithfulness,
-                               LLMContextPrecisionWithoutReference,
-                               LLMContextRecall)
+    from ragas.metrics import (
+        FactualCorrectness,
+        Faithfulness,
+        LLMContextPrecisionWithoutReference,
+        LLMContextRecall,
+    )
 
     logger.info("Running RAGAS evaluation...")
     logger.info("  (this calls the LLM multiple times — may take a few minutes)")
