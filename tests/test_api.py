@@ -48,7 +48,7 @@ def mock_pipeline():
     that we can assert against.
     """
     pipeline = MagicMock()
-    pipeline.model = "llama-3.1-8b-instant"
+    pipeline.model = "openai/gpt-oss-20b"
     pipeline.index = MagicMock()  # pretend index is loaded
 
     # Default query response
@@ -138,7 +138,7 @@ class TestHealthEndpoint:
 
         assert data["status"] == "healthy"
         assert data["index_loaded"] is True
-        assert data["model"] == "llama-3.1-8b-instant"
+        assert data["model"] == "openai/gpt-oss-20b"
 
     def test_health_reports_model_name(self, client):
         """Should include the model name in health response."""

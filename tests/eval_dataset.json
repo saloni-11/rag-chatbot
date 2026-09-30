@@ -1,22 +1,232 @@
 [
   {
+    "id": "attn-01",
+    "category": "answerable",
     "question": "What is the transformer architecture?",
-    "ground_truth": "The Transformer is a model architecture that relies entirely on self-attention mechanisms, dispensing with recurrence and convolutions. It consists of an encoder and decoder, each composed of stacked layers with multi-head self-attention and position-wise fully connected feed-forward networks."
+    "ground_truth": "The Transformer is a model architecture that relies entirely on attention mechanisms, dispensing with recurrence and convolutions. It consists of an encoder and a decoder, each a stack of identical layers built from multi-head self-attention and position-wise fully connected feed-forward sub-layers, with residual connections and layer normalization around each sub-layer.",
+    "source_files": ["Attention is all you need.pdf"]
   },
   {
+    "id": "attn-02",
+    "category": "answerable",
     "question": "What is self-attention and why is it important?",
-    "ground_truth": "Self-attention is a mechanism that relates different positions of a single sequence to compute a representation. It allows each position to attend to all positions in the previous layer, enabling the model to capture long-range dependencies more effectively than recurrent architectures."
+    "ground_truth": "Self-attention is an attention mechanism relating different positions of a single sequence in order to compute a representation of the sequence. Compared with recurrent layers it allows much more parallel computation and shortens the path length between long-range dependencies, making those dependencies easier to learn.",
+    "source_files": ["Attention is all you need.pdf"]
   },
   {
-    "question": "What is BERT and how does it differ from previous models?",
-    "ground_truth": "BERT (Bidirectional Encoder Representations from Transformers) is a language model that uses bidirectional self-attention, unlike previous models like GPT which use left-to-right (unidirectional) attention. BERT is pre-trained using masked language modeling and next sentence prediction objectives."
-  },
-  {
-    "question": "What is retrieval-augmented generation (RAG)?",
-    "ground_truth": "Retrieval-Augmented Generation (RAG) is an approach that combines retrieval of relevant documents from a knowledge base with language model generation. The retrieved documents provide grounding context that the LLM uses to generate more accurate and factual responses."
-  },
-  {
+    "id": "attn-03",
+    "category": "answerable",
     "question": "What is the scaled dot-product attention mechanism?",
-    "ground_truth": "Scaled dot-product attention computes attention weights by taking the dot product of queries with keys, dividing by the square root of the key dimension for scaling, applying a softmax function to obtain weights, and then computing a weighted sum of the values. The scaling factor prevents the dot products from growing too large for high-dimensional keys."
+    "ground_truth": "Scaled dot-product attention computes the dot products of a query with all keys, divides each by the square root of the key dimension, and applies a softmax to obtain weights on the values: Attention(Q, K, V) = softmax(QK^T / sqrt(d_k)) V. The scaling counteracts large dot products pushing the softmax into regions with extremely small gradients.",
+    "source_files": ["Attention is all you need.pdf"]
+  },
+  {
+    "id": "attn-04",
+    "category": "answerable",
+    "question": "How does the Transformer encode the position of tokens in a sequence?",
+    "ground_truth": "Because the Transformer has no recurrence or convolution, it adds positional encodings to the input embeddings at the bottom of the encoder and decoder stacks. The encodings have the same dimension as the embeddings and use sine and cosine functions of different frequencies, so each dimension of the positional encoding corresponds to a sinusoid.",
+    "source_files": ["Attention is all you need.pdf"]
+  },
+  {
+    "id": "attn-05",
+    "category": "answerable",
+    "question": "What BLEU score did the big Transformer model achieve on English-to-German translation?",
+    "ground_truth": "The big Transformer model achieved a BLEU score of 28.4 on the WMT 2014 English-to-German translation task, outperforming previously reported models including ensembles.",
+    "source_files": ["Attention is all you need.pdf"]
+  },
+  {
+    "id": "bert-01",
+    "category": "answerable",
+    "question": "What is BERT and how does it differ from previous models?",
+    "ground_truth": "BERT (Bidirectional Encoder Representations from Transformers) is a multi-layer bidirectional Transformer encoder pre-trained on unlabeled text. Unlike earlier left-to-right or shallowly concatenated left-to-right and right-to-left language models, BERT jointly conditions on both left and right context in all layers, using masked language modeling and next sentence prediction as pre-training tasks.",
+    "source_files": ["BERT- Pre-training of Deep Bidirectional Transformers for.pdf"]
+  },
+  {
+    "id": "bert-02",
+    "category": "answerable",
+    "question": "How does BERT's masked language modeling choose and replace tokens?",
+    "ground_truth": "BERT chooses 15% of token positions at random for prediction. A chosen token is replaced with the [MASK] token 80% of the time, with a random token 10% of the time, and left unchanged 10% of the time, and the model predicts the original token with a cross-entropy loss.",
+    "source_files": ["BERT- Pre-training of Deep Bidirectional Transformers for.pdf"]
+  },
+  {
+    "id": "bert-03",
+    "category": "answerable",
+    "question": "What is the next sentence prediction task in BERT?",
+    "ground_truth": "Next sentence prediction is a binarized pre-training task in which BERT is given sentence pairs A and B; 50% of the time B is the actual next sentence that follows A and 50% of the time it is a random sentence from the corpus. It helps the model learn relationships between sentences, which benefits tasks such as question answering and natural language inference.",
+    "source_files": ["BERT- Pre-training of Deep Bidirectional Transformers for.pdf"]
+  },
+  {
+    "id": "bert-04",
+    "category": "answerable",
+    "question": "How many parameters do BERT-base and BERT-large have?",
+    "ground_truth": "BERT-base contains 110M parameters and BERT-large contains 340M parameters.",
+    "source_files": ["BERT- Pre-training of Deep Bidirectional Transformers for.pdf"]
+  },
+  {
+    "id": "resnet-01",
+    "category": "answerable",
+    "question": "What is the degradation problem in deep neural networks?",
+    "ground_truth": "The degradation problem is that as plain network depth increases, accuracy saturates and then degrades rapidly. This is not caused by overfitting, because adding more layers leads to higher training error, as seen when a 34-layer plain network has higher error than an 18-layer one.",
+    "source_files": ["Deep residual learning from image recognition.pdf"]
+  },
+  {
+    "id": "resnet-02",
+    "category": "answerable",
+    "question": "How does residual learning work in ResNet?",
+    "ground_truth": "Instead of asking stacked layers to fit a desired underlying mapping H(x) directly, ResNet lets them fit a residual mapping F(x) := H(x) - x, so the original mapping becomes F(x) + x. This is implemented with shortcut connections that perform identity mapping and add the input to the output of the stacked layers, making very deep networks easier to optimize.",
+    "source_files": ["Deep residual learning from image recognition.pdf"]
+  },
+  {
+    "id": "resnet-03",
+    "category": "answerable",
+    "question": "What top-5 error did the ResNet ensemble achieve on ImageNet?",
+    "ground_truth": "An ensemble of residual networks, including two 152-layer models, achieved 3.57% top-5 error on the ImageNet test set, winning 1st place in the ILSVRC 2015 classification task.",
+    "source_files": ["Deep residual learning from image recognition.pdf"]
+  },
+  {
+    "id": "gan-01",
+    "category": "answerable",
+    "question": "How do generative adversarial networks work?",
+    "ground_truth": "A GAN simultaneously trains two models: a generative model G that captures the data distribution and a discriminative model D that estimates the probability that a sample came from the training data rather than from G. G is trained to maximize the probability of D making a mistake, so the framework corresponds to a two-player minimax game.",
+    "source_files": ["GANs.pdf"]
+  },
+  {
+    "id": "gan-02",
+    "category": "answerable",
+    "question": "What is the value function of the minimax game in GANs?",
+    "ground_truth": "D and G play a two-player minimax game with value function min_G max_D V(D, G) = E_{x~p_data(x)}[log D(x)] + E_{z~p_z(z)}[log(1 - D(G(z)))], where D tries to classify real and generated samples correctly and G tries to fool D.",
+    "source_files": ["GANs.pdf"]
+  },
+  {
+    "id": "gpt3-01",
+    "category": "answerable",
+    "question": "How many parameters does GPT-3 have?",
+    "ground_truth": "GPT-3 is an autoregressive language model with 175 billion parameters, the largest of eight model sizes trained, which range from 125 million to 175 billion parameters.",
+    "source_files": ["Language models are few shot learners.pdf"]
+  },
+  {
+    "id": "gpt3-02",
+    "category": "answerable",
+    "question": "What is the difference between zero-shot, one-shot, and few-shot learning in GPT-3?",
+    "ground_truth": "In GPT-3 the settings differ in how many demonstrations are provided in the model's context at inference time: few-shot gives a small number of examples of the task, one-shot gives exactly one example, and zero-shot gives only a natural language description of the task with no examples. In all settings the task is specified purely through text, with no gradient updates or fine-tuning.",
+    "source_files": ["Language models are few shot learners.pdf"]
+  },
+  {
+    "id": "gpt3-03",
+    "category": "answerable",
+    "question": "Does GPT-3 update its weights when performing few-shot learning?",
+    "ground_truth": "No. GPT-3 performs few-shot learning in context: demonstrations are placed in the prompt and the model performs no gradient updates or fine-tuning.",
+    "source_files": ["Language models are few shot learners.pdf"]
+  },
+  {
+    "id": "rag-01",
+    "category": "answerable",
+    "question": "What is retrieval-augmented generation (RAG)?",
+    "ground_truth": "Retrieval-Augmented Generation (RAG) combines the text generation capabilities of generative language models with the ability of information retrieval models to find the most relevant text. Retrieved external knowledge is supplied to the model so it can produce more accurate, up-to-date, and grounded responses.",
+    "source_files": [
+      "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+      "Survey on RAG meeting LLMs.pdf"
+    ]
+  },
+  {
+    "id": "rag-02",
+    "category": "answerable",
+    "question": "What are the three major components of a retrieval-augmented large language model framework?",
+    "ground_truth": "The basic retrieval-augmented LLM (RA-LLM) framework consists of three major components: retrieval, generation, and augmentation. Retrieved documents are leveraged in generation through the augmentation module, which can integrate them at the input, intermediate, or output layer.",
+    "source_files": ["Survey on RAG meeting LLMs.pdf"]
+  },
+  {
+    "id": "rag-03",
+    "category": "answerable",
+    "question": "What limitations of LLMs does RAG help address?",
+    "ground_truth": "LLMs face inherent limitations such as hallucinations and out-of-date internal knowledge, because they are constrained to the static data they were trained on. RAG addresses these by providing reliable, up-to-date external knowledge retrieved at inference time.",
+    "source_files": [
+      "Survey on RAG meeting LLMs.pdf",
+      "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf"
+    ]
+  },
+  {
+    "id": "rag-04",
+    "category": "answerable",
+    "question": "Why are traditional keyword-based information retrieval methods insufficient?",
+    "ground_truth": "Traditional IR methods such as TF-IDF and BM25 are based on keywords, so they cannot fully capture the semantic meaning and complexity of natural language when responding to specific queries. This motivated going beyond traditional IR toward context- and meaning-based approaches such as RAG.",
+    "source_files": ["Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf"]
+  },
+  {
+    "id": "dataperf-01",
+    "category": "answerable",
+    "question": "What is DataPerf?",
+    "ground_truth": "DataPerf is a community-led benchmark suite for evaluating ML datasets and data-centric algorithms, motivated by ML research focusing on models rather than data. Its first iteration contains five benchmarks spanning vision, speech, data acquisition, data debugging, and diffusion prompting, and it is maintained by the MLCommons Association.",
+    "source_files": ["DataPerf Benchmarks for data centric AI Dev.pdf"]
+  },
+  {
+    "id": "llmsec-01",
+    "category": "answerable",
+    "question": "How can large language models help improve security and privacy?",
+    "ground_truth": "LLMs have been shown to enhance code security, such as code vulnerability detection, and data privacy, such as data confidentiality protection, often outperforming traditional methods. For example, GPT-3 was reported to uncover 213 security vulnerabilities in a code repository, compared with 99 found by a leading commercial tool.",
+    "source_files": ["A survey on large language model (LLM)- good.pdf"]
+  },
+  {
+    "id": "llmsec-02",
+    "category": "answerable",
+    "question": "What security risks and vulnerabilities do large language models have?",
+    "ground_truth": "LLMs can be harnessed for various attacks, particularly user-level attacks, because of their human-like reasoning abilities, and they have inherent vulnerabilities of their own, including adversarial attacks such as jailbreaking and prompt injection, as well as data poisoning, backdoors, and model extraction.",
+    "source_files": ["A survey on large language model (LLM)- good.pdf"]
+  },
+  {
+    "id": "unans-01",
+    "category": "unanswerable",
+    "question": "How does XGBoost handle missing values when building trees?",
+    "ground_truth": "",
+    "source_files": []
+  },
+  {
+    "id": "unans-02",
+    "category": "unanswerable",
+    "question": "How do you choose the number of clusters with the elbow method in k-means?",
+    "ground_truth": "",
+    "source_files": []
+  },
+  {
+    "id": "unans-03",
+    "category": "unanswerable",
+    "question": "What is the difference between L1 and L2 regularization in linear regression?",
+    "ground_truth": "",
+    "source_files": []
+  },
+  {
+    "id": "oos-01",
+    "category": "out_of_scope",
+    "question": "What is the capital of France?",
+    "ground_truth": "",
+    "source_files": []
+  },
+  {
+    "id": "oos-02",
+    "category": "out_of_scope",
+    "question": "Can you give me a recipe for chocolate chip cookies?",
+    "ground_truth": "",
+    "source_files": []
+  },
+  {
+    "id": "oos-03",
+    "category": "out_of_scope",
+    "question": "Who won the football World Cup in 2018?",
+    "ground_truth": "",
+    "source_files": []
+  },
+  {
+    "id": "oos-04",
+    "category": "out_of_scope",
+    "question": "What is a good exercise routine for building muscle?",
+    "ground_truth": "",
+    "source_files": []
+  },
+  {
+    "id": "oos-05",
+    "category": "out_of_scope",
+    "question": "How do I renew my passport?",
+    "ground_truth": "",
+    "source_files": []
   }
 ]

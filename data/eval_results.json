@@ -1,0 +1,1795 @@
+{
+  "config": {
+    "timestamp": "2026-09-30T10:34:25+00:00",
+    "dataset": "tests/eval_dataset.json",
+    "dataset_size": 32,
+    "index_dir": "./data/chroma_db",
+    "index_chunks": 562,
+    "top_k": 3,
+    "generator_model": "openai/gpt-oss-20b",
+    "judge_model": "openai/gpt-oss-120b",
+    "ragas_version": "0.2.15"
+  },
+  "retrieval_and_guardrails": {
+    "summary": {
+      "retrieval": {
+        "hit_rate@3": 0.9583,
+        "hit_rate@1": 0.9583,
+        "mrr": 0.9583,
+        "n": 24
+      },
+      "guardrails": {
+        "answerable_pass_rate": 1.0,
+        "unanswerable_decline_rate": 1.0,
+        "out_of_scope_decline_rate": 1.0,
+        "out_of_scope_rejected_by_scope_layer": 0.8,
+        "thresholds": {
+          "scope": 0.2,
+          "confidence": 0.5,
+          "source_min_score": 0.3
+        }
+      },
+      "latency": {
+        "scope_check": {
+          "p50_ms": 10.1,
+          "p95_ms": 11.9,
+          "n": 32
+        },
+        "retrieval": {
+          "p50_ms": 13.8,
+          "p95_ms": 19.3,
+          "n": 27
+        }
+      }
+    },
+    "per_question": [
+      {
+        "id": "attn-01",
+        "category": "answerable",
+        "question": "What is the transformer architecture?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.6157,
+        "scope_best_match": "transformer architecture attention mechanism",
+        "best_retrieval_score": 0.5273,
+        "retrieved_files": [
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf"
+        ],
+        "expected_files": [
+          "Attention is all you need.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 9.4,
+          "retrieval_ms": 10.0
+        }
+      },
+      {
+        "id": "attn-02",
+        "category": "answerable",
+        "question": "What is self-attention and why is it important?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.5945,
+        "scope_best_match": "self-attention multi-head attention",
+        "best_retrieval_score": 0.6038,
+        "retrieved_files": [
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf"
+        ],
+        "expected_files": [
+          "Attention is all you need.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 10.2,
+          "retrieval_ms": 14.8
+        }
+      },
+      {
+        "id": "attn-03",
+        "category": "answerable",
+        "question": "What is the scaled dot-product attention mechanism?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.4738,
+        "scope_best_match": "transformer architecture attention mechanism",
+        "best_retrieval_score": 0.6144,
+        "retrieved_files": [
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf"
+        ],
+        "expected_files": [
+          "Attention is all you need.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 9.7,
+          "retrieval_ms": 11.5
+        }
+      },
+      {
+        "id": "attn-04",
+        "category": "answerable",
+        "question": "How does the Transformer encode the position of tokens in a sequence?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.5367,
+        "scope_best_match": "encoder decoder sequence to sequence",
+        "best_retrieval_score": 0.5779,
+        "retrieved_files": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "expected_files": [
+          "Attention is all you need.pdf"
+        ],
+        "first_relevant_rank": null,
+        "timings": {
+          "scope_ms": 10.9,
+          "retrieval_ms": 11.2
+        }
+      },
+      {
+        "id": "attn-05",
+        "category": "answerable",
+        "question": "What BLEU score did the big Transformer model achieve on English-to-German translation?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.3832,
+        "scope_best_match": "generative AI large language models",
+        "best_retrieval_score": 0.739,
+        "retrieved_files": [
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf"
+        ],
+        "expected_files": [
+          "Attention is all you need.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 8.0,
+          "retrieval_ms": 11.9
+        }
+      },
+      {
+        "id": "bert-01",
+        "category": "answerable",
+        "question": "What is BERT and how does it differ from previous models?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.6131,
+        "scope_best_match": "BERT language model pre-training",
+        "best_retrieval_score": 0.6341,
+        "retrieved_files": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "expected_files": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 7.3,
+          "retrieval_ms": 12.1
+        }
+      },
+      {
+        "id": "bert-02",
+        "category": "answerable",
+        "question": "How does BERT's masked language modeling choose and replace tokens?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.6099,
+        "scope_best_match": "BERT language model pre-training",
+        "best_retrieval_score": 0.7058,
+        "retrieved_files": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "expected_files": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 10.9,
+          "retrieval_ms": 15.0
+        }
+      },
+      {
+        "id": "bert-03",
+        "category": "answerable",
+        "question": "What is the next sentence prediction task in BERT?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.6559,
+        "scope_best_match": "BERT language model pre-training",
+        "best_retrieval_score": 0.7486,
+        "retrieved_files": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "expected_files": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 7.4,
+          "retrieval_ms": 11.5
+        }
+      },
+      {
+        "id": "bert-04",
+        "category": "answerable",
+        "question": "How many parameters do BERT-base and BERT-large have?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.4892,
+        "scope_best_match": "BERT language model pre-training",
+        "best_retrieval_score": 0.642,
+        "retrieved_files": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "expected_files": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 10.0,
+          "retrieval_ms": 15.4
+        }
+      },
+      {
+        "id": "resnet-01",
+        "category": "answerable",
+        "question": "What is the degradation problem in deep neural networks?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.5496,
+        "scope_best_match": "deep learning neural networks",
+        "best_retrieval_score": 0.7102,
+        "retrieved_files": [
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "expected_files": [
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 10.2,
+          "retrieval_ms": 9.6
+        }
+      },
+      {
+        "id": "resnet-02",
+        "category": "answerable",
+        "question": "How does residual learning work in ResNet?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.5473,
+        "scope_best_match": "residual connections skip connections deep networks",
+        "best_retrieval_score": 0.7114,
+        "retrieved_files": [
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "expected_files": [
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 9.9,
+          "retrieval_ms": 14.6
+        }
+      },
+      {
+        "id": "resnet-03",
+        "category": "answerable",
+        "question": "What top-5 error did the ResNet ensemble achieve on ImageNet?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.318,
+        "scope_best_match": "residual connections skip connections deep networks",
+        "best_retrieval_score": 0.6944,
+        "retrieved_files": [
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "expected_files": [
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 11.3,
+          "retrieval_ms": 12.2
+        }
+      },
+      {
+        "id": "gan-01",
+        "category": "answerable",
+        "question": "How do generative adversarial networks work?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.7384,
+        "scope_best_match": "generative adversarial networks GANs",
+        "best_retrieval_score": 0.686,
+        "retrieved_files": [
+          "GANs.pdf",
+          "GANs.pdf",
+          "GANs.pdf"
+        ],
+        "expected_files": [
+          "GANs.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 8.1,
+          "retrieval_ms": 12.2
+        }
+      },
+      {
+        "id": "gan-02",
+        "category": "answerable",
+        "question": "What is the value function of the minimax game in GANs?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.4432,
+        "scope_best_match": "generative adversarial networks GANs",
+        "best_retrieval_score": 0.6693,
+        "retrieved_files": [
+          "GANs.pdf",
+          "GANs.pdf",
+          "GANs.pdf"
+        ],
+        "expected_files": [
+          "GANs.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 10.3,
+          "retrieval_ms": 14.9
+        }
+      },
+      {
+        "id": "gpt3-01",
+        "category": "answerable",
+        "question": "How many parameters does GPT-3 have?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.2461,
+        "scope_best_match": "hyperparameter tuning grid search",
+        "best_retrieval_score": 0.5966,
+        "retrieved_files": [
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf"
+        ],
+        "expected_files": [
+          "Language models are few shot learners.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 9.8,
+          "retrieval_ms": 10.9
+        }
+      },
+      {
+        "id": "gpt3-02",
+        "category": "answerable",
+        "question": "What is the difference between zero-shot, one-shot, and few-shot learning in GPT-3?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.5678,
+        "scope_best_match": "few-shot learning in-context learning",
+        "best_retrieval_score": 0.7151,
+        "retrieved_files": [
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf"
+        ],
+        "expected_files": [
+          "Language models are few shot learners.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 11.9,
+          "retrieval_ms": 16.2
+        }
+      },
+      {
+        "id": "gpt3-03",
+        "category": "answerable",
+        "question": "Does GPT-3 update its weights when performing few-shot learning?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.4286,
+        "scope_best_match": "few-shot learning in-context learning",
+        "best_retrieval_score": 0.6722,
+        "retrieved_files": [
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf"
+        ],
+        "expected_files": [
+          "Language models are few shot learners.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 8.4,
+          "retrieval_ms": 12.0
+        }
+      },
+      {
+        "id": "rag-01",
+        "category": "answerable",
+        "question": "What is retrieval-augmented generation (RAG)?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.8465,
+        "scope_best_match": "retrieval augmented generation RAG",
+        "best_retrieval_score": 0.6885,
+        "retrieved_files": [
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf"
+        ],
+        "expected_files": [
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Survey on RAG meeting LLMs.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 10.0,
+          "retrieval_ms": 11.3
+        }
+      },
+      {
+        "id": "rag-02",
+        "category": "answerable",
+        "question": "What are the three major components of a retrieval-augmented large language model framework?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.5102,
+        "scope_best_match": "language model pre-training fine-tuning",
+        "best_retrieval_score": 0.7538,
+        "retrieved_files": [
+          "Survey on RAG meeting LLMs.pdf",
+          "Survey on RAG meeting LLMs.pdf",
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf"
+        ],
+        "expected_files": [
+          "Survey on RAG meeting LLMs.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 11.0,
+          "retrieval_ms": 11.7
+        }
+      },
+      {
+        "id": "rag-03",
+        "category": "answerable",
+        "question": "What limitations of LLMs does RAG help address?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.3614,
+        "scope_best_match": "retrieval augmented generation RAG",
+        "best_retrieval_score": 0.6111,
+        "retrieved_files": [
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf"
+        ],
+        "expected_files": [
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Survey on RAG meeting LLMs.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 9.9,
+          "retrieval_ms": 14.7
+        }
+      },
+      {
+        "id": "rag-04",
+        "category": "answerable",
+        "question": "Why are traditional keyword-based information retrieval methods insufficient?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.366,
+        "scope_best_match": "vector database embeddings retrieval",
+        "best_retrieval_score": 0.607,
+        "retrieved_files": [
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Survey on RAG meeting LLMs.pdf",
+          "Survey on RAG meeting LLMs.pdf"
+        ],
+        "expected_files": [
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 9.3,
+          "retrieval_ms": 15.7
+        }
+      },
+      {
+        "id": "dataperf-01",
+        "category": "answerable",
+        "question": "What is DataPerf?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.3762,
+        "scope_best_match": "exploratory data analysis visualization",
+        "best_retrieval_score": 0.6587,
+        "retrieved_files": [
+          "DataPerf Benchmarks for data centric AI Dev.pdf",
+          "DataPerf Benchmarks for data centric AI Dev.pdf",
+          "DataPerf Benchmarks for data centric AI Dev.pdf"
+        ],
+        "expected_files": [
+          "DataPerf Benchmarks for data centric AI Dev.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 8.1,
+          "retrieval_ms": 14.3
+        }
+      },
+      {
+        "id": "llmsec-01",
+        "category": "answerable",
+        "question": "How can large language models help improve security and privacy?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.4763,
+        "scope_best_match": "language model pre-training fine-tuning",
+        "best_retrieval_score": 0.7644,
+        "retrieved_files": [
+          "A survey on large language model (LLM)- good.pdf",
+          "A survey on large language model (LLM)- good.pdf",
+          "A survey on large language model (LLM)- good.pdf"
+        ],
+        "expected_files": [
+          "A survey on large language model (LLM)- good.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 13.8,
+          "retrieval_ms": 15.9
+        }
+      },
+      {
+        "id": "llmsec-02",
+        "category": "answerable",
+        "question": "What security risks and vulnerabilities do large language models have?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.4406,
+        "scope_best_match": "language model pre-training fine-tuning",
+        "best_retrieval_score": 0.7306,
+        "retrieved_files": [
+          "A survey on large language model (LLM)- good.pdf",
+          "Language models are few shot learners.pdf",
+          "A survey on large language model (LLM)- good.pdf"
+        ],
+        "expected_files": [
+          "A survey on large language model (LLM)- good.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 11.5,
+          "retrieval_ms": 17.0
+        }
+      },
+      {
+        "id": "unans-01",
+        "category": "unanswerable",
+        "question": "How does XGBoost handle missing values when building trees?",
+        "guardrail_action": "scope_rejected",
+        "scope_similarity": 0.1687,
+        "scope_best_match": "feature engineering data preprocessing",
+        "best_retrieval_score": 0.503,
+        "retrieved_files": [
+          "DataPerf Benchmarks for data centric AI Dev.pdf",
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf"
+        ],
+        "expected_files": [],
+        "first_relevant_rank": null,
+        "timings": {
+          "scope_ms": 11.3
+        }
+      },
+      {
+        "id": "unans-02",
+        "category": "unanswerable",
+        "question": "How do you choose the number of clusters with the elbow method in k-means?",
+        "guardrail_action": "low_confidence",
+        "scope_similarity": 0.383,
+        "scope_best_match": "unsupervised learning clustering",
+        "best_retrieval_score": 0.4627,
+        "retrieved_files": [
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf"
+        ],
+        "expected_files": [],
+        "first_relevant_rank": null,
+        "timings": {
+          "scope_ms": 11.7,
+          "retrieval_ms": 19.3
+        }
+      },
+      {
+        "id": "unans-03",
+        "category": "unanswerable",
+        "question": "What is the difference between L1 and L2 regularization in linear regression?",
+        "guardrail_action": "low_confidence",
+        "scope_similarity": 0.4149,
+        "scope_best_match": "overfitting regularization",
+        "best_retrieval_score": 0.4715,
+        "retrieved_files": [
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "expected_files": [],
+        "first_relevant_rank": null,
+        "timings": {
+          "scope_ms": 11.5,
+          "retrieval_ms": 26.1
+        }
+      },
+      {
+        "id": "oos-01",
+        "category": "out_of_scope",
+        "question": "What is the capital of France?",
+        "guardrail_action": "scope_rejected",
+        "scope_similarity": 0.112,
+        "scope_best_match": "data-centric AI benchmarks",
+        "best_retrieval_score": 0.4409,
+        "retrieved_files": [
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf"
+        ],
+        "expected_files": [],
+        "first_relevant_rank": null,
+        "timings": {
+          "scope_ms": 10.0
+        }
+      },
+      {
+        "id": "oos-02",
+        "category": "out_of_scope",
+        "question": "Can you give me a recipe for chocolate chip cookies?",
+        "guardrail_action": "scope_rejected",
+        "scope_similarity": 0.1387,
+        "scope_best_match": "generative adversarial networks GANs",
+        "best_retrieval_score": 0.4198,
+        "retrieved_files": [
+          "GANs.pdf",
+          "Survey on RAG meeting LLMs.pdf",
+          "Language models are few shot learners.pdf"
+        ],
+        "expected_files": [],
+        "first_relevant_rank": null,
+        "timings": {
+          "scope_ms": 10.3
+        }
+      },
+      {
+        "id": "oos-03",
+        "category": "out_of_scope",
+        "question": "Who won the football World Cup in 2018?",
+        "guardrail_action": "scope_rejected",
+        "scope_similarity": 0.1357,
+        "scope_best_match": "model evaluation metrics accuracy precision recall",
+        "best_retrieval_score": 0.4522,
+        "retrieved_files": [
+          "Survey on RAG meeting LLMs.pdf",
+          "Language models are few shot learners.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "expected_files": [],
+        "first_relevant_rank": null,
+        "timings": {
+          "scope_ms": 10.3
+        }
+      },
+      {
+        "id": "oos-04",
+        "category": "out_of_scope",
+        "question": "What is a good exercise routine for building muscle?",
+        "guardrail_action": "low_confidence",
+        "scope_similarity": 0.2145,
+        "scope_best_match": "model training and optimization",
+        "best_retrieval_score": 0.4509,
+        "retrieved_files": [
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf"
+        ],
+        "expected_files": [],
+        "first_relevant_rank": null,
+        "timings": {
+          "scope_ms": 11.0,
+          "retrieval_ms": 13.8
+        }
+      },
+      {
+        "id": "oos-05",
+        "category": "out_of_scope",
+        "question": "How do I renew my passport?",
+        "guardrail_action": "scope_rejected",
+        "scope_similarity": 0.1075,
+        "scope_best_match": "confusion matrix ROC curve",
+        "best_retrieval_score": 0.3973,
+        "retrieved_files": [
+          "DataPerf Benchmarks for data centric AI Dev.pdf",
+          "DataPerf Benchmarks for data centric AI Dev.pdf",
+          "A survey on large language model (LLM)- good.pdf"
+        ],
+        "expected_files": [],
+        "first_relevant_rank": null,
+        "timings": {
+          "scope_ms": 7.3
+        }
+      }
+    ]
+  },
+  "threshold_sweep": [
+    {
+      "scope_threshold": 0.2,
+      "confidence_threshold": 0.5,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 1.0
+    },
+    {
+      "scope_threshold": 0.1,
+      "confidence_threshold": 0.55,
+      "answerable_pass_rate": 0.9583,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.9792
+    },
+    {
+      "scope_threshold": 0.15,
+      "confidence_threshold": 0.55,
+      "answerable_pass_rate": 0.9583,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.9792
+    },
+    {
+      "scope_threshold": 0.2,
+      "confidence_threshold": 0.55,
+      "answerable_pass_rate": 0.9583,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.9792
+    },
+    {
+      "scope_threshold": 0.25,
+      "confidence_threshold": 0.5,
+      "answerable_pass_rate": 0.9583,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.9792
+    },
+    {
+      "scope_threshold": 0.3,
+      "confidence_threshold": 0.5,
+      "answerable_pass_rate": 0.9583,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.9792
+    },
+    {
+      "scope_threshold": 0.25,
+      "confidence_threshold": 0.55,
+      "answerable_pass_rate": 0.9167,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.9583
+    },
+    {
+      "scope_threshold": 0.3,
+      "confidence_threshold": 0.55,
+      "answerable_pass_rate": 0.9167,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.9583
+    },
+    {
+      "scope_threshold": 0.35,
+      "confidence_threshold": 0.5,
+      "answerable_pass_rate": 0.9167,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.9583
+    },
+    {
+      "scope_threshold": 0.1,
+      "confidence_threshold": 0.5,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 0.875,
+      "balanced_accuracy": 0.9375
+    },
+    {
+      "scope_threshold": 0.1,
+      "confidence_threshold": 0.6,
+      "answerable_pass_rate": 0.875,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.9375
+    },
+    {
+      "scope_threshold": 0.15,
+      "confidence_threshold": 0.5,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 0.875,
+      "balanced_accuracy": 0.9375
+    },
+    {
+      "scope_threshold": 0.15,
+      "confidence_threshold": 0.6,
+      "answerable_pass_rate": 0.875,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.9375
+    },
+    {
+      "scope_threshold": 0.2,
+      "confidence_threshold": 0.6,
+      "answerable_pass_rate": 0.875,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.9375
+    },
+    {
+      "scope_threshold": 0.25,
+      "confidence_threshold": 0.6,
+      "answerable_pass_rate": 0.875,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.9375
+    },
+    {
+      "scope_threshold": 0.3,
+      "confidence_threshold": 0.6,
+      "answerable_pass_rate": 0.875,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.9375
+    },
+    {
+      "scope_threshold": 0.35,
+      "confidence_threshold": 0.55,
+      "answerable_pass_rate": 0.875,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.9375
+    },
+    {
+      "scope_threshold": 0.35,
+      "confidence_threshold": 0.6,
+      "answerable_pass_rate": 0.8333,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.9167
+    },
+    {
+      "scope_threshold": 0.4,
+      "confidence_threshold": 0.5,
+      "answerable_pass_rate": 0.75,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.875
+    },
+    {
+      "scope_threshold": 0.25,
+      "confidence_threshold": 0.25,
+      "answerable_pass_rate": 0.9583,
+      "negative_decline_rate": 0.75,
+      "balanced_accuracy": 0.8542
+    },
+    {
+      "scope_threshold": 0.25,
+      "confidence_threshold": 0.3,
+      "answerable_pass_rate": 0.9583,
+      "negative_decline_rate": 0.75,
+      "balanced_accuracy": 0.8542
+    },
+    {
+      "scope_threshold": 0.25,
+      "confidence_threshold": 0.35,
+      "answerable_pass_rate": 0.9583,
+      "negative_decline_rate": 0.75,
+      "balanced_accuracy": 0.8542
+    },
+    {
+      "scope_threshold": 0.25,
+      "confidence_threshold": 0.4,
+      "answerable_pass_rate": 0.9583,
+      "negative_decline_rate": 0.75,
+      "balanced_accuracy": 0.8542
+    },
+    {
+      "scope_threshold": 0.25,
+      "confidence_threshold": 0.45,
+      "answerable_pass_rate": 0.9583,
+      "negative_decline_rate": 0.75,
+      "balanced_accuracy": 0.8542
+    },
+    {
+      "scope_threshold": 0.3,
+      "confidence_threshold": 0.25,
+      "answerable_pass_rate": 0.9583,
+      "negative_decline_rate": 0.75,
+      "balanced_accuracy": 0.8542
+    },
+    {
+      "scope_threshold": 0.3,
+      "confidence_threshold": 0.3,
+      "answerable_pass_rate": 0.9583,
+      "negative_decline_rate": 0.75,
+      "balanced_accuracy": 0.8542
+    },
+    {
+      "scope_threshold": 0.3,
+      "confidence_threshold": 0.35,
+      "answerable_pass_rate": 0.9583,
+      "negative_decline_rate": 0.75,
+      "balanced_accuracy": 0.8542
+    },
+    {
+      "scope_threshold": 0.3,
+      "confidence_threshold": 0.4,
+      "answerable_pass_rate": 0.9583,
+      "negative_decline_rate": 0.75,
+      "balanced_accuracy": 0.8542
+    },
+    {
+      "scope_threshold": 0.3,
+      "confidence_threshold": 0.45,
+      "answerable_pass_rate": 0.9583,
+      "negative_decline_rate": 0.75,
+      "balanced_accuracy": 0.8542
+    },
+    {
+      "scope_threshold": 0.4,
+      "confidence_threshold": 0.55,
+      "answerable_pass_rate": 0.7083,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.8542
+    },
+    {
+      "scope_threshold": 0.35,
+      "confidence_threshold": 0.25,
+      "answerable_pass_rate": 0.9167,
+      "negative_decline_rate": 0.75,
+      "balanced_accuracy": 0.8333
+    },
+    {
+      "scope_threshold": 0.35,
+      "confidence_threshold": 0.3,
+      "answerable_pass_rate": 0.9167,
+      "negative_decline_rate": 0.75,
+      "balanced_accuracy": 0.8333
+    },
+    {
+      "scope_threshold": 0.35,
+      "confidence_threshold": 0.35,
+      "answerable_pass_rate": 0.9167,
+      "negative_decline_rate": 0.75,
+      "balanced_accuracy": 0.8333
+    },
+    {
+      "scope_threshold": 0.35,
+      "confidence_threshold": 0.4,
+      "answerable_pass_rate": 0.9167,
+      "negative_decline_rate": 0.75,
+      "balanced_accuracy": 0.8333
+    },
+    {
+      "scope_threshold": 0.35,
+      "confidence_threshold": 0.45,
+      "answerable_pass_rate": 0.9167,
+      "negative_decline_rate": 0.75,
+      "balanced_accuracy": 0.8333
+    },
+    {
+      "scope_threshold": 0.4,
+      "confidence_threshold": 0.6,
+      "answerable_pass_rate": 0.6667,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.8333
+    },
+    {
+      "scope_threshold": 0.2,
+      "confidence_threshold": 0.25,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 0.625,
+      "balanced_accuracy": 0.8125
+    },
+    {
+      "scope_threshold": 0.2,
+      "confidence_threshold": 0.3,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 0.625,
+      "balanced_accuracy": 0.8125
+    },
+    {
+      "scope_threshold": 0.2,
+      "confidence_threshold": 0.35,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 0.625,
+      "balanced_accuracy": 0.8125
+    },
+    {
+      "scope_threshold": 0.2,
+      "confidence_threshold": 0.4,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 0.625,
+      "balanced_accuracy": 0.8125
+    },
+    {
+      "scope_threshold": 0.2,
+      "confidence_threshold": 0.45,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 0.625,
+      "balanced_accuracy": 0.8125
+    },
+    {
+      "scope_threshold": 0.4,
+      "confidence_threshold": 0.25,
+      "answerable_pass_rate": 0.75,
+      "negative_decline_rate": 0.875,
+      "balanced_accuracy": 0.8125
+    },
+    {
+      "scope_threshold": 0.4,
+      "confidence_threshold": 0.3,
+      "answerable_pass_rate": 0.75,
+      "negative_decline_rate": 0.875,
+      "balanced_accuracy": 0.8125
+    },
+    {
+      "scope_threshold": 0.4,
+      "confidence_threshold": 0.35,
+      "answerable_pass_rate": 0.75,
+      "negative_decline_rate": 0.875,
+      "balanced_accuracy": 0.8125
+    },
+    {
+      "scope_threshold": 0.4,
+      "confidence_threshold": 0.4,
+      "answerable_pass_rate": 0.75,
+      "negative_decline_rate": 0.875,
+      "balanced_accuracy": 0.8125
+    },
+    {
+      "scope_threshold": 0.4,
+      "confidence_threshold": 0.45,
+      "answerable_pass_rate": 0.75,
+      "negative_decline_rate": 0.875,
+      "balanced_accuracy": 0.8125
+    },
+    {
+      "scope_threshold": 0.45,
+      "confidence_threshold": 0.25,
+      "answerable_pass_rate": 0.625,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.8125
+    },
+    {
+      "scope_threshold": 0.45,
+      "confidence_threshold": 0.3,
+      "answerable_pass_rate": 0.625,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.8125
+    },
+    {
+      "scope_threshold": 0.45,
+      "confidence_threshold": 0.35,
+      "answerable_pass_rate": 0.625,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.8125
+    },
+    {
+      "scope_threshold": 0.45,
+      "confidence_threshold": 0.4,
+      "answerable_pass_rate": 0.625,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.8125
+    },
+    {
+      "scope_threshold": 0.45,
+      "confidence_threshold": 0.45,
+      "answerable_pass_rate": 0.625,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.8125
+    },
+    {
+      "scope_threshold": 0.45,
+      "confidence_threshold": 0.5,
+      "answerable_pass_rate": 0.625,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.8125
+    },
+    {
+      "scope_threshold": 0.45,
+      "confidence_threshold": 0.55,
+      "answerable_pass_rate": 0.5833,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.7917
+    },
+    {
+      "scope_threshold": 0.45,
+      "confidence_threshold": 0.6,
+      "answerable_pass_rate": 0.5417,
+      "negative_decline_rate": 1.0,
+      "balanced_accuracy": 0.7708
+    },
+    {
+      "scope_threshold": 0.15,
+      "confidence_threshold": 0.25,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 0.5,
+      "balanced_accuracy": 0.75
+    },
+    {
+      "scope_threshold": 0.15,
+      "confidence_threshold": 0.3,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 0.5,
+      "balanced_accuracy": 0.75
+    },
+    {
+      "scope_threshold": 0.15,
+      "confidence_threshold": 0.35,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 0.5,
+      "balanced_accuracy": 0.75
+    },
+    {
+      "scope_threshold": 0.15,
+      "confidence_threshold": 0.4,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 0.5,
+      "balanced_accuracy": 0.75
+    },
+    {
+      "scope_threshold": 0.15,
+      "confidence_threshold": 0.45,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 0.5,
+      "balanced_accuracy": 0.75
+    },
+    {
+      "scope_threshold": 0.1,
+      "confidence_threshold": 0.45,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 0.375,
+      "balanced_accuracy": 0.6875
+    },
+    {
+      "scope_threshold": 0.1,
+      "confidence_threshold": 0.4,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 0.125,
+      "balanced_accuracy": 0.5625
+    },
+    {
+      "scope_threshold": 0.1,
+      "confidence_threshold": 0.25,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 0.0,
+      "balanced_accuracy": 0.5
+    },
+    {
+      "scope_threshold": 0.1,
+      "confidence_threshold": 0.3,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 0.0,
+      "balanced_accuracy": 0.5
+    },
+    {
+      "scope_threshold": 0.1,
+      "confidence_threshold": 0.35,
+      "answerable_pass_rate": 1.0,
+      "negative_decline_rate": 0.0,
+      "balanced_accuracy": 0.5
+    }
+  ],
+  "generation": {
+    "summary": {
+      "faithfulness": {
+        "mean": 0.8963,
+        "n_scored": 16
+      },
+      "answer_relevancy": {
+        "mean": 0.8421,
+        "n_scored": 17
+      },
+      "llm_context_precision_with_reference": {
+        "mean": 0.7552,
+        "n_scored": 16
+      },
+      "context_recall": {
+        "mean": 0.8438,
+        "n_scored": 16
+      },
+      "answered": 24,
+      "declined_by_guardrail": 0,
+      "latency": {
+        "llm": {
+          "p50_ms": 983.5,
+          "p95_ms": 2139.4,
+          "n": 24
+        },
+        "end_to_end": {
+          "p50_ms": 1029.5,
+          "p95_ms": 2169.0,
+          "n": 24
+        }
+      }
+    },
+    "per_question": [
+      {
+        "id": "attn-01",
+        "question": "What is the transformer architecture?",
+        "answer": "**Transformer architecture (as described in the paper)**  \n\n- **Overall design**: A sequence‑to‑sequence model built entirely from *self‑attention* and *point‑wise fully‑connected* layers, with separate encoder and decoder stacks (Figure 1).  \n- **Encoder**:  \n  - 6 identical layers (N = 6).  \n  - Each layer has two sub‑layers:  \n    1. **Multi‑head self‑attention**.  \n    2. **Position‑wise feed‑forward network**.  \n  - Residual connection around each sub‑layer followed by **layer normalization**:  \n    \\[\n    \\text{LayerNorm}(x + \\text{Sublayer}(x))\n    \\]  \n  - All sub‑layers and embedding layers output vectors of dimension **dmodel = 512**.  \n- **Decoder**:  \n  - Also 6 identical layers.  \n  - Each layer contains the two encoder sub‑layers plus a third sub‑layer that performs **multi‑head attention over the encoder output**.  \n  - The decoder’s self‑attention is masked so that position *i* can attend only to positions < *i*, ensuring predictions depend only on previously generated tokens.  \n  - Residual connections and layer normalization are applied to every sub‑layer, just like in the encoder.  \n\nThese components together form the Transformer’s core architecture, enabling efficient parallel computation and state‑of‑the‑art performance on sequence tasks. (Source: *Attention is All You Need* – pages 1, 3.)",
+        "ground_truth": "The Transformer is a model architecture that relies entirely on attention mechanisms, dispensing with recurrence and convolutions. It consists of an encoder and a decoder, each a stack of identical layers built from multi-head self-attention and position-wise fully connected feed-forward sub-layers, with residual connections and layer normalization around each sub-layer.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf"
+        ],
+        "timings": {
+          "scope_ms": 14.0,
+          "retrieval_ms": 25.4,
+          "llm_ms": 2537.3,
+          "total_ms": 2576.8
+        },
+        "scores": {
+          "faithfulness": 0.8888888888888888,
+          "answer_relevancy": 0.7867039568495163,
+          "llm_context_precision_with_reference": 0.49999999995,
+          "context_recall": 1.0
+        }
+      },
+      {
+        "id": "attn-02",
+        "question": "What is self-attention and why is it important?",
+        "answer": "**Self‑attention (also called intra‑attention)**  \n- **Definition**: An attention mechanism that relates different positions of a *single* sequence to compute a representation of that sequence.  \n- **Key points from the sources**:  \n  - It is used in the Transformer, the first transduction model that relies *entirely* on self‑attention to compute representations of its input and output without sequence‑aligned RNNs or convolutions (source: page 2).  \n  - Self‑attention has been successfully applied to tasks such as reading comprehension, abstractive summarization, textual entailment, and learning task‑independent sentence representations (source: page 2).  \n  - In the Transformer, self‑attention reduces the number of operations needed to relate signals from two arbitrary positions to a constant, making it easier to learn long‑range dependencies (source: page 2).  \n\n**Why it is important**  \n- **Computational efficiency**: Self‑attention requires a constant number of sequential operations per layer, whereas recurrent layers need \\(O(n)\\) sequential operations (source: page 6).  \n- **Parallelizability**: Because all positions are connected simultaneously, self‑attention allows more computation to be parallelized, speeding up training and inference (source: page 6).  \n- **Shorter dependency paths**: The constant‑length paths between any two positions make it easier for the model to learn long‑range dependencies, a key challenge in sequence transduction (source: page 6).  \n- **Flexibility**: It can capture both local and global relationships within a sequence, as illustrated by attention visualizations where distant dependencies (e.g., the verb “making” and its complement “more difficult”) are attended to (source: page 13).",
+        "ground_truth": "Self-attention is an attention mechanism relating different positions of a single sequence in order to compute a representation of the sequence. Compared with recurrent layers it allows much more parallel computation and shortens the path length between long-range dependencies, making those dependencies easier to learn.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf"
+        ],
+        "timings": {
+          "scope_ms": 19.0,
+          "retrieval_ms": 21.4,
+          "llm_ms": 978.7,
+          "total_ms": 1019.4
+        },
+        "scores": {
+          "faithfulness": 0.8235294117647058,
+          "answer_relevancy": 0.990110783441917,
+          "llm_context_precision_with_reference": 0.9999999999666667,
+          "context_recall": 1.0
+        }
+      },
+      {
+        "id": "attn-03",
+        "question": "What is the scaled dot-product attention mechanism?",
+        "answer": "**Scaled Dot‑Product Attention**\n\n*Definition*  \nScaled Dot‑Product Attention is the core attention operation used in the Transformer. It computes a weighted sum of value vectors, where the weights are derived from the similarity between query and key vectors, scaled by the square root of the key dimension to keep the softmax gradients stable.\n\n*Key details from the source*  \n\n1. **Inputs** –  \n   - Queries \\(Q\\) (dimension \\(d_k\\))  \n   - Keys \\(K\\) (dimension \\(d_k\\))  \n   - Values \\(V\\) (dimension \\(d_v\\))\n\n2. **Computation** –  \n   \\[\n   \\text{Attention}(Q,K,V)=\\operatorname{softmax}\\!\\left(\\frac{QK^{\\top}}{\\sqrt{d_k}}\\right)V\n   \\]\n   (Equation (1) in the paper, page 4).\n\n3. **Scaling** –  \n   The dot products \\(QK^{\\top}\\) can become large when \\(d_k\\) is large, pushing the softmax into regions with very small gradients. Dividing by \\(\\sqrt{d_k}\\) counteracts this effect (page 4).\n\n4. **Comparison** –  \n   - Additive attention uses a feed‑forward network for the compatibility function.  \n   - Dot‑product attention (without scaling) is faster and more space‑efficient but suffers from the large‑dot‑product issue that scaling fixes (page 4).\n\n5. **Usage** –  \n   This mechanism is applied to each query in parallel, and is the building block of both single‑head and multi‑head attention layers in the Transformer architecture (page 4).",
+        "ground_truth": "Scaled dot-product attention computes the dot products of a query with all keys, divides each by the square root of the key dimension, and applies a softmax to obtain weights on the values: Attention(Q, K, V) = softmax(QK^T / sqrt(d_k)) V. The scaling counteracts large dot products pushing the softmax into regions with extremely small gradients.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf"
+        ],
+        "timings": {
+          "scope_ms": 46.8,
+          "retrieval_ms": 22.1,
+          "llm_ms": 873.3,
+          "total_ms": 942.5
+        },
+        "scores": {
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.9316768630968583,
+          "llm_context_precision_with_reference": 0.8333333332916666,
+          "context_recall": 1.0
+        }
+      },
+      {
+        "id": "attn-04",
+        "question": "How does the Transformer encode the position of tokens in a sequence?",
+        "answer": "**Definition**  \nIn BERT, each token’s input vector is a sum of three components: the token’s WordPiece embedding, a segment (sentence‑A/B) embedding, and a **position embedding** that tells the model where the token occurs in the sequence.\n\n**Key details from the BERT paper**  \n- The position embedding is a learned vector that is added to every token’s representation.  \n- It is summed together with the token and segment embeddings to form the final input embedding \\(E\\) for each token.  \n- This summed embedding is then fed into the Transformer encoder, allowing the model to incorporate absolute positional information.  \n\n(As described in the “Input/Output Representations” section of the BERT paper.)",
+        "ground_truth": "Because the Transformer has no recurrence or convolution, it adds positional encodings to the input embeddings at the bottom of the encoder and decoder stacks. The encodings have the same dimension as the embeddings and use sine and cosine functions of different frequencies, so each dimension of the positional encoding corresponds to a sinusoid.",
+        "guardrail_action": "passed",
+        "sources": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "timings": {
+          "scope_ms": 25.6,
+          "retrieval_ms": 31.0,
+          "llm_ms": 988.4,
+          "total_ms": 1045.2
+        },
+        "scores": {
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.49351574565146494,
+          "llm_context_precision_with_reference": 0.0,
+          "context_recall": 0.0
+        }
+      },
+      {
+        "id": "attn-05",
+        "question": "What BLEU score did the big Transformer model achieve on English-to-German translation?",
+        "answer": "**Answer**\n\nThe big Transformer model achieved a BLEU score of **28.4** on the English‑to‑German translation task.  \n\n*Source: “Attention is All You Need” – Table 2 and the accompanying text on page 8.*",
+        "ground_truth": "The big Transformer model achieved a BLEU score of 28.4 on the WMT 2014 English-to-German translation task, outperforming previously reported models including ensembles.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf"
+        ],
+        "timings": {
+          "scope_ms": 24.4,
+          "retrieval_ms": 24.9,
+          "llm_ms": 701.5,
+          "total_ms": 751.1
+        },
+        "scores": {
+          "faithfulness": 0.5,
+          "answer_relevancy": 0.9858935426860469,
+          "llm_context_precision_with_reference": 0.99999999995,
+          "context_recall": 1.0
+        }
+      },
+      {
+        "id": "bert-01",
+        "question": "What is BERT and how does it differ from previous models?",
+        "answer": "**What is BERT?**  \nBERT (Bidirectional Encoder Representations from Transformers) is a pre‑training framework that learns deep, bidirectional representations of text using a multi‑layer Transformer encoder. It is trained on large unlabeled corpora with two unsupervised objectives—Masked Language Modeling (MLM) and Next Sentence Prediction (NSP)—and then fine‑tuned on a variety of downstream tasks (e.g., QA, NLI) with minimal architectural changes.\n\n**Key details from the source**\n\n| Feature | BERT | Previous models (OpenAI GPT, ELMo) |\n|---------|------|-----------------------------------|\n| **Architecture** | Multi‑layer bidirectional Transformer encoder (L layers, H hidden size, A attention heads). | GPT: left‑to‑right Transformer decoder. ELMo: concatenation of independently trained left‑to‑right and right‑to‑left LSTMs. | \n| **Contextualization** | Every token is jointly conditioned on both left and right context in *all* layers. | GPT: only left context. ELMo: separate left/right models, combined only at the feature level. |\n| **Pre‑training tasks** | 1) **Masked Language Modeling (MLM)** – 15 % of tokens are masked; 80 % replaced with `[MASK]`, 10 % with a random token, 10 % unchanged; the model predicts the original token. 2) **Next Sentence Prediction (NSP)** – 50 % of pairs are true consecutive sentences (label `IsNext`), 50 % are random (label `NotNext`). | GPT: predicts every token in a left‑to‑right sequence. ELMo: no explicit pre‑training objective; features are extracted from separately trained LSTMs. |\n| **Training efficiency** | MLM converges slightly slower than a left‑to‑right model, but the empirical gains outweigh the extra cost. | GPT converges faster but lacks bidirectional context. |\n| **Fine‑tuning** | The same pre‑trained architecture is used for all downstream tasks; only the final layers are adapted. | GPT and BERT are fine‑tuning approaches; ELMo is a feature‑based approach. |\n| **Model sizes** | BERT‑BASE (L=12, H=768, A=12, 110 M params) and BERT‑LARGE (L=24, H=1024, A=16, 340 M params). | GPT‑BASE has a comparable size (≈110 M params). |\n\n**How BERT differs from previous models**\n\n1. **Bidirectionality** – Unlike GPT’s left‑to‑right context and ELMo’s separate left/right LSTMs, BERT’s Transformer encoder processes tokens in both directions simultaneously, providing richer contextual embeddings.  \n2. **Unified pre‑training objectives** – BERT jointly trains on MLM and NSP, explicitly learning sentence‑level relationships, which benefits downstream tasks such as QA and NLI.  \n3. **Minimal architectural changes for downstream tasks** – The same Transformer encoder is reused for all tasks, requiring only task‑specific output heads, whereas GPT and ELMo require different setups or feature extraction pipelines.  \n\n*Sources: page 3 (overall description), page 2 (architecture comparison), page 4 (MLM and NSP details).*",
+        "ground_truth": "BERT (Bidirectional Encoder Representations from Transformers) is a multi-layer bidirectional Transformer encoder pre-trained on unlabeled text. Unlike earlier left-to-right or shallowly concatenated left-to-right and right-to-left language models, BERT jointly conditions on both left and right context in all layers, using masked language modeling and next sentence prediction as pre-training tasks.",
+        "guardrail_action": "passed",
+        "sources": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "timings": {
+          "scope_ms": 23.1,
+          "retrieval_ms": 21.9,
+          "llm_ms": 1250.1,
+          "total_ms": 1295.4
+        },
+        "scores": {
+          "faithfulness": 0.88,
+          "answer_relevancy": 0.8229263252239808,
+          "llm_context_precision_with_reference": 0.9999999999666667,
+          "context_recall": 1.0
+        }
+      },
+      {
+        "id": "bert-02",
+        "question": "How does BERT's masked language modeling choose and replace tokens?",
+        "answer": "**Masked Language Modeling (MLM) in BERT**\n\n- **Definition**: MLM trains BERT to predict the original word for a subset of tokens that have been altered during pre‑training.  \n- **Token selection**:  \n  - Randomly pick **15 %** of the token positions in each input sequence for prediction.  \n- **Token replacement strategy** (for each selected token):  \n  1. Replace with the special `[MASK]` token **80 %** of the time.  \n  2. Replace with a random token from the vocabulary **10 %** of the time.  \n  3. Leave the token unchanged **10 %** of the time.  \n- **Training objective**: Use cross‑entropy loss to predict the original token from the final hidden state of the corresponding position.  \n\nThese choices encourage BERT to learn contextual representations for all tokens, not just the masked ones, and help the model generalize better to downstream tasks.  \n\n*Source: BERT paper, page 4.*",
+        "ground_truth": "BERT chooses 15% of token positions at random for prediction. A chosen token is replaced with the [MASK] token 80% of the time, with a random token 10% of the time, and left unchanged 10% of the time, and the model predicts the original token with a cross-entropy loss.",
+        "guardrail_action": "passed",
+        "sources": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "timings": {
+          "scope_ms": 22.8,
+          "retrieval_ms": 20.7,
+          "llm_ms": 1106.2,
+          "total_ms": 1150.0
+        },
+        "scores": {
+          "faithfulness": 0.875,
+          "answer_relevancy": 0.7701528522946729,
+          "llm_context_precision_with_reference": 0.8333333332916666,
+          "context_recall": 1.0
+        }
+      },
+      {
+        "id": "bert-03",
+        "question": "What is the next sentence prediction task in BERT?",
+        "answer": "**Definition**  \nThe Next Sentence Prediction (NSP) task is a binary classification problem that trains BERT to determine whether a second sentence actually follows a first sentence in the original text.\n\n**Key details from the source**\n\n- For each training pair, the model receives two sentences, A and B.  \n- 50 % of the time B is the true next sentence after A (label **IsNext**).  \n- 50 % of the time B is a random sentence from the corpus (label **NotNext**).  \n- The model predicts the label using the hidden representation of the special `[CLS]` token, denoted as **C**.  \n- The NSP objective is part of BERT’s pre‑training and is shown to benefit downstream tasks such as Question Answering and Natural Language Inference.  \n- The pre‑trained model achieves 97–98 % accuracy on NSP.  \n\n*(Source: BERT paper, page 4 – “Task #2: Next Sentence Prediction (NSP) …”)*",
+        "ground_truth": "Next sentence prediction is a binarized pre-training task in which BERT is given sentence pairs A and B; 50% of the time B is the actual next sentence that follows A and 50% of the time it is a random sentence from the corpus. It helps the model learn relationships between sentences, which benefits tasks such as question answering and natural language inference.",
+        "guardrail_action": "passed",
+        "sources": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "timings": {
+          "scope_ms": 12.1,
+          "retrieval_ms": 17.3,
+          "llm_ms": 2139.4,
+          "total_ms": 2169.0
+        },
+        "scores": {
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.9228338796492638,
+          "llm_context_precision_with_reference": 0.9999999999,
+          "context_recall": 1.0
+        }
+      },
+      {
+        "id": "bert-04",
+        "question": "How many parameters do BERT-base and BERT-large have?",
+        "answer": "Based on my sources, I can share the following:  \nThe provided excerpts from the BERT paper do not include the number of parameters for BERT‑Base or BERT‑Large.",
+        "ground_truth": "BERT-base contains 110M parameters and BERT-large contains 340M parameters.",
+        "guardrail_action": "passed",
+        "sources": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "timings": {
+          "scope_ms": 30.4,
+          "retrieval_ms": 21.5,
+          "llm_ms": 517.4,
+          "total_ms": 569.6
+        },
+        "scores": {
+          "faithfulness": 0.6666666666666666,
+          "answer_relevancy": 0.0,
+          "llm_context_precision_with_reference": 0.0,
+          "context_recall": 0.0
+        }
+      },
+      {
+        "id": "resnet-01",
+        "question": "What is the degradation problem in deep neural networks?",
+        "answer": "**Definition**  \nThe *degradation problem* in deep neural networks is the phenomenon where adding more layers to an already deep model causes the training accuracy to drop and the overall error to increase, even though the network has enough capacity to fit the data. This decline is not due to over‑fitting but to optimization difficulties that prevent the solver from finding a good solution.\n\n**Key details from the paper**\n\n- When deeper networks begin to converge, accuracy first saturates and then *rapidly degrades* as depth increases.  \n- Experiments show that deeper models can have **higher training error** than shallower ones, contradicting the expectation that a deeper network should at least match the performance of a shallower counterpart.  \n- The degradation is not caused by over‑fitting; simply training for more iterations does not resolve it.  \n- The authors propose residual learning (shortcut connections) to address this issue, making it easier to optimize the residual mapping \\(F(x)=H(x)-x\\) rather than the original mapping \\(H(x)\\).  \n\n*Source: “Deep residual learning from image recognition” – pages 1 and 2.*",
+        "ground_truth": "The degradation problem is that as plain network depth increases, accuracy saturates and then degrades rapidly. This is not caused by overfitting, because adding more layers leads to higher training error, as seen when a 34-layer plain network has higher error than an 18-layer one.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "timings": {
+          "scope_ms": 61.7,
+          "retrieval_ms": 14.9,
+          "llm_ms": 647.8,
+          "total_ms": 724.8
+        },
+        "scores": {
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "llm_context_precision_with_reference": 0.9999999999666667,
+          "context_recall": 1.0
+        }
+      },
+      {
+        "id": "resnet-02",
+        "question": "How does residual learning work in ResNet?",
+        "answer": "**Residual learning in ResNet**\n\n**Definition / Summary**  \nResNet introduces *shortcut connections* that let each block learn a *residual function*—the difference between the desired mapping and the block’s input—rather than learning the full mapping from scratch. This reformulation makes very deep networks easier to optimize.\n\n**Key details from the paper**\n\n1. **Reformulation of layers**  \n   - Each residual block is expressed as  \n     \\[\n     \\mathbf{y} = \\mathcal{F}(\\mathbf{x}, \\{W_i\\}) + \\mathbf{x}\n     \\]\n     where \\(\\mathbf{x}\\) is the block input, \\(\\mathcal{F}\\) is the residual function (typically a stack of 3 × 3 convolutions, batch‑norm, and ReLU), and the addition is the shortcut.  \n   - The shortcut is an *identity mapping* (option A) that adds the input directly to the output, requiring no extra parameters (see Table 2 and Fig. 4 on page 5).\n\n2. **Shortcut connections**  \n   - Added to every pair of 3 × 3 filters (Fig. 3, right).  \n   - When dimensions increase, zero‑padding is used to match shapes (option A).  \n   - Because the shortcut is identity, the residual network has the same number of parameters as its plain counterpart (e.g., 18‑layer vs. 34‑layer ResNet).\n\n3. **Training advantages**  \n   - Empirical evidence shows that residual networks converge faster and achieve lower training error than plain networks of the same depth (Fig. 4, Table 2).  \n   - The residual functions tend to have smaller responses than non‑residual functions (Fig. 7, page 8), indicating that each layer modifies the signal only slightly, which helps gradient flow.\n\n4. **Scalability**  \n   - The framework scales to very deep models (up to 152 layers on ImageNet, 1202 layers in an aggressive experiment) without optimization difficulties, achieving state‑of‑the‑art accuracy (page 1, abstract).\n\n**Bottom line**  \nResidual learning works by letting each block learn *how much* to adjust its input rather than learning the entire mapping, using identity shortcuts that preserve the input signal and simplify optimization.",
+        "ground_truth": "Instead of asking stacked layers to fit a desired underlying mapping H(x) directly, ResNet lets them fit a residual mapping F(x) := H(x) - x, so the original mapping becomes F(x) + x. This is implemented with shortcut connections that perform identity mapping and add the input to the output of the stacked layers, making very deep networks easier to optimize.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "timings": {
+          "scope_ms": 23.2,
+          "retrieval_ms": 24.6,
+          "llm_ms": 939.0,
+          "total_ms": 986.9
+        },
+        "scores": {
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.9625377079371508,
+          "llm_context_precision_with_reference": 0.5833333333041666,
+          "context_recall": 1.0
+        }
+      },
+      {
+        "id": "resnet-03",
+        "question": "What top-5 error did the ResNet ensemble achieve on ImageNet?",
+        "answer": "**Answer**\n\nBased on the provided excerpts, the exact top‑5 error percentage achieved by the ResNet ensemble on ImageNet is not listed. The document references *Table 5* as the source of ensemble error rates, noting that the top‑5 error is reported on the ImageNet test set, but the numeric value for the ResNet ensemble is not included in the excerpt you supplied.",
+        "ground_truth": "An ensemble of residual networks, including two 152-layer models, achieved 3.57% top-5 error on the ImageNet test set, winning 1st place in the ILSVRC 2015 classification task.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "timings": {
+          "scope_ms": 26.2,
+          "retrieval_ms": 25.9,
+          "llm_ms": 664.6,
+          "total_ms": 717.0
+        },
+        "scores": {
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.8654423046205938,
+          "llm_context_precision_with_reference": 0.9999999999,
+          "context_recall": 0.5
+        }
+      },
+      {
+        "id": "gan-01",
+        "question": "How do generative adversarial networks work?",
+        "answer": "**Generative Adversarial Networks (GANs)**  \nGANs are a framework in which two neural networks— a *generator* \\(G\\) and a *discriminator* \\(D\\)—play a minimax game. The generator maps random noise \\(z\\) (sampled from a simple distribution such as a uniform or Gaussian) to synthetic data \\(x = G(z)\\). The discriminator receives either real data samples from the true distribution \\(p_{\\text{data}}\\) or generated samples from \\(p_g\\) (the distribution induced by \\(G\\)) and outputs a probability that the input is real.\n\n**Key details from the source**\n\n1. **Training objective**  \n   - The discriminator is trained to maximize the probability of correctly classifying real versus generated samples.  \n   - The generator is trained to minimize the discriminator’s ability to distinguish its outputs, effectively pushing \\(p_g\\) toward \\(p_{\\text{data}}\\).  \n   - This is formalized as a minimax game where the optimal discriminator for a fixed generator satisfies  \n     \\[\n     D^*(x)=\\frac{p_{\\text{data}}(x)}{p_{\\text{data}}(x)+p_g(x)} \\quad\\text{(page 3, source 1)}.\n     \\]\n\n2. **Learning dynamics**  \n   - In each training iteration, \\(D\\) is updated to better discriminate real from fake samples (inner loop).  \n   - After updating \\(D\\), \\(G\\) is updated using gradients that flow through \\(D\\), guiding \\(G(z)\\) toward regions that \\(D\\) classifies as real (page 3, source 1).  \n   - With sufficient capacity and training time, the game converges to a point where \\(p_g = p_{\\text{data}}\\) and \\(D(x)=\\frac{1}{2}\\) everywhere (page 3, source 1).\n\n3. **Practical advantages**  \n   - Training uses only backpropagation and dropout; no Markov chains or approximate inference are required (page 2, source 1).  \n   - GANs can model sharp, even degenerate distributions, unlike methods based on Markov chains that often produce blurry outputs (page 7, source 1).\n\n4. **Extensions**  \n   - Conditional GANs add a conditioning variable \\(c\\) to both \\(G\\) and \\(D\\) to model \\(p(x|c)\\).  \n   - Auxiliary inference networks can be trained to predict latent codes \\(z\\) from data \\(x\\), enabling approximate inference after the generator is fixed (page 7, source 1).\n\nThese points summarize how GANs operate and why they are computationally attractive compared to traditional generative models that rely on Markov chains or undirected graphical models.",
+        "ground_truth": "A GAN simultaneously trains two models: a generative model G that captures the data distribution and a discriminative model D that estimates the probability that a sample came from the training data rather than from G. G is trained to maximize the probability of D making a mistake, so the framework corresponds to a two-player minimax game.",
+        "guardrail_action": "passed",
+        "sources": [
+          "GANs.pdf",
+          "GANs.pdf",
+          "GANs.pdf"
+        ],
+        "timings": {
+          "scope_ms": 63.0,
+          "retrieval_ms": 28.6,
+          "llm_ms": 1042.7,
+          "total_ms": 1134.6
+        },
+        "scores": {
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.9381977879856911,
+          "llm_context_precision_with_reference": 0.8333333332916666,
+          "context_recall": 1.0
+        }
+      },
+      {
+        "id": "gan-02",
+        "question": "What is the value function of the minimax game in GANs?",
+        "answer": "**Value function of the GAN minimax game**\n\nThe GAN framework formulates a two‑player minimax game between a generator \\(G\\) and a discriminator \\(D\\).  \nThe value function that both players optimize is\n\n\\[\nV(G,D)=\\mathbb{E}_{x\\sim p_{\\text{data}}}\\!\\big[\\log D(x)\\big]\n      +\\mathbb{E}_{z\\sim p_{z}}\\!\\big[\\log\\!\\big(1-D(G(z))\\big)\\big].\n\\]\n\n- **Generator’s goal**: minimize \\(V(G,D)\\) (i.e., make \\(D(G(z))\\) close to 1).  \n- **Discriminator’s goal**: maximize \\(V(G,D)\\) (i.e., correctly classify real vs. generated samples).\n\nThis expression is given in the source document (page 3 of *GANs.pdf*).",
+        "ground_truth": "D and G play a two-player minimax game with value function min_G max_D V(D, G) = E_{x~p_data(x)}[log D(x)] + E_{z~p_z(z)}[log(1 - D(G(z)))], where D tries to classify real and generated samples correctly and G tries to fool D.",
+        "guardrail_action": "passed",
+        "sources": [
+          "GANs.pdf",
+          "GANs.pdf",
+          "GANs.pdf"
+        ],
+        "timings": {
+          "scope_ms": 26.9,
+          "retrieval_ms": 21.3,
+          "llm_ms": 662.7,
+          "total_ms": 711.2
+        },
+        "scores": {
+          "faithfulness": 0.8571428571428571,
+          "answer_relevancy": 0.9780665789817998,
+          "llm_context_precision_with_reference": 0.49999999995,
+          "context_recall": 1.0
+        }
+      },
+      {
+        "id": "gpt3-01",
+        "question": "How many parameters does GPT-3 have?",
+        "answer": "**Answer**\n\nGPT‑3 has **175 billion parameters**.\n\n- This is stated in Table 2.1 of the source document, where the entry for “GPT‑3 175B or ‘GPT‑3’” lists 175.0 B parameters.  \n- The text also refers to the full GPT‑3 model as having 175 billion parameters.",
+        "ground_truth": "GPT-3 is an autoregressive language model with 175 billion parameters, the largest of eight model sizes trained, which range from 125 million to 175 billion parameters.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf"
+        ],
+        "timings": {
+          "scope_ms": 27.6,
+          "retrieval_ms": 23.8,
+          "llm_ms": 523.9,
+          "total_ms": 575.5
+        },
+        "scores": {
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.9911380075025308,
+          "llm_context_precision_with_reference": 0.99999999995,
+          "context_recall": 1.0
+        }
+      },
+      {
+        "id": "gpt3-02",
+        "question": "What is the difference between zero-shot, one-shot, and few-shot learning in GPT-3?",
+        "answer": "**Zero‑shot, one‑shot, and few‑shot learning in GPT‑3**\n\n**Definition**  \n- **Zero‑shot**: The model is asked a task with **no demonstrations** (no example question‑answer pairs) in the prompt.  \n- **One‑shot**: The prompt contains **one** demonstration (one example Q‑A pair) before the target question.  \n- **Few‑shot**: The prompt contains **multiple** demonstrations (typically 2–5) before the target question.  \n\nThese “learning” curves involve **no gradient updates or fine‑tuning**; the model simply conditions on the examples provided in the prompt (see page 5).\n\n**Key details from the paper**\n\n| Setting | Example performance (TriviaQA) | Example performance (CoQA) | Notes |\n|---------|--------------------------------|----------------------------|-------|\n| Zero‑shot | 64.3 % accuracy | 81.5 F1 | Already outperforms some fine‑tuned models (page 13) |\n| One‑shot | 68.0 % accuracy | 84.0 F1 | Matches or exceeds open‑domain SOTA that uses retrieval (page 13) |\n| Few‑shot | 71.2 % accuracy | 85.0 F1 | Further improves, sometimes surpassing fine‑tuned models (page 13) |\n\n- **Performance trend**: GPT‑3’s accuracy or F1 **increases smoothly with the number of demonstrations** and also scales with model size (page 14).  \n- **Rapid adaptation**: Few‑shot prompts enable GPT‑3 to handle tasks that test on‑the‑fly reasoning (e.g., arithmetic, novel word usage) and to generate synthetic news indistinguishable from human writing (page 5).  \n- **Limitations**: Some tasks (e.g., ANLI, RACE, QuAC) still see weaker few‑shot gains, indicating that more demonstrations do not guarantee success on all problems (page 5).\n\n**Summary**  \nZero‑shot, one‑shot, and few‑shot learning in GPT‑3 refer to the number of conditioning examples supplied in the prompt, with performance improving as more examples are added, without any model‑parameter updates.",
+        "ground_truth": "In GPT-3 the settings differ in how many demonstrations are provided in the model's context at inference time: few-shot gives a small number of examples of the task, one-shot gives exactly one example, and zero-shot gives only a natural language description of the task with no examples. In all settings the task is specified purely through text, with no gradient updates or fine-tuning.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf"
+        ],
+        "timings": {
+          "scope_ms": 39.4,
+          "retrieval_ms": 25.8,
+          "llm_ms": 1954.3,
+          "total_ms": 2019.9
+        },
+        "scores": {
+          "faithfulness": 0.85,
+          "answer_relevancy": 0.9475149334158618,
+          "llm_context_precision_with_reference": 0.9999999999,
+          "context_recall": 1.0
+        }
+      },
+      {
+        "id": "gpt3-03",
+        "question": "Does GPT-3 update its weights when performing few-shot learning?",
+        "answer": "**Answer**\n\nNo. In the few‑shot settings described for GPT‑3, the model does **not** update its weights.  \nThe learning occurs purely through *in‑context conditioning*—the model is given a few example demonstrations in the prompt, and it uses those examples to guide its responses, but its internal parameters remain unchanged.  \n\n**Key details from the source**\n\n- The paper explicitly states: “We emphasize that these ‘learning’ curves involve no gradient updates or fine‑tuning, just increasing numbers of demonstrations given as conditioning.” (page 5).  \n- This means GPT‑3’s few‑shot performance is achieved without any fine‑tuning or weight adjustment; the model simply adapts its output based on the prompt context.",
+        "ground_truth": "No. GPT-3 performs few-shot learning in context: demonstrations are placed in the prompt and the model performs no gradient updates or fine-tuning.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf"
+        ],
+        "timings": {
+          "scope_ms": 16.3,
+          "retrieval_ms": 17.8,
+          "llm_ms": 786.7,
+          "total_ms": 821.1
+        },
+        "scores": {
+          "faithfulness": null,
+          "answer_relevancy": null,
+          "llm_context_precision_with_reference": null,
+          "context_recall": null
+        }
+      },
+      {
+        "id": "rag-01",
+        "question": "What is retrieval-augmented generation (RAG)?",
+        "answer": "**Retrieval‑Augmented Generation (RAG)**  \nRAG is a framework that combines a retrieval component with a large language model (LLM) to generate responses that are grounded in up‑to‑date external documents.  \n\n**Key details from the sources**\n\n| Component | What it does | Supporting source |\n|-----------|--------------|-------------------|\n| **Retrieval** | Fetches relevant documents from an external knowledge base before generation. | “RAG, and Modular RAG models, and analyzing in detail the three core components of RAG systems: retrieval, generation, and augmentation techniques.” (page 3) |\n| **Generation** | An LLM uses the retrieved documents to produce a more accurate, contextual answer. | Same as above (page 3) |\n| **Augmentation techniques** | Methods that integrate the retrieved content into the generation process (e.g., passing each document individually to the LLM). | “Salemi et al. (2024) propose a new method for evaluating RAG systems, called eRAG, introducing an approach where each retrieved document is individually used by the large language model.” (page 3) |\n| **Benefits** | • Improves content quality by leveraging external knowledge.<br>• Overcomes inherent knowledge constraints of LLMs.<br>• Ensures knowledge timeliness. | “Fan et al. (2024) systematically examine the ability of LLMs integrated with RAG to improve content quality by leveraging external knowledge sources.” (page 3) |\n| **Evaluation** | eRAG evaluates at the document level, offering higher correlation and lower computational cost than traditional methods. | Same as above (page 3) |\n| **Research context** | RAG has been shown to create more effective answers in knowledge‑intensive NLP tasks and is a focus of ongoing research into evaluation frameworks and future directions. | “Lewis et al. (2020) reveals how the RAG architecture creates more effective answers in knowledge‑intensive NLP tasks.” (page 3) |\n\nThus, RAG is an architecture that augments a generative language model with retrieved documents to produce more accurate, up‑to‑date, and context‑aware outputs.",
+        "ground_truth": "Retrieval-Augmented Generation (RAG) combines the text generation capabilities of generative language models with the ability of information retrieval models to find the most relevant text. Retrieved external knowledge is supplied to the model so it can produce more accurate, up-to-date, and grounded responses.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf"
+        ],
+        "timings": {
+          "scope_ms": 22.5,
+          "retrieval_ms": 20.9,
+          "llm_ms": 1151.6,
+          "total_ms": 1195.4
+        },
+        "scores": {
+          "faithfulness": null,
+          "answer_relevancy": null,
+          "llm_context_precision_with_reference": null,
+          "context_recall": null
+        }
+      },
+      {
+        "id": "rag-02",
+        "question": "What are the three major components of a retrieval-augmented large language model framework?",
+        "answer": "**Three major components of a Retrieval‑Augmented Large Language Model (RA‑LLM) framework**\n\n1. **Retrieval** – The process that searches a datastore (documents, passages, etc.) and returns relevant pieces of information to the model.  \n2. **Generation** – The language‑model component that produces the final output, using the retrieved content as additional context.  \n3. **Augmentation** – The integration module that determines how the retrieved information is combined with the model’s internal representations (e.g., at input, intermediate, or output stages).  \n\n*According to the survey on RAG meeting LLMs (page 3, Figure 2).*",
+        "ground_truth": "The basic retrieval-augmented LLM (RA-LLM) framework consists of three major components: retrieval, generation, and augmentation. Retrieved documents are leveraged in generation through the augmentation module, which can integrate them at the input, intermediate, or output layer.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Survey on RAG meeting LLMs.pdf",
+          "Survey on RAG meeting LLMs.pdf",
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf"
+        ],
+        "timings": {
+          "scope_ms": 28.7,
+          "retrieval_ms": 28.8,
+          "llm_ms": 664.4,
+          "total_ms": 722.1
+        },
+        "scores": {
+          "faithfulness": null,
+          "answer_relevancy": null,
+          "llm_context_precision_with_reference": null,
+          "context_recall": null
+        }
+      },
+      {
+        "id": "rag-03",
+        "question": "What limitations of LLMs does RAG help address?",
+        "answer": "**RAG (Retrieval‑Augmented Generation) mitigates several core shortcomings of large language models (LLMs):**\n\n1. **Limited access to up‑to‑date external knowledge**  \n   *LLMs are trained on static corpora and cannot “pass” new training data once deployed.*  \n   – RAG forwards retrieval‑engine (IR) data to the model at inference time, giving it fresh, context‑specific information that the base LLM would otherwise lack.  \n   – *Source: page 4, “The shortcomings of LLMs, such as the inability to pass training data and the inaccessibility of external data sources, are effectively addressed by RAG’s IR data forwarding.”*\n\n2. **Knowledge staleness and timeliness**  \n   *Because LLMs are frozen after training, their knowledge can become outdated.*  \n   – By pulling in current documents or databases, RAG keeps answers relevant and accurate without retraining the entire model.  \n   – *Source: page 4, “RAG has provided a solution to LLM’s concerns about maintainability… ensuring that datasets are updated has been an alternative solution to the problem of re‑training process.”*\n\n3. **Contextual and factual accuracy**  \n   *LLMs sometimes generate plausible but incorrect or vague responses, especially on knowledge‑intensive tasks.*  \n   – Retrieval of specific documents lets the model ground its generation in verifiable evidence, improving factual correctness.  \n   – *Source: page 3, “RAG’s ability to create more contextual and accurate answers by combining large language models with information retrieval processes is supported by various studies.”*\n\n4. **Scalability and modularity**  \n   *Training a single monolithic LLM on ever‑growing data is computationally expensive.*  \n   – RAG separates retrieval, generation, and augmentation, allowing each component to be updated or fine‑tuned independently, which eases maintenance and scaling.  \n   – *Source: page 4, “Modular RAG is an approach to optimizing all components separately and independently… improvements and fine‑tuning can be done only to a certain module.”*\n\nIn summary, RAG addresses LLM limitations related to static knowledge, data accessibility, timeliness, factual accuracy, and maintainability by integrating real‑time retrieval into the generation process.",
+        "ground_truth": "LLMs face inherent limitations such as hallucinations and out-of-date internal knowledge, because they are constrained to the static data they were trained on. RAG addresses these by providing reliable, up-to-date external knowledge retrieved at inference time.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf"
+        ],
+        "timings": {
+          "scope_ms": 23.1,
+          "retrieval_ms": 27.1,
+          "llm_ms": 989.0,
+          "total_ms": 1039.5
+        },
+        "scores": {
+          "faithfulness": null,
+          "answer_relevancy": null,
+          "llm_context_precision_with_reference": null,
+          "context_recall": null
+        }
+      },
+      {
+        "id": "rag-04",
+        "question": "Why are traditional keyword-based information retrieval methods insufficient?",
+        "answer": "**Why keyword‑based IR is insufficient**\n\n*Keyword‑based (sparse) retrieval relies on exact term matching and a fixed inverted index. Because it has no learning component, its effectiveness is tightly bound to the quality of the database and the wording of the query. It can only rank results by term‑frequency similarity and cannot adapt to other desirable criteria such as diversity or semantic relevance.*\n\n**Key points from the sources**\n\n- *Sparse retrieval (e.g., TF‑IDF, BM25) is word‑based and uses an inverted index for matching raw data.*  \n  (Survey on RAG meeting LLMs, page 3)\n\n- *Its performance heavily depends on the database and the query, and it offers no training ability.*  \n  (Survey on RAG meeting LLMs, page 3)\n\n- *Because it is a fixed, term‑based method, it only supports similarity‑based retrieval and cannot be adapted for other retrieval criteria that may be needed in LLM applications, such as diversity.*  \n  (Survey on RAG meeting LLMs, page 3)\n\n- *These limitations make keyword‑based IR less suitable for the dynamic, knowledge‑intensive tasks that Retrieval‑Augmented Generation (RAG) aims to solve.*  \n  (Retrieval‑Augmented Generation, page 1)\n\nThus, traditional keyword‑based IR falls short when up‑to‑date, diverse, or semantically rich information is required, which is why modern RAG systems favor dense, learnable retrieval methods.",
+        "ground_truth": "Traditional IR methods such as TF-IDF and BM25 are based on keywords, so they cannot fully capture the semantic meaning and complexity of natural language when responding to specific queries. This motivated going beyond traditional IR toward context- and meaning-based approaches such as RAG.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Survey on RAG meeting LLMs.pdf",
+          "Survey on RAG meeting LLMs.pdf"
+        ],
+        "timings": {
+          "scope_ms": 24.8,
+          "retrieval_ms": 23.8,
+          "llm_ms": 969.3,
+          "total_ms": 1018.2
+        },
+        "scores": {
+          "faithfulness": null,
+          "answer_relevancy": 0.9281497095048633,
+          "llm_context_precision_with_reference": null,
+          "context_recall": null
+        }
+      },
+      {
+        "id": "dataperf-01",
+        "question": "What is DataPerf?",
+        "answer": "**DataPerf**  \n*Definition:*  \nDataPerf is a unified benchmark suite designed to evaluate and improve the data‑centric stages of machine‑learning pipelines. It provides a set of challenges, leaderboards, and evaluation tools that focus on tasks such as training‑set selection, data cleaning, debugging, acquisition, and generative‑model prompting.\n\n**Key details from the source**\n\n| Aspect | Information |\n|--------|-------------|\n| **Purpose** | To benchmark all major stages of a data‑centric pipeline (shown in green in the paper) and thereby improve ML data quality. | (Source: page 4, “DataPerf aims to benchmark all major stages…”) |\n| **Benchmarks** | Five initial tasks covering training‑set selection for speech and vision, data cleaning/debugging, data acquisition, and generative‑model prompting. | (Source: page 4, “DataPerf’s initial suite consists of tasks…”) |\n| **Platform** | Hosted on Dynabench, an online platform that allows participants to submit, evaluate, and compare solutions. | (Source: page 4, “The DataPerf benchmarks, evaluation tools, leaderboards, and documentation are hosted in an online platform called Dynabench”) |\n| **Open‑source & Support** | Both the benchmarks and the Dynabench platform are open‑source and maintained by the MLCommons Association, a non‑profit with over 50 member companies and academics. | (Source: page 4, “The DataPerf benchmarks and the Dynabench platform are open‑source, and are hosted and maintained by the MLCommons Association”) |\n| **Extensions to Dynabench** | • Support for diverse submission artifacts (training subsets, priority orderings, purchase strategies, containerized systems). <br>• Modular software adaptors for custom evaluation algorithms and metrics. <br>• Serverless deployment for dynamic scaling. | (Source: page 4, “DataPerf introduces three key extensions to the Dynabench codebase…”) |\n| **Offline Evaluation** | Provides offline scripts so participants can iterate locally before submitting, reducing load on the online platform. | (Source: page 4, “DataPerf additionally offers offline evaluation scripts…”) |\n| **Community Involvement** | A working group invites academia and industry to propose new data‑centric benchmarks for inclusion. | (Source: page 4, “a working group which invites members in academia and industry to propose new data‑centric benchmarks…”) |\n\nThese points collectively describe what DataPerf is, its goals, structure, and how it supports the data‑centric AI community.",
+        "ground_truth": "DataPerf is a community-led benchmark suite for evaluating ML datasets and data-centric algorithms, motivated by ML research focusing on models rather than data. Its first iteration contains five benchmarks spanning vision, speech, data acquisition, data debugging, and diffusion prompting, and it is maintained by the MLCommons Association.",
+        "guardrail_action": "passed",
+        "sources": [
+          "DataPerf Benchmarks for data centric AI Dev.pdf",
+          "DataPerf Benchmarks for data centric AI Dev.pdf",
+          "DataPerf Benchmarks for data centric AI Dev.pdf"
+        ],
+        "timings": {
+          "scope_ms": 21.2,
+          "retrieval_ms": 27.1,
+          "llm_ms": 1181.2,
+          "total_ms": 1229.7
+        },
+        "scores": {
+          "faithfulness": null,
+          "answer_relevancy": null,
+          "llm_context_precision_with_reference": null,
+          "context_recall": null
+        }
+      },
+      {
+        "id": "llmsec-01",
+        "question": "How can large language models help improve security and privacy?",
+        "answer": "**How LLMs can help improve security and privacy**\n\n**Definition / Summary**  \nLarge Language Models (LLMs) can be leveraged as tools for identifying, mitigating, and monitoring security and privacy risks in software, data, and systems. By learning from vast text corpora, they can detect vulnerabilities, generate defensive strategies, and enforce privacy‑preserving techniques.\n\n**Key ways LLMs contribute (based on the survey)**  \n\n| Area | How LLMs help | Supporting source |\n|------|---------------|-------------------|\n| **Vulnerability detection** | LLMs can analyze code, documentation, and logs to flag potential security flaws, as noted in the survey’s mention of “vulnerability detection” among LLM applications. | Section 2.1 (page 2) – “vulnerability detection[11]” |\n| **Risk assessment** | LLMs can synthesize threat intelligence and assess risk levels for systems or data sets, aiding decision‑making in security planning. | Section 2.1 (page 2) – “risk assessment[20]” |\n| **Adversarial robustness** | Adversarial training techniques (e.g., token‑aware virtual adversarial training) can be applied to LLMs to make them more resistant to malicious inputs, thereby strengthening downstream NLP systems. | References [288]–[292] (page 20) – adversarial training papers |\n| **Backdoor detection & mitigation** | By learning normal language patterns, LLMs can help identify anomalous prompts or outputs that may indicate backdoor attacks, and can be used to design counter‑measures. | References [178]–[180] (page 18) – backdoor attack studies |\n| **Privacy‑preserving data handling** | Techniques such as deduplication of training data reduce the risk of memorizing and leaking personal information. Differential‑privacy representations provide formal guarantees for privacy and fairness. | References [285] (deduplication) and [182] (differential privacy) (page 20) |\n| **Secure code generation** | LLMs can assist developers by generating code snippets that follow secure coding practices, reducing the likelihood of introducing vulnerabilities. | Section 2.1 (page 2) – “programming[21]” |\n\n**Takeaway**  \nWhile LLMs themselves can be a source of security and privacy concerns, the survey shows that, when combined with techniques like adversarial training, deduplication, and differential privacy, they become powerful allies in detecting threats, hardening systems, and safeguarding personal data.",
+        "ground_truth": "LLMs have been shown to enhance code security, such as code vulnerability detection, and data privacy, such as data confidentiality protection, often outperforming traditional methods. For example, GPT-3 was reported to uncover 213 security vulnerabilities in a code repository, compared with 99 found by a leading commercial tool.",
+        "guardrail_action": "passed",
+        "sources": [
+          "A survey on large language model (LLM)- good.pdf",
+          "A survey on large language model (LLM)- good.pdf",
+          "A survey on large language model (LLM)- good.pdf"
+        ],
+        "timings": {
+          "scope_ms": 15.2,
+          "retrieval_ms": 18.6,
+          "llm_ms": 1243.4,
+          "total_ms": 1277.3
+        },
+        "scores": {
+          "faithfulness": null,
+          "answer_relevancy": null,
+          "llm_context_precision_with_reference": null,
+          "context_recall": null
+        }
+      },
+      {
+        "id": "llmsec-02",
+        "question": "What security risks and vulnerabilities do large language models have?",
+        "answer": "**Security risks and vulnerabilities of large language models (LLMs)**  \n\n**Summary**  \nLLMs can be misused to generate harmful content and facilitate cyber‑attacks. Their high‑quality text synthesis makes it difficult to distinguish synthetic from human‑written material, creating new attack vectors. Threat actors ranging from low‑skill individuals to advanced persistent threats (APTs) can exploit these capabilities.\n\n**Key details from the sources**\n\n| Source | Risk / Vulnerability | Description |\n|--------|----------------------|-------------|\n| **Survey on LLMs – Section 5 & 6** | *Negative impacts on security and privacy* | The paper identifies general security and privacy concerns, and discusses threats, vulnerabilities, and countermeasures specific to LLMs. |\n| **Survey on LLMs – Section 6** | *Prevalent threats & vulnerabilities* | The authors outline the types of threats that can arise from LLM misuse and the vulnerabilities that enable them, though specific examples are not listed in the excerpt. |\n| **Language models are few‑shot learners – Section 6.1** | *Misuse of language models* | • Misinformation, spam, phishing, abuse of legal/governmental processes, fraudulent academic essay writing, and social‑engineering pretexting. <br>• The higher the quality of text synthesis, the greater the risk (e.g., GPT‑3 can produce synthetic paragraphs that are hard to distinguish from human text). |\n| **Language models are few‑shot learners – Section 6.1.2** | *Threat actor analysis* | • Threat actors range from low‑skill individuals who can build malicious products to highly skilled APTs. <br>• Misuse discussions correlate with media coverage, but successful deployments have been limited since GPT‑2. |\n\n**Takeaway**  \nLLMs pose security risks primarily through their ability to generate convincing synthetic text that can be used for misinformation, phishing, and other social‑engineering attacks. The vulnerabilities lie in the models’ capacity to produce high‑quality content and the lack of robust detection or mitigation mechanisms, as highlighted in the survey’s discussion of threats and countermeasures.",
+        "ground_truth": "LLMs can be harnessed for various attacks, particularly user-level attacks, because of their human-like reasoning abilities, and they have inherent vulnerabilities of their own, including adversarial attacks such as jailbreaking and prompt injection, as well as data poisoning, backdoors, and model extraction.",
+        "guardrail_action": "passed",
+        "sources": [
+          "A survey on large language model (LLM)- good.pdf",
+          "Language models are few shot learners.pdf",
+          "A survey on large language model (LLM)- good.pdf"
+        ],
+        "timings": {
+          "scope_ms": 48.5,
+          "retrieval_ms": 23.6,
+          "llm_ms": 1497.1,
+          "total_ms": 1569.2
+        },
+        "scores": {
+          "faithfulness": null,
+          "answer_relevancy": null,
+          "llm_context_precision_with_reference": null,
+          "context_recall": null
+        }
+      }
+    ]
+  }
+}

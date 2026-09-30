@@ -34,7 +34,7 @@ User Query
                  - confidence      ┌──────┴──────┐
                    threshold       │             │
                  - source filter  [ChromaDB]  [Groq LLM]
-                              Vector Store  (llama3.1-8b-instant)
+                              Vector Store  (gpt-oss-20b)
                                    │
                             [Embeddings]
                    (sentence-transformers/all-MiniLM-L6-v2)
@@ -48,7 +48,7 @@ User Query
 |---|---|---|
 | RAG Framework | LlamaIndex | Chosen over LangChain for deeper RAG learning |
 | Vector Store | ChromaDB | Free, local, persistent |
-| LLM | Groq API (llama-3.1-8b-instant) | Free tier, fast inference |
+| LLM | Groq API (openai/gpt-oss-20b) | Free tier, fast inference (Llama 3.1 8B was retired by Groq) |
 | Embeddings | sentence-transformers/all-MiniLM-L6-v2 | Runs locally, free |
 | Backend API | FastAPI + Uvicorn | With Pydantic schemas |
 | Frontend | React (Vite + Tailwind CSS) | Chat UI with source panel |
@@ -56,7 +56,7 @@ User Query
 | CI/CD | GitHub Actions | Lint → test → Docker build → deploy |
 | Deployment | HuggingFace Spaces | Docker-based, auto-deploy on push |
 | Testing | Pytest | 43 tests (unit + integration) |
-| Evaluation | RAGAS 0.2.15 | Faithfulness, context precision metrics |
+| Evaluation | RAGAS 0.2.15 + custom harness | Retrieval Hit@k/MRR, guardrail accuracy, RAGAS generation metrics |
 | Code Quality | black + isort + flake8 | Pinned versions, runs in CI |
 
 ---
@@ -84,7 +84,7 @@ rag-chatbot/
 ├── data/
 │   ├── raw/                    # Source documents (PDFs, MD files)
 │   ├── chroma_db/              # ChromaDB vector store (gitignored)
-│   └── eval_results.json       # RAGAS evaluation output
+│   └── eval_results.json       # Latest evaluation report
 │
 ├── src/
 │   ├── __init__.py
@@ -106,7 +106,7 @@ rag-chatbot/
 │   │   ├── routes.py           # API endpoints (/api/query, /api/health)
 │   │   └── schemas.py          # Pydantic request/response models
 │   └── evaluation/
-│       └── ragas_eval.py       # RAGAS evaluation (faithfulness, context precision)
+│       └── ragas_eval.py       # Retrieval, guardrail and RAGAS evaluation
 │
 ├── frontend/                   # React app (Vite + Tailwind CSS)
 │   ├── index.html
@@ -125,7 +125,7 @@ rag-chatbot/
 │   ├── test_ingestion.py       # Unit tests for loader + chunker
 │   ├── test_guardrails.py      # Unit tests with mocked embeddings
 │   ├── test_api.py             # Integration tests for API endpoints
-│   └── eval_dataset.json       # 5-question RAGAS evaluation dataset
+│   └── eval_dataset.json       # 32 labelled evaluation questions
 │
 ├── Dockerfile                  # Multi-stage build (Node → Python)
 ├── docker-compose.yml          # Local dev orchestration
@@ -258,22 +258,43 @@ python -m pytest --cov=src --cov-report=term-missing
 
 ## 📊 RAG Evaluation (Phase 10)
 
-Evaluation is run with [RAGAS](https://github.com/explodinggradients/ragas) using Groq as the judge LLM and HuggingFace embeddings — no OpenAI key required.
+The evaluation dataset (`tests/eval_dataset.json`) has 32 labelled questions across all 9 source papers:
+
+- **24 answerable**: each has a ground-truth answer written from the paper and the source document(s) it should be retrieved from
+- **3 unanswerable**: on-topic for AI/ML, but not covered by the corpus, so the bot should decline rather than guess
+- **5 out-of-scope**: off-topic questions the scope guardrail should reject
+
+Evaluation runs in two stages:
 
 ```bash
+# Stage 1: retrieval + guardrails. Offline, deterministic, no API key.
+python src/evaluation/ragas_eval.py --stage retrieval --sweep
+
+# Stage 2: generation quality with RAGAS. Needs GROQ_API_KEY.
 pip install -r requirements-phase10.txt
 python src/evaluation/ragas_eval.py
 # Results saved to data/eval_results.json
 ```
 
-Results on the 5-question evaluation dataset (`tests/eval_dataset.json`):
+Stage 2 scores answers with RAGAS (faithfulness, answer relevancy, context precision, context recall). The judge is a separate, larger Groq model than the 8B generator, so the model never grades its own answers. Embeddings come from HuggingFace, so no OpenAI key is needed.
 
-| Metric | Score | Notes |
-|---|---|---|
-| Faithfulness | 0.41 | Answers occasionally include detail beyond the retrieved context |
-| Context Precision | 0.83 | Retrieved chunks are mostly relevant to the query |
+### Stage 1 results (562-chunk index, top_k = 3)
 
-**Notable finding:** The RAG question ("What is retrieval-augmented generation?") was blocked by the scope guardrail — the semantic similarity check didn't map "retrieval-augmented generation" close enough to the AI/ML reference phrases. A tuning opportunity for the `SCOPE_THRESHOLD` environment variable.
+| Metric | Score |
+|---|---|
+| Retrieval Hit@3 / MRR | 0.958 / 0.958 |
+| Answerable questions let through by guardrails | 1.00 (24/24) |
+| Unanswerable questions declined | 1.00 (3/3) |
+| Out-of-scope questions declined | 1.00 (5/5) |
+| Scope check + retrieval latency (p50) | ~11 ms + ~16 ms |
+
+### What the evaluation found and fixed
+
+- **Stale index.** The local ChromaDB index held only 2 of the 9 papers (77 chunks), because it was built before the other 7 papers were added. Re-running ingestion would have appended duplicate vectors to the old collection, so ingestion now rebuilds the collection from scratch (562 chunks). On the same dataset, Hit@3 went from **0.33 to 0.96**.
+- **Truncated judge context.** The first version of the evaluation passed the UI's 500-character source previews to RAGAS, while the LLM saw full ~1,400-character chunks. That penalised faithfulness for claims that were actually supported. The pipeline now returns the full contexts separately.
+- **Silent NaN scores.** RAGAS defaults to 16 concurrent workers and records every failed call as NaN. On Groq's free tier, that meant most scores were lost to rate limits. The harness now uses 2 workers with retry/backoff, reports how many questions each metric actually scored, and caches scores so an interrupted run can resume.
+- **Guardrail thresholds tuned with data.** At the previous settings (scope 0.30, confidence 0.40), 1 answerable question was wrongly rejected and 2 of the 3 unanswerable questions reached the LLM. `--sweep` grid-searches both thresholds. Off-topic and on-topic questions overlap around 0.2–0.25 scope similarity, but the retrieval-confidence scores separate them cleanly: off-topic and unanswerable questions score ≤ 0.50, answerable ones ≥ 0.53. The defaults are now scope 0.20 and confidence 0.50. The margins are thin and were tuned on this same dataset, so more held-out questions are the next step.
+- **Known miss.** "How does the Transformer encode position?" retrieves BERT chunks ahead of the Attention paper. That is a limit of the small embedding model and a candidate for a reranker or hybrid BM25 search.
 
 ---
 

@@ -20,7 +20,7 @@ How persistence works:
   ChromaDB stores data on disk at the path you give it (./data/chroma_db).
   First run:  creates the database and inserts all embeddings (~10–30 seconds)
   Later runs: loads from disk instantly (no re-embedding needed)
-  If you change your documents, delete the chroma_db folder and re-run ingestion.
+  If you change your documents, re-run ingestion — it rebuilds the collection.
 """
 
 from pathlib import Path
@@ -83,6 +83,7 @@ def build_index_from_nodes(
     nodes: List[TextNode],
     persist_dir: str = DEFAULT_PERSIST_DIR,
     collection_name: str = DEFAULT_COLLECTION,
+    reset: bool = True,
 ) -> VectorStoreIndex:
     """
     Embed chunks and store them in ChromaDB. Returns a queryable index.
@@ -94,6 +95,9 @@ def build_index_from_nodes(
         nodes:           list of TextNode chunks (from DocumentChunker)
         persist_dir:     ChromaDB storage path
         collection_name: collection name
+        reset:           drop the existing collection first, so re-running
+                         ingestion rebuilds the index instead of appending
+                         duplicate vectors on top of stale ones
 
     Returns:
         VectorStoreIndex — use index.as_query_engine() in Phase 4
@@ -107,6 +111,14 @@ def build_index_from_nodes(
         raise ValueError("No nodes provided to index.")
 
     logger.info(f"Building index from {len(nodes)} nodes...")
+
+    if reset:
+        Path(persist_dir).mkdir(parents=True, exist_ok=True)
+        chroma_client = chromadb.PersistentClient(path=str(persist_dir))
+        existing = [c.name for c in chroma_client.list_collections()]
+        if collection_name in existing:
+            logger.info(f"Dropping existing collection '{collection_name}'")
+            chroma_client.delete_collection(collection_name)
 
     # Get our components
     embed_model = get_embedding_model()

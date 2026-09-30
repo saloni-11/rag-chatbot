@@ -57,9 +57,14 @@ from loguru import logger
 
 from src.indexing.embeddings import get_embedding_model
 
-# ── Thresholds (tune these based on testing) ─────────
-SCOPE_THRESHOLD = float(os.getenv("SCOPE_THRESHOLD", "0.3"))
-CONFIDENCE_THRESHOLD = float(os.getenv("CONFIDENCE_THRESHOLD", "0.55"))
+# ── Thresholds (tuned with the evaluation sweep) ─────
+# `python src/evaluation/ragas_eval.py --stage retrieval --sweep` grid-searches
+# these against tests/eval_dataset.json. Scope is kept loose because on-topic
+# and off-topic questions overlap around 0.2–0.25 similarity; the confidence
+# check separates them far more cleanly (off-topic / unanswerable questions
+# retrieve at <= 0.50, answerable ones at >= 0.53).
+SCOPE_THRESHOLD = float(os.getenv("SCOPE_THRESHOLD", "0.2"))
+CONFIDENCE_THRESHOLD = float(os.getenv("CONFIDENCE_THRESHOLD", "0.5"))
 SOURCE_MIN_SCORE = float(os.getenv("SOURCE_MIN_SCORE", "0.35"))
 
 
@@ -163,6 +168,28 @@ class Guardrails:
 
         logger.info("Guardrails ready ✅")
 
+    def scope_score(self, question: str) -> Tuple[float, str]:
+        """
+        Highest cosine similarity between the question and any reference
+        phrase, plus the phrase that matched. check_scope() compares this
+        against SCOPE_THRESHOLD; the evaluation uses it to tune the threshold.
+        """
+        # Embed the question
+        question_embedding = np.array(self._embed_model.get_query_embedding(question))
+
+        # Compute cosine similarity against all reference phrases
+        # Cosine similarity = dot product of normalised vectors
+        #   → 1.0 = identical meaning
+        #   → 0.0 = completely unrelated
+        similarities = self._cosine_similarity(
+            question_embedding, self._reference_matrix
+        )
+        best_match_idx = int(np.argmax(similarities))
+        return (
+            float(similarities[best_match_idx]),
+            SCOPE_REFERENCE_PHRASES[best_match_idx],
+        )
+
     def check_scope(self, question: str) -> Tuple[bool, Optional[str]]:
         """
         Layer 1: Is this question about AI/ML/Data Analytics?
@@ -178,22 +205,11 @@ class Guardrails:
                 in_scope=True,  message=None         → proceed with retrieval
                 in_scope=False, message="Sorry..."   → return message to user
         """
-        # Embed the question
-        question_embedding = np.array(self._embed_model.get_query_embedding(question))
-
-        # Compute cosine similarity against all reference phrases
-        # Cosine similarity = dot product of normalised vectors
-        #   → 1.0 = identical meaning
-        #   → 0.0 = completely unrelated
-        similarities = self._cosine_similarity(
-            question_embedding, self._reference_matrix
-        )
-        max_similarity = float(np.max(similarities))
-        best_match_idx = int(np.argmax(similarities))
+        max_similarity, best_match = self.scope_score(question)
 
         logger.debug(
             f"Scope check: max similarity = {max_similarity:.4f} "
-            f"(best match: '{SCOPE_REFERENCE_PHRASES[best_match_idx]}')"
+            f"(best match: '{best_match}')"
         )
 
         if max_similarity < SCOPE_THRESHOLD:
@@ -329,6 +345,9 @@ class Guardrails:
 #   - Stronger instruction to ONLY use provided context
 #   - Explicit instruction to say which document info came from
 #   - Instruction to structure answers in an interview-friendly way
+#
+# A closing "why it matters" section was removed after evaluation showed it
+# invited claims the sources didn't support (lowering RAGAS faithfulness).
 
 SYSTEM_PROMPT = PromptTemplate(
     """\
@@ -346,7 +365,6 @@ provide only what the context supports. Do NOT fill gaps with your own knowledge
 4. Structure answers clearly for learning:
    - Start with a concise definition or summary
    - Follow with key details from the context
-   - End with why it matters (practical significance)
 5. Keep answers focused and avoid repeating information.
 
 CONTEXT FROM SOURCE DOCUMENTS:
