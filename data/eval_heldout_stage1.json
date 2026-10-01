@@ -1,0 +1,468 @@
+{
+  "config": {
+    "timestamp": "2026-10-01T10:17:25+00:00",
+    "dataset": "tests/eval_heldout.json",
+    "dataset_size": 20,
+    "index_dir": "./data/chroma_db",
+    "index_chunks": 562,
+    "top_k": 3,
+    "generator_model": "openai/gpt-oss-20b",
+    "judge_model": null,
+    "ragas_version": "0.2.15"
+  },
+  "retrieval_and_guardrails": {
+    "summary": {
+      "retrieval": {
+        "hit_rate@3": 1.0,
+        "hit_rate@1": 1.0,
+        "mrr": 1.0,
+        "n": 12
+      },
+      "guardrails": {
+        "answerable_pass_rate": 1.0,
+        "unanswerable_decline_rate": 0.5,
+        "out_of_scope_decline_rate": 1.0,
+        "out_of_scope_rejected_by_scope_layer": 1.0,
+        "thresholds": {
+          "scope": 0.2,
+          "confidence": 0.5,
+          "source_min_score": 0.35
+        }
+      },
+      "latency": {
+        "scope_check": {
+          "p50_ms": 33.8,
+          "p95_ms": 41.0,
+          "n": 20
+        },
+        "retrieval": {
+          "p50_ms": 42.3,
+          "p95_ms": 51.6,
+          "n": 16
+        }
+      }
+    },
+    "per_question": [
+      {
+        "id": "ho-attn-01",
+        "category": "answerable",
+        "question": "How many attention heads does the Transformer use, and what is the dimension of each head?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.5817,
+        "scope_best_match": "transformer architecture attention mechanism",
+        "best_retrieval_score": 0.5937,
+        "retrieved_files": [
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf"
+        ],
+        "expected_files": [
+          "Attention is all you need.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 35.4,
+          "retrieval_ms": 43.7
+        }
+      },
+      {
+        "id": "ho-attn-02",
+        "category": "answerable",
+        "question": "What label smoothing value was used when training the Transformer, and what effect did it have?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.3409,
+        "scope_best_match": "transformer architecture attention mechanism",
+        "best_retrieval_score": 0.5669,
+        "retrieved_files": [
+          "Attention is all you need.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "Attention is all you need.pdf"
+        ],
+        "expected_files": [
+          "Attention is all you need.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 38.4,
+          "retrieval_ms": 51.6
+        }
+      },
+      {
+        "id": "ho-bert-01",
+        "category": "answerable",
+        "question": "What data was BERT pre-trained on?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.718,
+        "scope_best_match": "BERT language model pre-training",
+        "best_retrieval_score": 0.684,
+        "retrieved_files": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "expected_files": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 32.3,
+          "retrieval_ms": 42.2
+        }
+      },
+      {
+        "id": "ho-resnet-01",
+        "category": "answerable",
+        "question": "What is the bottleneck building block used in deeper ResNets?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.3878,
+        "scope_best_match": "residual connections skip connections deep networks",
+        "best_retrieval_score": 0.6944,
+        "retrieved_files": [
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "expected_files": [
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 31.4,
+          "retrieval_ms": 39.9
+        }
+      },
+      {
+        "id": "ho-resnet-02",
+        "category": "answerable",
+        "question": "Why did the 1202-layer ResNet perform worse on CIFAR-10 than the 110-layer ResNet?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.3159,
+        "scope_best_match": "residual connections skip connections deep networks",
+        "best_retrieval_score": 0.6103,
+        "retrieved_files": [
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "expected_files": [
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 35.3,
+          "retrieval_ms": 40.2
+        }
+      },
+      {
+        "id": "ho-gan-01",
+        "category": "answerable",
+        "question": "Why is the GAN generator trained to maximize log D(G(z)) instead of minimizing log(1 - D(G(z)))?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.4475,
+        "scope_best_match": "generative adversarial networks GANs",
+        "best_retrieval_score": 0.7116,
+        "retrieved_files": [
+          "GANs.pdf",
+          "GANs.pdf",
+          "GANs.pdf"
+        ],
+        "expected_files": [
+          "GANs.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 36.1,
+          "retrieval_ms": 46.6
+        }
+      },
+      {
+        "id": "ho-gan-02",
+        "category": "answerable",
+        "question": "What is the Helvetica scenario in GAN training?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.5,
+        "scope_best_match": "generative adversarial networks GANs",
+        "best_retrieval_score": 0.6247,
+        "retrieved_files": [
+          "GANs.pdf",
+          "GANs.pdf",
+          "GANs.pdf"
+        ],
+        "expected_files": [
+          "GANs.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 31.3,
+          "retrieval_ms": 42.4
+        }
+      },
+      {
+        "id": "ho-gpt3-01",
+        "category": "answerable",
+        "question": "How was the quality of the Common Crawl data used to train GPT-3 improved?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.2732,
+        "scope_best_match": "model evaluation metrics accuracy precision recall",
+        "best_retrieval_score": 0.6673,
+        "retrieved_files": [
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf"
+        ],
+        "expected_files": [
+          "Language models are few shot learners.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 34.6,
+          "retrieval_ms": 40.9
+        }
+      },
+      {
+        "id": "ho-rag-01",
+        "category": "answerable",
+        "question": "What are the two types of retrievers used in retrieval-augmented LLMs?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.5177,
+        "scope_best_match": "retrieval augmented generation RAG",
+        "best_retrieval_score": 0.655,
+        "retrieved_files": [
+          "Survey on RAG meeting LLMs.pdf",
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Survey on RAG meeting LLMs.pdf"
+        ],
+        "expected_files": [
+          "Survey on RAG meeting LLMs.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 34.1,
+          "retrieval_ms": 45.3
+        }
+      },
+      {
+        "id": "ho-rag-02",
+        "category": "answerable",
+        "question": "Which research team introduced the RAG model, and in what year?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.4298,
+        "scope_best_match": "retrieval augmented generation RAG",
+        "best_retrieval_score": 0.626,
+        "retrieved_files": [
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf"
+        ],
+        "expected_files": [
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 33.5,
+          "retrieval_ms": 41.2
+        }
+      },
+      {
+        "id": "ho-dataperf-01",
+        "category": "answerable",
+        "question": "On which platform are the DataPerf benchmarks hosted?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.4379,
+        "scope_best_match": "data-centric AI benchmarks",
+        "best_retrieval_score": 0.7762,
+        "retrieved_files": [
+          "DataPerf Benchmarks for data centric AI Dev.pdf",
+          "DataPerf Benchmarks for data centric AI Dev.pdf",
+          "DataPerf Benchmarks for data centric AI Dev.pdf"
+        ],
+        "expected_files": [
+          "DataPerf Benchmarks for data centric AI Dev.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 38.9,
+          "retrieval_ms": 41.6
+        }
+      },
+      {
+        "id": "ho-llmsec-01",
+        "category": "answerable",
+        "question": "According to the LLM security survey, what four key features should a capable large language model have?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.4694,
+        "scope_best_match": "language model pre-training fine-tuning",
+        "best_retrieval_score": 0.7193,
+        "retrieved_files": [
+          "A survey on large language model (LLM)- good.pdf",
+          "A survey on large language model (LLM)- good.pdf",
+          "A survey on large language model (LLM)- good.pdf"
+        ],
+        "expected_files": [
+          "A survey on large language model (LLM)- good.pdf"
+        ],
+        "first_relevant_rank": 1,
+        "timings": {
+          "scope_ms": 35.4,
+          "retrieval_ms": 41.5
+        }
+      },
+      {
+        "id": "ho-unans-01",
+        "category": "unanswerable",
+        "question": "How does the kernel trick work in support vector machines?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.3892,
+        "scope_best_match": "machine learning algorithms",
+        "best_retrieval_score": 0.5123,
+        "retrieved_files": [
+          "Deep residual learning from image recognition.pdf",
+          "GANs.pdf",
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "expected_files": [],
+        "first_relevant_rank": null,
+        "timings": {
+          "scope_ms": 32.9,
+          "retrieval_ms": 42.8
+        }
+      },
+      {
+        "id": "ho-unans-02",
+        "category": "unanswerable",
+        "question": "How does a random forest compute feature importance?",
+        "guardrail_action": "low_confidence",
+        "scope_similarity": 0.3346,
+        "scope_best_match": "machine learning algorithms",
+        "best_retrieval_score": 0.4697,
+        "retrieved_files": [
+          "DataPerf Benchmarks for data centric AI Dev.pdf",
+          "DataPerf Benchmarks for data centric AI Dev.pdf",
+          "DataPerf Benchmarks for data centric AI Dev.pdf"
+        ],
+        "expected_files": [],
+        "first_relevant_rank": null,
+        "timings": {
+          "scope_ms": 30.5,
+          "retrieval_ms": 45.5
+        }
+      },
+      {
+        "id": "ho-unans-03",
+        "category": "unanswerable",
+        "question": "How does the DBSCAN clustering algorithm decide which points are noise?",
+        "guardrail_action": "low_confidence",
+        "scope_similarity": 0.3654,
+        "scope_best_match": "unsupervised learning clustering",
+        "best_retrieval_score": 0.432,
+        "retrieved_files": [
+          "DataPerf Benchmarks for data centric AI Dev.pdf",
+          "DataPerf Benchmarks for data centric AI Dev.pdf",
+          "Survey on RAG meeting LLMs.pdf"
+        ],
+        "expected_files": [],
+        "first_relevant_rank": null,
+        "timings": {
+          "scope_ms": 41.0,
+          "retrieval_ms": 44.8
+        }
+      },
+      {
+        "id": "ho-unans-04",
+        "category": "unanswerable",
+        "question": "What is the difference between bagging and boosting in ensemble learning?",
+        "guardrail_action": "passed",
+        "scope_similarity": 0.2669,
+        "scope_best_match": "model training and optimization",
+        "best_retrieval_score": 0.5096,
+        "retrieved_files": [
+          "DataPerf Benchmarks for data centric AI Dev.pdf",
+          "DataPerf Benchmarks for data centric AI Dev.pdf",
+          "DataPerf Benchmarks for data centric AI Dev.pdf"
+        ],
+        "expected_files": [],
+        "first_relevant_rank": null,
+        "timings": {
+          "scope_ms": 31.4,
+          "retrieval_ms": 41.3
+        }
+      },
+      {
+        "id": "ho-oos-01",
+        "category": "out_of_scope",
+        "question": "What is a good recipe for banana bread?",
+        "guardrail_action": "scope_rejected",
+        "scope_similarity": 0.1465,
+        "scope_best_match": "tokenization text processing",
+        "best_retrieval_score": 0.4378,
+        "retrieved_files": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "Survey on RAG meeting LLMs.pdf"
+        ],
+        "expected_files": [],
+        "first_relevant_rank": null,
+        "timings": {
+          "scope_ms": 31.4
+        }
+      },
+      {
+        "id": "ho-oos-02",
+        "category": "out_of_scope",
+        "question": "How do I fix a flat tyre on my bicycle?",
+        "guardrail_action": "scope_rejected",
+        "scope_similarity": 0.1466,
+        "scope_best_match": "overfitting regularization",
+        "best_retrieval_score": 0.4199,
+        "retrieved_files": [
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "expected_files": [],
+        "first_relevant_rank": null,
+        "timings": {
+          "scope_ms": 31.1
+        }
+      },
+      {
+        "id": "ho-oos-03",
+        "category": "out_of_scope",
+        "question": "How do I fix a 404 error on my website?",
+        "guardrail_action": "scope_rejected",
+        "scope_similarity": 0.16,
+        "scope_best_match": "data analytics statistical analysis",
+        "best_retrieval_score": 0.444,
+        "retrieved_files": [
+          "A survey on large language model (LLM)- good.pdf",
+          "Language models are few shot learners.pdf",
+          "A survey on large language model (LLM)- good.pdf"
+        ],
+        "expected_files": [],
+        "first_relevant_rank": null,
+        "timings": {
+          "scope_ms": 32.0
+        }
+      },
+      {
+        "id": "ho-oos-04",
+        "category": "out_of_scope",
+        "question": "Which laptop should I buy for gaming?",
+        "guardrail_action": "scope_rejected",
+        "scope_similarity": 0.1451,
+        "scope_best_match": "data-centric AI benchmarks",
+        "best_retrieval_score": 0.4329,
+        "retrieved_files": [
+          "Language models are few shot learners.pdf",
+          "A survey on large language model (LLM)- good.pdf",
+          "Attention is all you need.pdf"
+        ],
+        "expected_files": [],
+        "first_relevant_rank": null,
+        "timings": {
+          "scope_ms": 47.4
+        }
+      }
+    ]
+  }
+}
