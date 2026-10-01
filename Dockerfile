@@ -52,6 +52,12 @@ COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 # Copy config files
 COPY pytest.ini ./
 
+# LlamaIndex downloads NLTK tokenizer data on import and re-checks it on
+# every startup. By default that cache lives inside root-owned site-packages,
+# which appuser cannot read, so the app crashed at startup (PermissionError).
+# Keep it under /app instead and hand it to appuser below.
+ENV NLTK_DATA=/app/nltk_data
+
 # Run data ingestion during build — this embeds all PDFs from
 # data/raw/ into ChromaDB so the index is baked into the image.
 # No need to run ingestion at startup or commit binary DB files.
@@ -62,6 +68,7 @@ ENV HF_HUB_OFFLINE=1
 # Create non-root user with write access to data and logs dirs
 RUN useradd --create-home appuser \
     && chown -R appuser:appuser /app/data \
+    && mkdir -p /app/nltk_data && chown -R appuser:appuser /app/nltk_data \
     && mkdir -p /app/logs && chown -R appuser:appuser /app/logs
 USER appuser
 

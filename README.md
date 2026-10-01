@@ -276,7 +276,7 @@ python src/evaluation/ragas_eval.py
 # Results saved to data/eval_results.json
 ```
 
-Stage 2 scores answers with RAGAS (faithfulness, answer relevancy, context precision, context recall). The judge is a separate, larger Groq model than the 8B generator, so the model never grades its own answers. Embeddings come from HuggingFace, so no OpenAI key is needed.
+Stage 2 scores answers with RAGAS (faithfulness, answer relevancy, context precision, context recall). The judge (`gpt-oss-120b`) is a separate, larger model than the generator (`gpt-oss-20b`), so the model never grades its own answers. Embeddings come from HuggingFace, so no OpenAI key is needed.
 
 ### Stage 1 results (562-chunk index, top_k = 3)
 
@@ -288,13 +288,33 @@ Stage 2 scores answers with RAGAS (faithfulness, answer relevancy, context preci
 | Out-of-scope questions declined | 1.00 (5/5) |
 | Scope check + retrieval latency (p50) | ~11 ms + ~16 ms |
 
+Hit@3 counts the right *paper* among the top 3 chunks. Context recall below is the stricter, passage-level measure.
+
+### Stage 2 results (24 answerable questions, all scored)
+
+| Metric | Score |
+|---|---|
+| Faithfulness | 0.875 |
+| Answer relevancy | 0.839 |
+| Context precision | 0.781 |
+| Context recall | 0.833 |
+| End-to-end latency | 1.0 s p50 / 2.2 s p95 |
+
 ### What the evaluation found and fixed
 
 - **Stale index.** The local ChromaDB index held only 2 of the 9 papers (77 chunks), because it was built before the other 7 papers were added. Re-running ingestion would have appended duplicate vectors to the old collection, so ingestion now rebuilds the collection from scratch (562 chunks). On the same dataset, Hit@3 went from **0.33 to 0.96**.
 - **Truncated judge context.** The first version of the evaluation passed the UI's 500-character source previews to RAGAS, while the LLM saw full ~1,400-character chunks. That penalised faithfulness for claims that were actually supported. The pipeline now returns the full contexts separately.
 - **Silent NaN scores.** RAGAS defaults to 16 concurrent workers and records every failed call as NaN. On Groq's free tier, that meant most scores were lost to rate limits. The harness now uses 2 workers with retry/backoff, reports how many questions each metric actually scored, and caches scores so an interrupted run can resume.
-- **Guardrail thresholds tuned with data.** At the previous settings (scope 0.30, confidence 0.40), 1 answerable question was wrongly rejected and 2 of the 3 unanswerable questions reached the LLM. `--sweep` grid-searches both thresholds. Off-topic and on-topic questions overlap around 0.2–0.25 scope similarity, but the retrieval-confidence scores separate them cleanly: off-topic and unanswerable questions score ≤ 0.50, answerable ones ≥ 0.53. The defaults are now scope 0.20 and confidence 0.50. The margins are thin and were tuned on this same dataset, so more held-out questions are the next step.
-- **Known miss.** "How does the Transformer encode position?" retrieves BERT chunks ahead of the Attention paper. That is a limit of the small embedding model and a candidate for a reranker or hybrid BM25 search.
+- **Guardrail thresholds tuned with data.** At the previous settings (scope 0.30, confidence 0.40), 1 answerable question was wrongly rejected and 2 of the 3 unanswerable questions reached the LLM. `--sweep` grid-searches both thresholds. Off-topic and on-topic questions overlap around 0.2–0.25 scope similarity, but the retrieval-confidence scores separate them cleanly: off-topic and unanswerable questions score ≤ 0.50, answerable ones ≥ 0.53. The defaults are now scope 0.20 and confidence 0.50, though the margins are thin.
+- **A prompt instruction hurt faithfulness.** The system prompt asked every answer to end with "why it matters". The model filled that section with claims the sources didn't support: GPT-3's correct "175 billion parameters" answer scored 0.25. Removing the instruction raised faithfulness from **0.79 to 0.90** on the same 16 questions (better on 8, worse on 6, unchanged on 2). Retrieval was unchanged, and context recall held identical on all 16, so the gain is not judge noise.
+- **Retired model.** Groq retired Llama 3.1 8B mid-evaluation (the API returned 404). The generator is now `gpt-oss-20b`.
+
+### Known limitations
+
+- **Position-encoding miss.** "How does the Transformer encode position?" retrieves BERT chunks ahead of the Attention paper. That is a limit of the small embedding model and a candidate for a reranker or hybrid BM25 search.
+- **Right paper, wrong passage.** For "How many parameters do BERT-base and BERT-large have?", the right paper is retrieved but not the passage with the numbers. The bot correctly says it doesn't know rather than guessing.
+- **LLM-security paper.** Its PDF extracts with the spaces between words missing ("Asurveyonlargelanguagemodel..."), and its two questions score lowest (faithfulness 0.40, context recall 0.0). A layout-aware PDF parser would likely fix it.
+- **Small dataset.** The thresholds were tuned on the same 32 questions they're measured on. More held-out questions are the next step.
 
 ---
 
