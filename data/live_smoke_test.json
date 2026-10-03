@@ -1,0 +1,28 @@
+[
+  {
+    "label": "answerable",
+    "question": "How does BERT's masked language modeling choose and replace tokens?",
+    "http": 200,
+    "seconds": 2.48,
+    "guardrail_action": "passed",
+    "source_scores": [
+      0.7064,
+      0.6931,
+      0.6734
+    ],
+    "answer": "**Masked Language Modeling (MLM) in BERT**\n\n- **Definition**:  \n  MLM trains BERT to predict the original word for a subset of tokens that have been altered during pre‑training. This forces the model to learn contextual representations for every token.\n\n- **Token selection and replacement** (source: *BERT – Pre‑training of Deep Bidirectional Transformers for.pdf*, page 4):  \n  1. **Selection** – Randomly pick 15 % of the token positions in each input sequence for prediction.  \n  2. **Replacement** – For each selected token:  \n     - Replace with the special `[MASK]` token **80 %** of the time.  \n     - Replace with a random token from the vocabulary **10 %** of the time.  \n     - Leave the token unchanged **10 %** of the time.  \n\n  The model then uses the final hidden state of the `[CLS]` token (or the token’s own hidden state) to predict the original word via cross‑entropy loss.\n\n- **Rationale** (source: page 1):  \n  Because the encoder does not know which tokens will be masked or altered, it must maintain a contextual representation for every input token. The random‑replacement portion (1.5 % of all tokens) is small enough not to hurt language understanding, while the 15 % masking encourages learning of bidirectional context."
+  },
+  {
+    "label": "out_of_scope (oos-04)",
+    "question": "What is a good exercise routine for building muscle?",
+    "http": 200,
+    "seconds": 0.85,
+    "guardrail_action": "low_confidence",
+    "source_scores": [
+      0.4409,
+      0.4407,
+      0.4396
+    ],
+    "answer": "I don't have enough relevant information in my sources to answer this confidently. The documents I have don't seem to cover this specific topic in enough detail. Try asking about concepts from the Attention/Transformer or BERT papers."
+  }
+]

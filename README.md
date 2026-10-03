@@ -258,54 +258,78 @@ python -m pytest --cov=src --cov-report=term-missing
 
 ## 📊 RAG Evaluation (Phase 10)
 
-The evaluation dataset (`tests/eval_dataset.json`) has 32 labelled questions across all 9 source papers:
+📄 **Full methodology, commands, raw counts and per-question results: [EVAL_REPORT.md](EVAL_REPORT.md).**
 
-- **24 answerable**: each has a ground-truth answer written from the paper and the source document(s) it should be retrieved from
-- **3 unanswerable**: on-topic for AI/ML, but not covered by the corpus, so the bot should decline rather than guess
-- **5 out-of-scope**: off-topic questions the scope guardrail should reject
+There are two labelled question sets, covering all 9 source papers:
+
+| Set | File | Questions | Role |
+|---|---|---|---|
+| **Tuning set** | `tests/eval_dataset.json` | 24 answerable, 3 unanswerable, 5 out-of-scope | Used to choose the guardrail thresholds, so its guardrail results are **in-sample** |
+| **Held-out set** | `tests/eval_heldout.json` | 12 answerable, 4 unanswerable, 4 out-of-scope | New questions, frozen in commit `31c4819` before any evaluation ran on them, then evaluated once at fixed thresholds |
+
+"Unanswerable" means on-topic for AI/ML but not covered by the corpus, so the bot should decline. "Out-of-scope" means off-topic.
 
 Evaluation runs in two stages:
 
 ```bash
 # Stage 1: retrieval + guardrails. Offline, deterministic, no API key.
-python src/evaluation/ragas_eval.py --stage retrieval --sweep
+python src/evaluation/ragas_eval.py --stage retrieval --dataset tests/eval_heldout.json
 
 # Stage 2: generation quality with RAGAS. Needs GROQ_API_KEY.
 pip install -r requirements-phase10.txt
-python src/evaluation/ragas_eval.py
-# Results saved to data/eval_results.json
+python src/evaluation/ragas_eval.py --stage generation --dataset tests/eval_heldout.json
 ```
 
 Stage 2 scores answers with RAGAS (faithfulness, answer relevancy, context precision, context recall). The judge (`gpt-oss-120b`) is a separate, larger model than the generator (`gpt-oss-20b`), so the model never grades its own answers. Embeddings come from HuggingFace, so no OpenAI key is needed.
 
-### Stage 1 results (562-chunk index, top_k = 3)
+### Held-out results (headline)
 
-| Metric | Score |
+Thresholds: scope 0.2, confidence 0.5, source minimum 0.35 (the production values). Local 562-chunk index, top_k = 3.
+
+| Guardrail metric | Result |
 |---|---|
-| Retrieval Hit@3 / MRR | 0.958 / 0.958 |
-| Answerable questions let through by guardrails | 1.00 (24/24) |
-| Unanswerable questions declined | 1.00 (3/3) |
-| Out-of-scope questions declined | 1.00 (5/5) |
-| Scope check + retrieval latency (p50) | ~11 ms + ~16 ms |
+| Answerable questions wrongly rejected | **0/12** |
+| Out-of-scope questions refused | **4/4**, all by the scope layer |
+| Unanswerable (on-topic, not in corpus) questions refused | **2/4** |
+| Retrieval Hit@3 (right *paper* in top 3) | 12/12 |
 
-Hit@3 counts the right *paper* among the top 3 chunks. Context recall below is the stricter, passage-level measure.
+The two unanswerable questions that got through (the SVM kernel trick, and bagging vs boosting) scored 0.512 and 0.510 against the 0.5 confidence threshold. Both reached the LLM, and the LLM declined both, saying its sources don't cover the topic. So no answer was made up, but each cost an LLM call.
 
-### Stage 2 results (24 answerable questions, all scored)
+| RAGAS metric | Mean | Scored |
+|---|---|---|
+| Faithfulness | 0.791 | 12/12 |
+| Answer relevancy | 0.885 | 12/12 |
+| Context precision | 0.361 | 12/12 |
+| Context recall | 0.458 | 12/12 |
 
-| Metric | Score |
+The low context scores are the main finding. For 5 of 12 questions, retrieval found the right paper but not the passage containing the answer, which document-level Hit@3 doesn't show. In 3 of those 5 the bot said its sources didn't contain the answer, in 1 it answered from related but off-target text, and in 1 it used outside knowledge (faithfulness 0.0).
+
+| Latency (local, Groq free tier) | Median | p95 |
+|---|---|---|
+| End-to-end, paced queries (n=24, 0 rate-limit retries) | 1.09 s | 1.60 s |
+| End-to-end, back-to-back queries (n=24, 20 rate-limited) | 14.0 s | 18.7 s |
+
+Back-to-back queries exceed Groq's free-tier limit of 8,000 tokens per minute, and the client then waits and retries. See the report for details.
+
+### Tuning-set results (in-sample)
+
+⚠️ The guardrail thresholds were chosen on these questions, so the guardrail rows below measure fit, not generalisation. Compare the held-out results above. Source minimum score was 0.3 for these runs.
+
+| Metric (tuning set) | Result |
 |---|---|
-| Faithfulness | 0.875 |
-| Answer relevancy | 0.839 |
-| Context precision | 0.781 |
-| Context recall | 0.833 |
-| End-to-end latency | 1.0 s p50 / 2.2 s p95 |
+| Answerable questions let through by guardrails | 24/24 (100%) |
+| Unanswerable questions declined | 3/3 (100%) |
+| Out-of-scope questions declined | 5/5 (100%) |
+| Retrieval Hit@3 / MRR | 0.958 / 0.958 (23/24) |
+| RAGAS faithfulness / answer relevancy | 0.875 / 0.839 (n=24) |
+| RAGAS context precision / context recall | 0.781 / 0.833 (n=24) |
 
 ### What the evaluation found and fixed
 
 - **Stale index.** The local ChromaDB index held only 2 of the 9 papers (77 chunks), because it was built before the other 7 papers were added. Re-running ingestion would have appended duplicate vectors to the old collection, so ingestion now rebuilds the collection from scratch (562 chunks). On the same dataset, Hit@3 went from **0.33 to 0.96**.
 - **Truncated judge context.** The first version of the evaluation passed the UI's 500-character source previews to RAGAS, while the LLM saw full ~1,400-character chunks. That penalised faithfulness for claims that were actually supported. The pipeline now returns the full contexts separately.
 - **Silent NaN scores.** RAGAS defaults to 16 concurrent workers and records every failed call as NaN. On Groq's free tier, that meant most scores were lost to rate limits. The harness now uses 2 workers with retry/backoff, reports how many questions each metric actually scored, and caches scores so an interrupted run can resume.
-- **Guardrail thresholds tuned with data.** At the previous settings (scope 0.30, confidence 0.40), 1 answerable question was wrongly rejected and 2 of the 3 unanswerable questions reached the LLM. `--sweep` grid-searches both thresholds. Off-topic and on-topic questions overlap around 0.2–0.25 scope similarity, but the retrieval-confidence scores separate them cleanly: off-topic and unanswerable questions score ≤ 0.50, answerable ones ≥ 0.53. The defaults are now scope 0.20 and confidence 0.50, though the margins are thin.
+- **Guardrail thresholds tuned with data.** At the previous settings (scope 0.30, confidence 0.40), 1 answerable question was wrongly rejected and 2 of the 3 unanswerable questions reached the LLM. `--sweep` grid-searches both thresholds. On the tuning set, off-topic and on-topic questions overlap around 0.2–0.25 scope similarity, but retrieval-confidence scores separated them cleanly: off-topic and unanswerable questions scored ≤ 0.50, answerable ones ≥ 0.53. The defaults are now scope 0.20 and confidence 0.50. On the held-out set, that separation held for answerable questions (0/12 wrongly rejected), but 2 of 4 unanswerable questions scored just above 0.5 and got through.
 - **A prompt instruction hurt faithfulness.** The system prompt asked every answer to end with "why it matters". The model filled that section with claims the sources didn't support: GPT-3's correct "175 billion parameters" answer scored 0.25. Removing the instruction raised faithfulness from **0.79 to 0.90** on the same 16 questions (better on 8, worse on 6, unchanged on 2). Retrieval was unchanged, and context recall held identical on all 16, so the gain is not judge noise.
 - **Retired model.** Groq retired Llama 3.1 8B mid-evaluation (the API returned 404). The generator is now `gpt-oss-20b`.
 
@@ -314,7 +338,10 @@ Hit@3 counts the right *paper* among the top 3 chunks. Context recall below is t
 - **Position-encoding miss.** "How does the Transformer encode position?" retrieves BERT chunks ahead of the Attention paper. That is a limit of the small embedding model and a candidate for a reranker or hybrid BM25 search.
 - **Right paper, wrong passage.** For "How many parameters do BERT-base and BERT-large have?", the right paper is retrieved but not the passage with the numbers. The bot correctly says it doesn't know rather than guessing.
 - **LLM-security paper.** Its PDF extracts with the spaces between words missing ("Asurveyonlargelanguagemodel..."), and its two questions score lowest (faithfulness 0.40, context recall 0.0). A layout-aware PDF parser would likely fix it.
-- **Small dataset.** The thresholds were tuned on the same 32 questions they're measured on. More held-out questions are the next step.
+- **Passage-level retrieval.** On held-out questions, 5 of 12 retrieved the right paper but not the answer passage (context recall 0.458). A reranker or hybrid BM25 search is the next thing to try.
+- **Small held-out set.** Only 4 unanswerable and 4 out-of-scope held-out questions, so 2/4 and 4/4 are rough estimates. The confidence threshold sits close to the boundary: the two misses scored 0.510 and 0.512 against 0.5.
+- **Local vs deployed index.** The Docker build rebuilds the index, and the deployed chunk scores differ slightly from the local ones, so production retrieval can differ from what was measured.
+- **Shared rate limits.** Evaluation runs and the live demo share one Groq organisation's quota, so heavy evaluation can exhaust the daily token budget for the live app.
 
 ---
 

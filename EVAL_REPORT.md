@@ -56,7 +56,7 @@ Defined in `src/rag/guardrails.py:66-68`. Each reads an environment variable and
 | Threshold | Code default | Local (`.env`) | Live Space |
 |---|---|---|---|
 | `SCOPE_THRESHOLD` | 0.2 | 0.2 | not set as a variable or secret → **0.2** |
-| `CONFIDENCE_THRESHOLD` | 0.5 | 0.5 | **set as a Space secret; value unreadable** (behaviour shows it is below 0.5, see below) |
+| `CONFIDENCE_THRESHOLD` | 0.5 | 0.5 | Space secret, value unreadable. On 2026-10-01 it behaved as below 0.5; the owner set it to **0.5** on 2026-10-03 (see below) |
 | `SOURCE_MIN_SCORE` | 0.35 | **0.3** | not set as a variable or secret → **0.35** |
 
 **Documented mismatch:** the local `.env` sets `SOURCE_MIN_SCORE=0.3`, while the code default (and therefore the live Space) uses 0.35. Earlier evaluations in this repo ran at 0.3. The held-out evaluation in this report ran at **0.35**, set on the command line only.
@@ -73,6 +73,11 @@ These came out of checking which thresholds the live Space uses (`scripts/probe_
    - 4 returned HTTP 500 with Groq error `429 ... tokens per day (TPD): Limit 200000` for `openai/gpt-oss-20b`. The LLM is only called after both the scope and confidence checks pass, so **these 4 questions passed both live guardrails**. They include one out-of-scope question (`oos-04`, "What is a good exercise routine for building muscle?") and two unanswerable ones (`unans-02`, `unans-03`). Locally, at confidence 0.5, all three are refused; their local best-chunk scores are 0.454, 0.463 and 0.472.
    - The exact live value cannot be determined: the secret is unreadable, and the 500 responses carry no chunk scores.
 3. **The live index differs from the local index.** For every question that returned scores, the live chunk scores differ from local ones (for example `attn-01` best chunk 0.5522 live vs 0.5273 local, and `rag-01` 0.7989 vs 0.6885). The Docker image rebuilds the index during the build, evidently producing different chunks; the cause was not investigated. **The retrieval and guardrail numbers in this report describe the local index**, and production behaviour can differ.
+   - **Follow-up, 2026-10-03:** the Space owner set the `CONFIDENCE_THRESHOLD` secret to 0.5 and restarted the Space. A live smoke test (raw output in `data/live_smoke_test.json`) then gave:
+     - an answerable question ("How does BERT's masked language modeling choose and replace tokens?"): `passed`, best live chunk score 0.7064, 2.5 s
+     - out-of-scope `oos-04` ("What is a good exercise routine for building muscle?"): `low_confidence`, best live chunk score 0.4409, 0.9 s, refused without an LLM call
+
+     `oos-04` had passed the live guardrails before the change. It is now refused by the confidence layer, as in the local evaluation, where it scored 0.454 locally. This is consistent with a live threshold of 0.5, though two questions cannot pin down the exact value.
 4. **Evaluation and production share one Groq quota.** The 429s above came from the 200,000 tokens-per-day limit on `gpt-oss-20b`. It is shared by the whole Groq organisation, and this session's latency runs and live probes used it up. While it is exhausted, **the live app returns errors for every question that reaches the LLM.**
 
 ## Task 2: Held-out guardrail evaluation
@@ -195,7 +200,7 @@ Rate-limit retries: **20 of 24 queries** retried at least once (24 retries in to
 
 1. **Tiny held-out negatives.** Only 4 unanswerable and 4 out-of-scope questions. The 2/4 refusal rate has wide uncertainty; it shows the tuning-set 100% does not generalise, but not what the true rate is.
 2. **Thresholds sit close to the boundary.** The two leaked unanswerable questions scored 0.510 and 0.512 against a 0.5 threshold. Small changes to the index or embedding model can flip these decisions.
-3. **Production differs from what was measured.** The live confidence threshold is an unreadable secret, behaviourally below 0.5. The live index produces different chunk scores than the local one. All guardrail and retrieval figures here describe the local configuration at the stated thresholds.
+3. **Production differs from what was measured.** The live index produces different chunk scores than the local one, so all guardrail and retrieval figures here describe the local index at the stated thresholds. The live confidence threshold was below 0.5 until 2026-10-03; it is now set to 0.5, which a two-question smoke test is consistent with but cannot prove exactly.
 4. **Passage-level retrieval is weak on held-out questions.** Context recall is 0.458, and 5 of 12 questions retrieved the right paper but not the answer-bearing passage. Document-level Hit@3 (12/12) hides this. The RAGAS numbers in `README.md` come from the 24-question tuning set at `SOURCE_MIN_SCORE=0.3` and are higher than the held-out results.
 5. **Shared quota.** Evaluation and the live app draw on the same Groq organisation's limits, so evaluation runs can take the live demo offline.
 6. **Hit@3 is document-level.** It does not confirm the retrieved chunk contains the answer.
@@ -211,6 +216,7 @@ Rate-limit retries: **20 of 24 queries** retried at least once (24 retries in to
 | `data/eval_heldout_stage2.json` | Held-out RAGAS results: answers, sources, per-question scores |
 | `data/heldout_leaked_unanswerable.json` | LLM responses to the two unanswerable questions that passed the guardrails |
 | `data/latency_paced.json`, `data/latency_back_to_back.json` | Per-query latency, retry counts, hardware |
-| `data/live_space_probe.json` | Live-Space guardrail decisions and scores vs local |
+| `data/live_space_probe.json` | Live-Space guardrail decisions and scores vs local (before the threshold fix) |
+| `data/live_smoke_test.json` | Live smoke test after `CONFIDENCE_THRESHOLD` was set to 0.5 |
 | `scripts/measure_latency.py` | Latency harness |
 | `scripts/probe_live_space.py` | Live-Space probe |
