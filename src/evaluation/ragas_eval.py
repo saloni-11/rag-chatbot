@@ -348,13 +348,16 @@ def get_judge(judge_model: str):
 
 def _cache_key(entry: dict, pipeline) -> str:
     """Same question + ground truth + pipeline config → reuse the answer."""
-    from src.rag.guardrails import SYSTEM_PROMPT
+    from src.rag import guardrails as g
 
     payload = json.dumps(
         [
             entry["question"],
             entry["ground_truth"],
-            SYSTEM_PROMPT.get_template(),
+            g.SYSTEM_PROMPT.get_template(),
+            # The thresholds decide which chunks reach the LLM, so an answer
+            # generated under different thresholds must not be reused.
+            [g.SCOPE_THRESHOLD, g.CONFIDENCE_THRESHOLD, g.SOURCE_MIN_SCORE],
             pipeline.model,
             pipeline.top_k,
             pipeline.persist_dir,

@@ -1,0 +1,32 @@
+{
+  "thresholds": [
+    0.2,
+    0.5,
+    0.35
+  ],
+  "model": "openai/gpt-oss-20b",
+  "results": [
+    {
+      "id": "ho-unans-01",
+      "question": "How does the kernel trick work in support vector machines?",
+      "guardrail_action": "passed",
+      "sources": [
+        "Deep residual learning from image recognition.pdf",
+        "Deep residual learning from image recognition.pdf",
+        "Deep residual learning from image recognition.pdf"
+      ],
+      "answer": "Based on my sources, I can share the following: The provided context does not contain any information about how the kernel trick works in support vector machines."
+    },
+    {
+      "id": "ho-unans-04",
+      "question": "What is the difference between bagging and boosting in ensemble learning?",
+      "guardrail_action": "passed",
+      "sources": [
+        "DataPerf Benchmarks for data centric AI Dev.pdf",
+        "DataPerf Benchmarks for data centric AI Dev.pdf",
+        "DataPerf Benchmarks for data centric AI Dev.pdf"
+      ],
+      "answer": "Based on my sources, I can share the following: The provided documents do not contain information about bagging or boosting in ensemble learning."
+    }
+  ]
+}

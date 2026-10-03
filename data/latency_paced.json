@@ -1,0 +1,239 @@
+{
+  "timestamp": "2026-10-01T10:07:53+00:00",
+  "dataset": "tests/eval_dataset.json",
+  "generator_model": "openai/gpt-oss-20b",
+  "top_k": 3,
+  "pause_between_queries_s": 25.0,
+  "hardware": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 170 Stepping 4, GenuineIntel",
+    "logical_cpus": 18,
+    "python": "3.12.12",
+    "ram_gb": 15.5
+  },
+  "queries": 24,
+  "answered_by_llm": 24,
+  "queries_with_retries": 0,
+  "end_to_end_retry_free": {
+    "n": 24,
+    "median_ms": 1092.7,
+    "p95_ms": 1602.2,
+    "min_ms": 607.1,
+    "max_ms": 2567.4
+  },
+  "llm_only_retry_free": {
+    "n": 24,
+    "median_ms": 1005.5,
+    "p95_ms": 1506.6,
+    "min_ms": 511.7,
+    "max_ms": 2480.5
+  },
+  "end_to_end_all": {
+    "n": 24,
+    "median_ms": 1092.7,
+    "p95_ms": 1602.2,
+    "min_ms": 607.1,
+    "max_ms": 2567.4
+  },
+  "retrieval_and_guardrails": {
+    "n": 24,
+    "median_ms": 90.0,
+    "p95_ms": 102.5,
+    "min_ms": 75.0,
+    "max_ms": 114.2
+  },
+  "per_query": [
+    {
+      "question": "What is the transformer architecture?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 999.0,
+      "llm_ms": 924.0,
+      "retrieval_and_guardrails_ms": 75.0
+    },
+    {
+      "question": "What is self-attention and why is it important?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 1039.9,
+      "llm_ms": 963.4,
+      "retrieval_and_guardrails_ms": 76.5
+    },
+    {
+      "question": "What is the scaled dot-product attention mechanism?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 1229.0,
+      "llm_ms": 1138.3,
+      "retrieval_and_guardrails_ms": 90.7
+    },
+    {
+      "question": "How does the Transformer encode the position of tokens in a sequence?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 607.1,
+      "llm_ms": 511.7,
+      "retrieval_and_guardrails_ms": 95.4
+    },
+    {
+      "question": "What BLEU score did the big Transformer model achieve on English-to-German translation?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 1003.0,
+      "llm_ms": 908.2,
+      "retrieval_and_guardrails_ms": 94.8
+    },
+    {
+      "question": "What is BERT and how does it differ from previous models?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 1486.4,
+      "llm_ms": 1372.2,
+      "retrieval_and_guardrails_ms": 114.2
+    },
+    {
+      "question": "How does BERT's masked language modeling choose and replace tokens?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 2567.4,
+      "llm_ms": 2480.5,
+      "retrieval_and_guardrails_ms": 86.9
+    },
+    {
+      "question": "What is the next sentence prediction task in BERT?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 1001.5,
+      "llm_ms": 920.7,
+      "retrieval_and_guardrails_ms": 80.8
+    },
+    {
+      "question": "How many parameters do BERT-base and BERT-large have?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 1057.8,
+      "llm_ms": 971.0,
+      "retrieval_and_guardrails_ms": 86.8
+    },
+    {
+      "question": "What is the degradation problem in deep neural networks?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 1264.5,
+      "llm_ms": 1176.5,
+      "retrieval_and_guardrails_ms": 88.0
+    },
+    {
+      "question": "How does residual learning work in ResNet?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 1537.2,
+      "llm_ms": 1447.7,
+      "retrieval_and_guardrails_ms": 89.5
+    },
+    {
+      "question": "What top-5 error did the ResNet ensemble achieve on ImageNet?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 1212.7,
+      "llm_ms": 1118.0,
+      "retrieval_and_guardrails_ms": 94.6
+    },
+    {
+      "question": "How do generative adversarial networks work?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 1316.3,
+      "llm_ms": 1235.4,
+      "retrieval_and_guardrails_ms": 80.9
+    },
+    {
+      "question": "What is the value function of the minimax game in GANs?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 904.7,
+      "llm_ms": 822.0,
+      "retrieval_and_guardrails_ms": 82.8
+    },
+    {
+      "question": "How many parameters does GPT-3 have?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 723.4,
+      "llm_ms": 620.9,
+      "retrieval_and_guardrails_ms": 102.5
+    },
+    {
+      "question": "What is the difference between zero-shot, one-shot, and few-shot learning in GPT-3?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 1196.4,
+      "llm_ms": 1104.2,
+      "retrieval_and_guardrails_ms": 92.2
+    },
+    {
+      "question": "Does GPT-3 update its weights when performing few-shot learning?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 810.1,
+      "llm_ms": 716.6,
+      "retrieval_and_guardrails_ms": 93.5
+    },
+    {
+      "question": "What is retrieval-augmented generation (RAG)?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 829.7,
+      "llm_ms": 754.0,
+      "retrieval_and_guardrails_ms": 75.6
+    },
+    {
+      "question": "What are the three major components of a retrieval-augmented large language model framework?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 851.0,
+      "llm_ms": 757.2,
+      "retrieval_and_guardrails_ms": 93.7
+    },
+    {
+      "question": "What limitations of LLMs does RAG help address?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 1086.3,
+      "llm_ms": 996.8,
+      "retrieval_and_guardrails_ms": 89.5
+    },
+    {
+      "question": "Why are traditional keyword-based information retrieval methods insufficient?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 1534.5,
+      "llm_ms": 1444.2,
+      "retrieval_and_guardrails_ms": 90.4
+    },
+    {
+      "question": "What is DataPerf?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 1452.0,
+      "llm_ms": 1357.6,
+      "retrieval_and_guardrails_ms": 94.3
+    },
+    {
+      "question": "How can large language models help improve security and privacy?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 1099.0,
+      "llm_ms": 1014.3,
+      "retrieval_and_guardrails_ms": 84.7
+    },
+    {
+      "question": "What security risks and vulnerabilities do large language models have?",
+      "guardrail_action": "passed",
+      "retries": 0,
+      "total_ms": 1602.2,
+      "llm_ms": 1506.6,
+      "retrieval_and_guardrails_ms": 95.6
+    }
+  ]
+}

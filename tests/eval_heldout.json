@@ -1,0 +1,142 @@
+[
+  {
+    "id": "ho-attn-01",
+    "category": "answerable",
+    "question": "How many attention heads does the Transformer use, and what is the dimension of each head?",
+    "ground_truth": "The Transformer employs h = 8 parallel attention layers, or heads. For each head it uses d_k = d_v = d_model / h = 64, so the reduced dimension per head keeps the total computational cost similar to single-head attention with full dimensionality.",
+    "source_files": ["Attention is all you need.pdf"]
+  },
+  {
+    "id": "ho-attn-02",
+    "category": "answerable",
+    "question": "What label smoothing value was used when training the Transformer, and what effect did it have?",
+    "ground_truth": "The Transformer was trained with label smoothing of value 0.1. This hurts perplexity, because the model learns to be more unsure, but it improves accuracy and BLEU score.",
+    "source_files": ["Attention is all you need.pdf"]
+  },
+  {
+    "id": "ho-bert-01",
+    "category": "answerable",
+    "question": "What data was BERT pre-trained on?",
+    "ground_truth": "BERT was pre-trained on the BooksCorpus (800M words) and English Wikipedia (2,500M words). For Wikipedia only the text passages were extracted, ignoring lists, tables, and headers, because a document-level corpus is needed rather than a shuffled sentence-level one.",
+    "source_files": ["BERT- Pre-training of Deep Bidirectional Transformers for.pdf"]
+  },
+  {
+    "id": "ho-resnet-01",
+    "category": "answerable",
+    "question": "What is the bottleneck building block used in deeper ResNets?",
+    "ground_truth": "For deeper networks (ResNet-50/101/152), each residual function uses a stack of three layers instead of two: 1x1, 3x3, and 1x1 convolutions. The 1x1 layers reduce and then increase (restore) dimensions, leaving the 3x3 layer as a bottleneck with smaller input and output dimensions.",
+    "source_files": ["Deep residual learning from image recognition.pdf"]
+  },
+  {
+    "id": "ho-resnet-02",
+    "category": "answerable",
+    "question": "Why did the 1202-layer ResNet perform worse on CIFAR-10 than the 110-layer ResNet?",
+    "ground_truth": "The 1202-layer network had a worse test result than the 110-layer network even though both had similar training error. The authors attribute this to overfitting: the 1202-layer network (19.4M parameters) may be unnecessarily large for this small dataset.",
+    "source_files": ["Deep residual learning from image recognition.pdf"]
+  },
+  {
+    "id": "ho-gan-01",
+    "category": "answerable",
+    "question": "Why is the GAN generator trained to maximize log D(G(z)) instead of minimizing log(1 - D(G(z)))?",
+    "ground_truth": "Early in learning, when G is poor, D can reject generated samples with high confidence, so log(1 - D(G(z))) saturates and does not provide sufficient gradient for G. Training G to maximize log D(G(z)) instead has the same fixed point of the dynamics of G and D but provides much stronger gradients early in learning.",
+    "source_files": ["GANs.pdf"]
+  },
+  {
+    "id": "ho-gan-02",
+    "category": "answerable",
+    "question": "What is the Helvetica scenario in GAN training?",
+    "ground_truth": "The Helvetica scenario is when the generator G collapses too many values of z to the same value of x, so it lacks the diversity to model the data distribution. To avoid it, G must not be trained too much without updating the discriminator D; D must be kept well synchronized with G during training.",
+    "source_files": ["GANs.pdf"]
+  },
+  {
+    "id": "ho-gpt3-01",
+    "category": "answerable",
+    "question": "How was the quality of the Common Crawl data used to train GPT-3 improved?",
+    "ground_truth": "Two techniques were used: filtering and fuzzy deduplication. For filtering, an automatic method removed low-quality documents using a classifier trained to distinguish the original WebText, used as a proxy for high-quality documents, from raw Common Crawl. Fuzzy deduplication then removed near-duplicate documents.",
+    "source_files": ["Language models are few shot learners.pdf"]
+  },
+  {
+    "id": "ho-rag-01",
+    "category": "answerable",
+    "question": "What are the two types of retrievers used in retrieval-augmented LLMs?",
+    "ground_truth": "Retrievers fall into two types: sparse retrievers and dense retrievers. Sparse retrievers represent documents with sparse features such as word frequencies and score relevance with metrics such as TF-IDF and BM25. Dense retrievers represent queries and documents as dense embeddings produced by neural encoders, for example ones based on Transformer or BERT backbones.",
+    "source_files": ["Survey on RAG meeting LLMs.pdf"]
+  },
+  {
+    "id": "ho-rag-02",
+    "category": "answerable",
+    "question": "Which research team introduced the RAG model, and in what year?",
+    "ground_truth": "The RAG model was unveiled by the Facebook artificial intelligence research team in 2020. It integrates the text generation capabilities of generative AI models with the ability of information retrieval models to identify the most pertinent text.",
+    "source_files": ["Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf"]
+  },
+  {
+    "id": "ho-dataperf-01",
+    "category": "answerable",
+    "question": "On which platform are the DataPerf benchmarks hosted?",
+    "ground_truth": "The DataPerf benchmarks, evaluation tools, leaderboards, and documentation are hosted on the open-source Dynabench platform, and the MLCommons Association maintains DataPerf.",
+    "source_files": ["DataPerf Benchmarks for data centric AI Dev.pdf"]
+  },
+  {
+    "id": "ho-llmsec-01",
+    "category": "answerable",
+    "question": "According to the LLM security survey, what four key features should a capable large language model have?",
+    "ground_truth": "A capable LLM should have four key features: (i) profound comprehension of natural language context; (ii) the ability to generate human-like text; (iii) contextual awareness, especially in knowledge-intensive domains; and (iv) strong instruction-following ability, which is useful for problem-solving and decision-making.",
+    "source_files": ["A survey on large language model (LLM)- good.pdf"]
+  },
+  {
+    "id": "ho-unans-01",
+    "category": "unanswerable",
+    "question": "How does the kernel trick work in support vector machines?",
+    "ground_truth": "",
+    "source_files": []
+  },
+  {
+    "id": "ho-unans-02",
+    "category": "unanswerable",
+    "question": "How does a random forest compute feature importance?",
+    "ground_truth": "",
+    "source_files": []
+  },
+  {
+    "id": "ho-unans-03",
+    "category": "unanswerable",
+    "question": "How does the DBSCAN clustering algorithm decide which points are noise?",
+    "ground_truth": "",
+    "source_files": []
+  },
+  {
+    "id": "ho-unans-04",
+    "category": "unanswerable",
+    "question": "What is the difference between bagging and boosting in ensemble learning?",
+    "ground_truth": "",
+    "source_files": []
+  },
+  {
+    "id": "ho-oos-01",
+    "category": "out_of_scope",
+    "question": "What is a good recipe for banana bread?",
+    "ground_truth": "",
+    "source_files": []
+  },
+  {
+    "id": "ho-oos-02",
+    "category": "out_of_scope",
+    "question": "How do I fix a flat tyre on my bicycle?",
+    "ground_truth": "",
+    "source_files": []
+  },
+  {
+    "id": "ho-oos-03",
+    "category": "out_of_scope",
+    "question": "How do I fix a 404 error on my website?",
+    "ground_truth": "",
+    "source_files": []
+  },
+  {
+    "id": "ho-oos-04",
+    "category": "out_of_scope",
+    "question": "Which laptop should I buy for gaming?",
+    "ground_truth": "",
+    "source_files": []
+  }
+]

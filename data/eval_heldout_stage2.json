@@ -1,0 +1,337 @@
+{
+  "config": {
+    "timestamp": "2026-10-03T01:35:22+00:00",
+    "dataset": "tests/eval_heldout.json",
+    "dataset_size": 20,
+    "index_dir": "./data/chroma_db",
+    "index_chunks": 562,
+    "top_k": 3,
+    "generator_model": "openai/gpt-oss-20b",
+    "judge_model": "openai/gpt-oss-120b",
+    "ragas_version": "0.2.15"
+  },
+  "generation": {
+    "summary": {
+      "faithfulness": {
+        "mean": 0.7909,
+        "n_scored": 12
+      },
+      "answer_relevancy": {
+        "mean": 0.8853,
+        "n_scored": 12
+      },
+      "llm_context_precision_with_reference": {
+        "mean": 0.3611,
+        "n_scored": 12
+      },
+      "context_recall": {
+        "mean": 0.4583,
+        "n_scored": 12
+      },
+      "answered": 12,
+      "declined_by_guardrail": 0,
+      "latency": {
+        "llm": {
+          "p50_ms": 942.2,
+          "p95_ms": 2415.5,
+          "n": 12
+        },
+        "end_to_end": {
+          "p50_ms": 1031.8,
+          "p95_ms": 2763.9,
+          "n": 12
+        }
+      }
+    },
+    "per_question": [
+      {
+        "id": "ho-attn-01",
+        "question": "How many attention heads does the Transformer use, and what is the dimension of each head?",
+        "answer": "**Answer**\n\n- **Number of attention heads:** 8  \n- **Dimension of each head:** 64 (both key and value dimensions, i.e., \\(d_k = d_v = 64\\))\n\n**Details from the source**\n\n- The Transformer uses **h = 8** parallel attention layers (heads).  \n- Each head projects the model dimension \\(d_{\\text{model}} = 512\\) into a sub‑space of size \\(d_k = d_v = d_{\\text{model}}/h = 64\\).  \n- This configuration keeps the overall computational cost comparable to single‑head attention with full dimensionality.  \n\n*Source: “Attention is All You Need” – page 5.*",
+        "ground_truth": "The Transformer employs h = 8 parallel attention layers, or heads. For each head it uses d_k = d_v = d_model / h = 64, so the reduced dimension per head keeps the total computational cost similar to single-head attention with full dimensionality.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf",
+          "Attention is all you need.pdf"
+        ],
+        "timings": {
+          "scope_ms": 46.3,
+          "retrieval_ms": 301.8,
+          "llm_ms": 2415.5,
+          "total_ms": 2763.9
+        },
+        "scores": {
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.9990918223406552,
+          "llm_context_precision_with_reference": 0.9999999999,
+          "context_recall": 1.0
+        }
+      },
+      {
+        "id": "ho-attn-02",
+        "question": "What label smoothing value was used when training the Transformer, and what effect did it have?",
+        "answer": "**Answer**\n\nBased on the provided sources, there is no mention of a label‑smoothing value or its effect in the training of the Transformer. The excerpts from the *Attention is all you need* paper (page 8) and the *BERT* paper (pages 5 and 8) discuss model size, GPU FLOPS, and fine‑tuning details, but they do not specify a label‑smoothing hyperparameter or its impact.",
+        "ground_truth": "The Transformer was trained with label smoothing of value 0.1. This hurts perplexity, because the model learns to be more unsure, but it improves accuracy and BLEU score.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Attention is all you need.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "timings": {
+          "scope_ms": 26.4,
+          "retrieval_ms": 32.7,
+          "llm_ms": 994.9,
+          "total_ms": 1054.5
+        },
+        "scores": {
+          "faithfulness": 0.75,
+          "answer_relevancy": 0.9190722914530753,
+          "llm_context_precision_with_reference": 0.0,
+          "context_recall": 0.0
+        }
+      },
+      {
+        "id": "ho-bert-01",
+        "question": "What data was BERT pre-trained on?",
+        "answer": "**Answer**\n\nBased on the provided excerpts, there is no mention of the specific data set(s) that BERT was pre‑trained on. The context focuses on hyperparameter selection, fine‑tuning procedures, and evaluation results, but does not describe the pre‑training corpus.",
+        "ground_truth": "BERT was pre-trained on the BooksCorpus (800M words) and English Wikipedia (2,500M words). For Wikipedia only the text passages were extracted, ignoring lists, tables, and headers, because a document-level corpus is needed rather than a shuffled sentence-level one.",
+        "guardrail_action": "passed",
+        "sources": [
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf",
+          "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+        ],
+        "timings": {
+          "scope_ms": 49.7,
+          "retrieval_ms": 55.1,
+          "llm_ms": 740.9,
+          "total_ms": 846.3
+        },
+        "scores": {
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.9675774183455093,
+          "llm_context_precision_with_reference": 0.0,
+          "context_recall": 0.0
+        }
+      },
+      {
+        "id": "ho-resnet-01",
+        "question": "What is the bottleneck building block used in deeper ResNets?",
+        "answer": "**Answer**\n\nThe deeper ResNets use a **3‑layer bottleneck building block**.  \nAccording to the paper (page 7), this block is employed in the 34‑layer net and, when stacked, yields a 50‑layer ResNet. The design also uses “option B” for increasing dimensions and relies on parameter‑free identity shortcuts to keep the model efficient.",
+        "ground_truth": "For deeper networks (ResNet-50/101/152), each residual function uses a stack of three layers instead of two: 1x1, 3x3, and 1x1 convolutions. The 1x1 layers reduce and then increase (restore) dimensions, leaving the 3x3 layer as a bottleneck with smaller input and output dimensions.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "timings": {
+          "scope_ms": 48.2,
+          "retrieval_ms": 46.5,
+          "llm_ms": 914.1,
+          "total_ms": 1009.2
+        },
+        "scores": {
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.8663678045634257,
+          "llm_context_precision_with_reference": 0.3333333333,
+          "context_recall": 0.5
+        }
+      },
+      {
+        "id": "ho-resnet-02",
+        "question": "Why did the 1202-layer ResNet perform worse on CIFAR-10 than the 110-layer ResNet?",
+        "answer": "**Answer**\n\nThe 1202‑layer ResNet achieved a very low training error (<0.1 %) but its test error on CIFAR‑10 was higher than that of the 110‑layer ResNet.  \nAccording to the paper (page 8), this indicates that the aggressively deep model suffers from **generalization issues**—the extra depth does not translate into better performance on unseen data, and the authors note that “there are still open problems on such aggressively deep models.”  \n\n*Source: Deep residual learning from image recognition, page 8.*",
+        "ground_truth": "The 1202-layer network had a worse test result than the 110-layer network even though both had similar training error. The authors attribute this to overfitting: the 1202-layer network (19.4M parameters) may be unnecessarily large for this small dataset.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf",
+          "Deep residual learning from image recognition.pdf"
+        ],
+        "timings": {
+          "scope_ms": 66.5,
+          "retrieval_ms": 38.4,
+          "llm_ms": 2293.8,
+          "total_ms": 2399.1
+        },
+        "scores": {
+          "faithfulness": 0.8,
+          "answer_relevancy": 0.8685006218456763,
+          "llm_context_precision_with_reference": 0.0,
+          "context_recall": 0.5
+        }
+      },
+      {
+        "id": "ho-gan-01",
+        "question": "Why is the GAN generator trained to maximize log D(G(z)) instead of minimizing log(1 - D(G(z)))?",
+        "answer": "**Why the generator can be trained to maximize log D(G(z))**\n\n*Definition / Summary*  \nIn a GAN the generator G tries to produce samples that the discriminator D classifies as real.  \nInstead of minimizing the “vanilla” loss log(1 – D(G(z))), one can equivalently maximize log D(G(z)).  \nBoth objectives lead to the same equilibrium (pg = pdata), but the latter gives much stronger gradients at the start of training.\n\n*Key details from the source*  \n- The text states: “This objective function results in the same fixed point of the dynamics of G and D but provides much stronger gradients early in learning.” (page 3).  \n- The generator’s update in Algorithm 1 uses the gradient of log(1 – D(G(z))) for descent, but the alternative objective of maximizing log D(G(z)) is mentioned as a more effective choice because it avoids the vanishing‑gradient problem that can occur when D(G(z)) is close to 0.  \n\nThus, training the generator to maximize log D(G(z)) is preferred because it reaches the same optimal distribution while giving the generator stronger learning signals during the early stages of training.",
+        "ground_truth": "Early in learning, when G is poor, D can reject generated samples with high confidence, so log(1 - D(G(z))) saturates and does not provide sufficient gradient for G. Training G to maximize log D(G(z)) instead has the same fixed point of the dynamics of G and D but provides much stronger gradients early in learning.",
+        "guardrail_action": "passed",
+        "sources": [
+          "GANs.pdf",
+          "GANs.pdf",
+          "GANs.pdf"
+        ],
+        "timings": {
+          "scope_ms": 173.3,
+          "retrieval_ms": 51.1,
+          "llm_ms": 1273.5,
+          "total_ms": 1498.3
+        },
+        "scores": {
+          "faithfulness": 0.75,
+          "answer_relevancy": 0.7950024301566827,
+          "llm_context_precision_with_reference": 0.9999999999,
+          "context_recall": 1.0
+        }
+      },
+      {
+        "id": "ho-gan-02",
+        "question": "What is the Helvetica scenario in GAN training?",
+        "answer": "**Answer**\n\nBased on the documents provided, there is no mention of a “Helvetica scenario” in the context of GAN training. The excerpts from the GANs paper discuss the adversarial training framework, theoretical results, and practical advantages, but they do not describe or reference a Helvetica scenario.",
+        "ground_truth": "The Helvetica scenario is when the generator G collapses too many values of z to the same value of x, so it lacks the diversity to model the data distribution. To avoid it, G must not be trained too much without updating the discriminator D; D must be kept well synchronized with G during training.",
+        "guardrail_action": "passed",
+        "sources": [
+          "GANs.pdf",
+          "GANs.pdf",
+          "GANs.pdf"
+        ],
+        "timings": {
+          "scope_ms": 60.5,
+          "retrieval_ms": 63.8,
+          "llm_ms": 521.2,
+          "total_ms": 646.4
+        },
+        "scores": {
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.9509335752606033,
+          "llm_context_precision_with_reference": 0.0,
+          "context_recall": 0.0
+        }
+      },
+      {
+        "id": "ho-gpt3-01",
+        "question": "How was the quality of the Common Crawl data used to train GPT-3 improved?",
+        "answer": "**How the Common Crawl data quality was improved**\n\n- **Deduplication & contamination removal**  \n  The authors first attempted to eliminate any overlap between the training data and the development/test sets of the benchmarks they evaluated. They used a systematic overlap‑detection tool that flags any example that shares a 13‑gram sequence with the pre‑training corpus (or the entire example if it is shorter than 13 grams). This conservative filtering was intended to produce a “clean” subset that is free of contamination with high confidence.\n\n- **Clean benchmark subsets**  \n  For each benchmark they created a version that excluded all potentially leaked examples. These clean subsets were then used to assess GPT‑3’s true performance, ensuring that any gains were not due to memorized test data.\n\n- **Validation set deduplication**  \n  The held‑out validation set used to measure training progress was also deduplicated against the training data, which helped confirm that GPT‑3 did not over‑fit despite the large Common Crawl corpus.\n\nThese steps—deduplication, aggressive overlap filtering, and the creation of clean benchmark subsets—constituted the primary methods for improving the quality of the Common Crawl data used to train GPT‑3.",
+        "ground_truth": "Two techniques were used: filtering and fuzzy deduplication. For filtering, an automatic method removed low-quality documents using a classifier trained to distinguish the original WebText, used as a proxy for high-quality documents, from raw Common Crawl. Fuzzy deduplication then removed near-duplicate documents.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf",
+          "Language models are few shot learners.pdf"
+        ],
+        "timings": {
+          "scope_ms": 52.2,
+          "retrieval_ms": 44.3,
+          "llm_ms": 1293.2,
+          "total_ms": 1390.1
+        },
+        "scores": {
+          "faithfulness": 0.8571428571428571,
+          "answer_relevancy": 0.7203447852912345,
+          "llm_context_precision_with_reference": 0.0,
+          "context_recall": 0.0
+        }
+      },
+      {
+        "id": "ho-rag-01",
+        "question": "What are the two types of retrievers used in retrieval-augmented LLMs?",
+        "answer": "**Answer**\n\n**Two types of retrievers used in retrieval‑augmented LLMs**\n\n| Type | Key characteristics (from the survey) |\n|------|----------------------------------------|\n| **Sparse retrievers** | • Word‑based, rely on inverted‑index matching (e.g., TF‑IDF, BM25). <br>• Operate on raw text, ranking passages by term and inverse document frequencies. <br>• No training required; performance depends heavily on database quality and query formulation. <br>• Limited to similarity‑based retrieval and cannot easily adapt to other criteria such as diversity. |\n| **Dense retrievers** | • Embed queries and documents into continuous vector spaces (semantic similarity). <br>• Use neural encoders (e.g., BERT, Transformer‑based models). <br>• Can be trained (bi‑encoder or single‑encoder) and often pre‑trained on large unaligned corpora via contrastive learning. <br>• More versatile and generalizable to new domains or tasks. |\n\n**Source**: The survey “A Survey on RAG Meeting LLMs: Towards Retrieval‑Augmented Large Language Models” (KDD ’24) – section 2.1.1 “Retriever Type.”",
+        "ground_truth": "Retrievers fall into two types: sparse retrievers and dense retrievers. Sparse retrievers represent documents with sparse features such as word frequencies and score relevance with metrics such as TF-IDF and BM25. Dense retrievers represent queries and documents as dense embeddings produced by neural encoders, for example ones based on Transformer or BERT backbones.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Survey on RAG meeting LLMs.pdf",
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Survey on RAG meeting LLMs.pdf"
+        ],
+        "timings": {
+          "scope_ms": 104.1,
+          "retrieval_ms": 46.0,
+          "llm_ms": 795.0,
+          "total_ms": 945.6
+        },
+        "scores": {
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.9964003984317084,
+          "llm_context_precision_with_reference": 0.9999999999,
+          "context_recall": 1.0
+        }
+      },
+      {
+        "id": "ho-rag-02",
+        "question": "Which research team introduced the RAG model, and in what year?",
+        "answer": "**Answer**\n\nThe RAG (Retrieval‑Augmented Generation) model was introduced by the research team of **Lewis et al.** in **2020**.  \n\n*Source: page 3 of the PDF, which cites Lewis et al. (2020) as the study that first revealed the effectiveness of the RAG architecture.*",
+        "ground_truth": "The RAG model was unveiled by the Facebook artificial intelligence research team in 2020. It integrates the text generation capabilities of generative AI models with the ability of information retrieval models to identify the most pertinent text.",
+        "guardrail_action": "passed",
+        "sources": [
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf",
+          "Retrieval-Augmented_Generation_RAG_and_LLM_Integration.pdf"
+        ],
+        "timings": {
+          "scope_ms": 94.2,
+          "retrieval_ms": 46.4,
+          "llm_ms": 751.7,
+          "total_ms": 892.7
+        },
+        "scores": {
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.6428332906949,
+          "llm_context_precision_with_reference": 0.0,
+          "context_recall": 0.0
+        }
+      },
+      {
+        "id": "ho-dataperf-01",
+        "question": "On which platform are the DataPerf benchmarks hosted?",
+        "answer": "**Answer**\n\nThe DataPerf benchmarks are hosted on the online platform **Dynabench** (https://dynabench.org/).  \n\n*Source: The paper states that “The DataPerf benchmarks, evaluation tools, leaderboards, and documentation are hosted in an online platform called Dynabench” (page 4).*",
+        "ground_truth": "The DataPerf benchmarks, evaluation tools, leaderboards, and documentation are hosted on the open-source Dynabench platform, and the MLCommons Association maintains DataPerf.",
+        "guardrail_action": "passed",
+        "sources": [
+          "DataPerf Benchmarks for data centric AI Dev.pdf",
+          "DataPerf Benchmarks for data centric AI Dev.pdf",
+          "DataPerf Benchmarks for data centric AI Dev.pdf"
+        ],
+        "timings": {
+          "scope_ms": 35.2,
+          "retrieval_ms": 47.8,
+          "llm_ms": 557.1,
+          "total_ms": 640.6
+        },
+        "scores": {
+          "faithfulness": 0.5,
+          "answer_relevancy": 0.9368779956626423,
+          "llm_context_precision_with_reference": 0.99999999995,
+          "context_recall": 1.0
+        }
+      },
+      {
+        "id": "ho-llmsec-01",
+        "question": "According to the LLM security survey, what four key features should a capable large language model have?",
+        "answer": "**Answer**\n\nBased on the information provided in the LLM security survey, a capable large language model should possess at least the following two key features:\n\n1. **Deep understanding and interpretation of natural language text** – enabling the model to extract information and perform various language‑related tasks such as translation.  \n2. **Capacity to generate human‑like text** – allowing the model to complete sentences, compose paragraphs, and even write full articles when prompted.\n\n*Note: The survey explicitly lists only these two features; the fourth feature is not mentioned in the provided context.*",
+        "ground_truth": "A capable LLM should have four key features: (i) profound comprehension of natural language context; (ii) the ability to generate human-like text; (iii) contextual awareness, especially in knowledge-intensive domains; and (iv) strong instruction-following ability, which is useful for problem-solving and decision-making.",
+        "guardrail_action": "passed",
+        "sources": [
+          "A survey on large language model (LLM)- good.pdf",
+          "A survey on large language model (LLM)- good.pdf",
+          "A survey on large language model (LLM)- good.pdf"
+        ],
+        "timings": {
+          "scope_ms": 124.4,
+          "retrieval_ms": 55.7,
+          "llm_ms": 970.2,
+          "total_ms": 1150.9
+        },
+        "scores": {
+          "faithfulness": 0.8333333333333334,
+          "answer_relevancy": 0.9609071773049146,
+          "llm_context_precision_with_reference": 0.0,
+          "context_recall": 0.5
+        }
+      }
+    ]
+  }
+}
