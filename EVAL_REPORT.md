@@ -1,6 +1,6 @@
 # Evaluation Report: AI/ML Study Companion
 
-**Date:** 2026-10-01 (measurements taken 10:07–10:38 UTC)
+**Date:** 2026-10-01 (Tasks 1, 2 and 4: measurements taken 10:07–10:38 UTC); 2026-10-03 (Task 3 run started 01:35 UTC; the leaked-question check ran shortly after)
 **Branch:** `eval-verification`, based on `main` at `d657a4d` (the commit deployed to the HuggingFace Space)
 **Held-out set:** frozen in commit `31c4819` before any evaluation was run against it.
 SHA-256 of the committed file: `dc8b3f0db31a8903bb84a2994a42eef054b25929f10ad4917ca867066613987b`
@@ -19,7 +19,10 @@ Every number below was measured during this session and can be reproduced with t
 | Held-out: unanswerable questions correctly refused | **2/4** |
 | Held-out: out-of-scope questions rejected | **4/4** |
 | Held-out: retrieval Hit@3 (document level) | **12/12** |
-| Held-out RAGAS scores | **Not measured.** The generator's daily Groq quota was exhausted (see Task 3) |
+| Held-out RAGAS faithfulness | **0.791** (n=12/12) |
+| Held-out RAGAS answer relevancy | **0.885** (n=12/12) |
+| Held-out RAGAS context precision | **0.361** (n=12/12) |
+| Held-out RAGAS context recall | **0.458** (n=12/12) |
 | End-to-end latency, paced (headline) | **median 1,092.7 ms, p95 1,602.2 ms** (n=24, 0 rate-limit retries) |
 | End-to-end latency, back-to-back | median 14,046.0 ms, p95 18,724.9 ms (n=24, 20/24 queries retried after HTTP 429) |
 
@@ -101,23 +104,57 @@ SOURCE_MIN_SCORE=0.35 python src/evaluation/ragas_eval.py --stage retrieval \
 | ho-unans-02: How does a random forest compute feature importance? | 0.470 | 0.5 | refused ✓ |
 | ho-unans-03: How does the DBSCAN clustering algorithm decide which points are noise? | 0.432 | 0.5 | refused ✓ |
 
-On this set, answerable questions' best scores ranged from 0.567 to 0.776. Whether the LLM's grounding prompt then declines the two leaked questions, or answers from its own knowledge, was **not measured**, because the generator quota was exhausted.
+On this set, answerable questions' best scores ranged from 0.567 to 0.776.
+
+**What the LLM did with the two leaked questions** (measured 2026-10-03, same thresholds, raw output in `data/heldout_leaked_unanswerable.json`): it declined both. It replied that the provided context does not contain information about the kernel trick, or about bagging and boosting. The grounding prompt acted as a second line of defence, so no hallucinated answer was produced, but each leak still cost an LLM call.
 
 Hit@3 is document-level: it counts a hit when any of the top 3 chunks comes from the right paper. It does not check that the chunk contains the answer.
 
 ## Task 3: RAGAS on held-out answerable questions
 
-**Not measured.** Generating the 12 answers requires `openai/gpt-oss-20b`, whose 200,000 tokens-per-day Groq limit was exhausted during this session (see Production configuration findings, item 4). No RAGAS numbers are reported for the held-out set.
-
-To run it once the quota frees (Groq counts the daily limit over a rolling window):
+This was first blocked on 2026-10-01, when the generator's daily Groq quota was exhausted (see Production configuration findings, item 4). It was run on **2026-10-03 (01:35 UTC)**, after the quota recovered:
 
 ```bash
 SOURCE_MIN_SCORE=0.35 python src/evaluation/ragas_eval.py --stage generation \
   --dataset tests/eval_heldout.json --output data/eval_heldout_stage2.json \
-  --cache-dir data/eval_cache_heldout
+  --cache-dir data/eval_cache/heldout
 ```
 
-The harness reports `n_scored` per metric and never averages over failed calls. A metric that fails is left unscored, not counted as 0. Re-running the same command re-scores only the missing metrics, using the cached answers. The answer cache key now includes the guardrail thresholds, so answers generated at `SOURCE_MIN_SCORE=0.3` are never reused at 0.35.
+Generator `openai/gpt-oss-20b`, judge `openai/gpt-oss-120b`, thresholds 0.2 / 0.5 / 0.35, top_k 3. All 12 answerable questions passed the guardrails and were answered.
+
+| Metric | Mean | Questions scored |
+|---|---|---|
+| Faithfulness | **0.791** | 12/12 |
+| Answer relevancy | **0.885** | 12/12 |
+| Context precision (with reference) | **0.361** | 12/12 |
+| Context recall | **0.458** | 12/12 |
+
+No judge call failed: the run log contains 0 "judge failed" or exception lines, so no metric was skipped or returned NaN. The harness reports `n_scored` per metric, never averages over failed calls, and leaves a failed metric unscored rather than counting it as 0. The answer cache key includes the guardrail thresholds, so answers generated at `SOURCE_MIN_SCORE=0.3` are never reused at 0.35.
+
+Per question:
+
+| ID | Faithfulness | Answer relevancy | Context precision | Context recall |
+|---|---|---|---|---|
+| ho-attn-01 | 1.000 | 0.999 | 1.000 | 1.000 |
+| ho-attn-02 | 0.750 | 0.919 | 0.000 | 0.000 |
+| ho-bert-01 | 1.000 | 0.968 | 0.000 | 0.000 |
+| ho-resnet-01 | 1.000 | 0.866 | 0.333 | 0.500 |
+| ho-resnet-02 | 0.800 | 0.869 | 0.000 | 0.500 |
+| ho-gan-01 | 0.750 | 0.795 | 1.000 | 1.000 |
+| ho-gan-02 | 1.000 | 0.951 | 0.000 | 0.000 |
+| ho-gpt3-01 | 0.857 | 0.720 | 0.000 | 0.000 |
+| ho-rag-01 | 1.000 | 0.996 | 1.000 | 1.000 |
+| ho-rag-02 | 0.000 | 0.643 | 0.000 | 0.000 |
+| ho-dataperf-01 | 0.500 | 0.937 | 1.000 | 1.000 |
+| ho-llmsec-01 | 0.833 | 0.961 | 0.000 | 0.500 |
+
+**Why the context scores are low.** For 5 of 12 questions (attn-02, bert-01, gan-02, gpt3-01, rag-02), context recall is 0. Manual inspection of the cached contexts confirmed that none of their top-3 chunks contains the answer: no label-smoothing value, no BooksCorpus, no Helvetica scenario, no WebText classifier, no mention of Facebook. The right *paper* was retrieved every time (document-level Hit@3 12/12), but not the right *passage*. What the generator did in those 5 cases:
+
+- **3 of 5 declined**, saying the sources do not contain the answer (attn-02, bert-01, gan-02).
+- **1 of 5 answered from related but off-target retrieved material** (gpt3-01 described the contamination analysis instead of the quality-filtering classifier; faithfulness 0.857).
+- **1 of 5 used outside knowledge:** for rag-02 it answered "Lewis et al. (2020)", which the retrieved chunks do not support (faithfulness 0.000).
+
+For comparison, the tuning set (24 questions, `SOURCE_MIN_SCORE=0.3`, the same harness) scored faithfulness 0.875, answer relevancy 0.839, context precision 0.781 and context recall 0.833. Those held-out questions target narrower details (specific hyperparameters, datasets and definitions), and passage-level retrieval is the weak point on them.
 
 ## Task 4: Latency
 
@@ -159,7 +196,7 @@ Rate-limit retries: **20 of 24 queries** retried at least once (24 retries in to
 1. **Tiny held-out negatives.** Only 4 unanswerable and 4 out-of-scope questions. The 2/4 refusal rate has wide uncertainty; it shows the tuning-set 100% does not generalise, but not what the true rate is.
 2. **Thresholds sit close to the boundary.** The two leaked unanswerable questions scored 0.510 and 0.512 against a 0.5 threshold. Small changes to the index or embedding model can flip these decisions.
 3. **Production differs from what was measured.** The live confidence threshold is an unreadable secret, behaviourally below 0.5. The live index produces different chunk scores than the local one. All guardrail and retrieval figures here describe the local configuration at the stated thresholds.
-4. **No held-out RAGAS scores.** Task 3 is blocked until the Groq quota frees. Earlier RAGAS numbers in `README.md` come from the 24-question tuning set at `SOURCE_MIN_SCORE=0.3`.
+4. **Passage-level retrieval is weak on held-out questions.** Context recall is 0.458, and 5 of 12 questions retrieved the right paper but not the answer-bearing passage. Document-level Hit@3 (12/12) hides this. The RAGAS numbers in `README.md` come from the 24-question tuning set at `SOURCE_MIN_SCORE=0.3` and are higher than the held-out results.
 5. **Shared quota.** Evaluation and the live app draw on the same Groq organisation's limits, so evaluation runs can take the live demo offline.
 6. **Hit@3 is document-level.** It does not confirm the retrieved chunk contains the answer.
 7. **Test fragility.** Two API tests depend on whether `frontend/dist/` exists.
@@ -171,6 +208,8 @@ Rate-limit retries: **20 of 24 queries** retried at least once (24 retries in to
 |---|---|
 | `tests/eval_heldout.json` | Frozen held-out set (20 questions) |
 | `data/eval_heldout_stage1.json` | Held-out retrieval and guardrail results, per question |
+| `data/eval_heldout_stage2.json` | Held-out RAGAS results: answers, sources, per-question scores |
+| `data/heldout_leaked_unanswerable.json` | LLM responses to the two unanswerable questions that passed the guardrails |
 | `data/latency_paced.json`, `data/latency_back_to_back.json` | Per-query latency, retry counts, hardware |
 | `data/live_space_probe.json` | Live-Space guardrail decisions and scores vs local |
 | `scripts/measure_latency.py` | Latency harness |
