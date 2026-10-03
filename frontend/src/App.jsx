@@ -18,7 +18,9 @@ async function askQuestion(question) {
     });
 
     if (!response.ok) {
-      throw new Error("API error: " + response.status);
+      const error = new Error("API error: " + response.status);
+      error.status = response.status;
+      throw error;
     }
 
     return response.json();
@@ -124,13 +126,20 @@ export default function App() {
       }
     } catch (error) {
       const isTimeout = error.message.includes("timed out");
-      const errorMessage = {
-        role: "bot",
-        content: isTimeout
-          ? "The app is waking up from sleep (HuggingFace free tier pauses after inactivity). Please wait 10–20 seconds and try again."
-          : "Sorry, I couldn't reach the server. Make sure the FastAPI backend is running: uvicorn src.api.main:app --reload",
-        guardrailAction: "error",
-      };
+      // error.status is set only when the server answered with an error code;
+      // a network failure (server down or unreachable) has no status.
+      let content;
+      if (isTimeout) {
+        content =
+          "The app is waking up from sleep (HuggingFace free tier pauses after inactivity). Please wait 10–20 seconds and try again.";
+      } else if (error.status) {
+        content =
+          "Sorry, something went wrong while answering that question. Please try again in a moment.";
+      } else {
+        content =
+          "Sorry, I couldn't reach the server. Please check your connection and try again.";
+      }
+      const errorMessage = { role: "bot", content, guardrailAction: "error" };
       setMessages((prev) => [...prev, errorMessage]);
       setActiveSources(null);
     } finally {
