@@ -353,7 +353,7 @@ Three layers of protection, each saving unnecessary API calls:
 - **Confidence threshold** — checks retrieval similarity scores after ChromaDB search. If the best chunk isn't relevant enough, returns a fallback response without calling the LLM.
 - **Source filtering** — removes low-scoring chunks before sending to the LLM, ensuring it only sees high-quality context.
 
-All thresholds are configurable via environment variables (`SCOPE_THRESHOLD`, `CONFIDENCE_THRESHOLD`, `SOURCE_MIN_SCORE`).
+All thresholds are true cosine similarity and configurable via environment variables (`SCOPE_THRESHOLD`, `CONFIDENCE_MIN_COSINE`, `SOURCE_MIN_COSINE`). ChromaDB reports retrieval scores as e^(cosine − 1); the guardrails convert them back to cosine before comparing (see `chroma_score_to_cosine` in `src/rag/guardrails.py`). The old `CONFIDENCE_THRESHOLD` / `SOURCE_MIN_SCORE` variables held values on ChromaDB's scale and are now ignored, with a warning.
 
 ---
 

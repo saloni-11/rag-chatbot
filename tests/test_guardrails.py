@@ -173,7 +173,7 @@ class TestConfidenceCheck:
         assert "don't have enough" in message.lower() or "confident" in message.lower()
 
     def test_source_filtering_removes_low_scores(self, guardrails):
-        """Chunks below SOURCE_MIN_SCORE should be filtered out."""
+        """Chunks below SOURCE_MIN_COSINE should be filtered out."""
         g, _ = guardrails
 
         nodes = [
@@ -187,11 +187,21 @@ class TestConfidenceCheck:
         assert passed is True
         # The bad chunk (0.1) should be filtered out
         assert len(filtered) < len(nodes)
-        # All remaining chunks should meet the minimum score
-        from src.rag.guardrails import SOURCE_MIN_SCORE
+        # All remaining chunks should meet the minimum (as true cosine)
+        from src.rag.guardrails import SOURCE_MIN_COSINE, chroma_score_to_cosine
 
         for node in filtered:
-            assert node.score >= SOURCE_MIN_SCORE
+            assert chroma_score_to_cosine(node.score) >= SOURCE_MIN_COSINE
+
+    def test_chroma_score_converts_to_true_cosine(self):
+        """ChromaDB reports exp(cosine - 1); conversion must invert it exactly."""
+        import math
+
+        from src.rag.guardrails import chroma_score_to_cosine
+
+        for cosine in (-1.0, -0.05, 0.0, 0.307, 0.5, 1.0):
+            score = math.exp(cosine - 1)
+            assert chroma_score_to_cosine(score) == pytest.approx(cosine)
 
     def test_empty_nodes_rejected(self, guardrails):
         """Empty node list should fail confidence check."""
