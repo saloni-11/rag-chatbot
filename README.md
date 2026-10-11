@@ -347,11 +347,12 @@ Back-to-back queries exceed Groq's free-tier limit of 8,000 tokens per minute, a
 
 ## 🔒 Guardrails
 
-Three layers of protection, each saving unnecessary API calls:
+Two active guardrails decide whether a question is answered at all. Both run before the LLM is called, so a refused question costs no API call:
 
-- **Scope guardrail** — embeds the question and compares against reference AI/ML phrases using cosine similarity. Off-topic questions are rejected before hitting ChromaDB or the LLM.
-- **Confidence threshold** — checks retrieval similarity scores after ChromaDB search. If the best chunk isn't relevant enough, returns a fallback response without calling the LLM.
-- **Source filtering** — removes low-scoring chunks before sending to the LLM, ensuring it only sees high-quality context.
+- **Scope check** (`SCOPE_THRESHOLD = 0.2`) — embeds the question and compares it against reference AI/ML phrases using cosine similarity. Off-topic questions are rejected before ChromaDB or the LLM are touched.
+- **Confidence check** (`CONFIDENCE_MIN_COSINE = 0.307`) — after retrieval, if the best chunk's cosine similarity is below the threshold, the bot returns a fallback response instead of calling the LLM.
+
+A third stage, the **source-quality filter** (`SOURCE_MIN_COSINE = 0.25`), drops individual chunks below the threshold before they reach the LLM. At the current `top_k = 3` it is intentionally a no-op: any question that passes the confidence check has all three chunks well above 0.25 (the lowest observed across the evaluation sets is 0.294). The filter is designed for wider retrieval: once a reranker draws on a larger candidate pool (`top_k` 5–10), low-quality candidates will reach it, and the threshold will be re-tuned against that pool. It is kept below the confidence threshold so it can only trim weak chunks, never refuse a question by itself.
 
 All thresholds are true cosine similarity and configurable via environment variables (`SCOPE_THRESHOLD`, `CONFIDENCE_MIN_COSINE`, `SOURCE_MIN_COSINE`). ChromaDB reports retrieval scores as e^(cosine − 1); the guardrails convert them back to cosine before comparing (see `chroma_score_to_cosine` in `src/rag/guardrails.py`). The old `CONFIDENCE_THRESHOLD` / `SOURCE_MIN_SCORE` variables held values on ChromaDB's scale and are now ignored, with a warning.
 
