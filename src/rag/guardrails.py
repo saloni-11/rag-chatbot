@@ -78,9 +78,17 @@ from src.indexing.embeddings import get_embedding_model
 # old scale can never be silently read as a cosine. Old -> new equivalents:
 #   CONFIDENCE_THRESHOLD=0.5  ->  CONFIDENCE_MIN_COSINE=0.307  (1 + ln 0.5)
 #   SOURCE_MIN_SCORE=0.35     ->  SOURCE_MIN_COSINE=-0.05      (1 + ln 0.35)
+#
+# SOURCE_MIN_COSINE was then raised from -0.05 to 0.25 (a deliberate no-op at
+# top_k=3). Across the 52 eval questions, every chunk that reaches this filter
+# (i.e. passed scope + confidence) scored >= 0.355 on the tuning set; chunks
+# below 0.25 only appear for questions already refused. It is kept below
+# CONFIDENCE_MIN_COSINE on purpose: above 0.307 the filter would start refusing
+# questions (all chunks removed), duplicating the confidence check. Re-tune it
+# against the wider candidate pool if top_k is increased (e.g. with a reranker).
 SCOPE_THRESHOLD = float(os.getenv("SCOPE_THRESHOLD", "0.2"))
 CONFIDENCE_MIN_COSINE = float(os.getenv("CONFIDENCE_MIN_COSINE", "0.307"))
-SOURCE_MIN_COSINE = float(os.getenv("SOURCE_MIN_COSINE", "-0.05"))
+SOURCE_MIN_COSINE = float(os.getenv("SOURCE_MIN_COSINE", "0.25"))
 
 for _old_name in ("CONFIDENCE_THRESHOLD", "SOURCE_MIN_SCORE"):
     if os.getenv(_old_name) is not None:
