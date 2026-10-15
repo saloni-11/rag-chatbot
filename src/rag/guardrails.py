@@ -118,6 +118,16 @@ def chroma_score_to_cosine(score: float) -> float:
     return math.log(score) + 1.0
 
 
+def cosine_to_chroma_score(cosine: float) -> float:
+    """
+    Inverse of chroma_score_to_cosine(): put a cosine on ChromaDB's
+    exp(cosine - 1) scale. The hybrid retriever computes cosine itself
+    (BM25-only chunks have no ChromaDB score) and reports it on this scale
+    so every chunk's .score means the same thing as before.
+    """
+    return math.exp(cosine - 1.0)
+
+
 # ── Reference phrases for scope checking ─────────────
 # These represent the "boundary" of what the chatbot should answer.
 # The embedding model will place questions close to these phrases
@@ -367,6 +377,38 @@ class Guardrails:
             )
 
         return True, filtered, None
+
+    def select_sources(
+        self, ranked_nodes: List[NodeWithScore], top_k: int
+    ) -> Tuple[bool, List[NodeWithScore], Optional[str], int]:
+        """
+        Layers 2 + 3 for a reranked candidate pool (hybrid retrieval).
+
+        The source filter runs on the whole pool BEFORE the top-k cut, so a
+        weak chunk the reranker liked is replaced by the next one instead of
+        just shrinking the context. The confidence check then runs on the
+        top-k chunks that would actually reach the LLM.
+
+        Returns (passed, nodes, message, displaced): displaced counts the
+        chunks in the reranked top-k that the source filter removed.
+        """
+        kept = [
+            node
+            for node in ranked_nodes
+            if node.score is not None
+            and chroma_score_to_cosine(node.score) >= SOURCE_MIN_COSINE
+        ]
+        kept_ids = {node.node.node_id for node in kept}
+        displaced = sum(
+            1 for node in ranked_nodes[:top_k] if node.node.node_id not in kept_ids
+        )
+        if displaced:
+            logger.info(
+                f"Source filtering: removed {displaced} of the reranked top "
+                f"{top_k} (cosine < {SOURCE_MIN_COSINE})"
+            )
+        passed, nodes, message = self.check_confidence(kept[:top_k])
+        return passed, nodes, message, displaced
 
     @staticmethod
     def _cosine_similarity(vector: np.ndarray, matrix: np.ndarray) -> np.ndarray:

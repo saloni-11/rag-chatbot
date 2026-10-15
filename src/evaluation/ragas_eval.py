@@ -34,6 +34,7 @@ HOW TO RUN:
   python src/evaluation/ragas_eval.py --stage retrieval # offline only
   python src/evaluation/ragas_eval.py --stage retrieval --sweep
   python src/evaluation/ragas_eval.py --judge-model qwen/qwen3.8-27b
+  python src/evaluation/ragas_eval.py --retrieval dense # the pre-hybrid pipeline
 """
 
 import argparse
@@ -145,9 +146,10 @@ def evaluate_retrieval(pipeline, dataset: list) -> dict:
     """
     Score the retriever and guardrails against the labelled dataset.
 
-    Retrieval metrics call the retriever directly, so they measure retriever
-    quality on its own; the guardrail decision is measured separately via
-    pipeline.retrieve(), which runs the three guardrail layers.
+    Retrieval metrics use the ranked chunks before the guardrails filter
+    them, so they measure retriever quality on its own; the guardrail
+    decision comes from the same pipeline.retrieve() call, so both are
+    measured on one retrieval (HNSW can return different chunks per call).
     """
     from src.rag import guardrails as g
 
@@ -156,8 +158,12 @@ def evaluate_retrieval(pipeline, dataset: list) -> dict:
         question = entry["question"]
 
         scope_sim, scope_match = pipeline.guardrails.scope_score(question)
-        nodes = pipeline.retriever.retrieve(question)
         stage = pipeline.retrieve(question)
+        nodes = stage["retrieved_nodes"]
+        if stage["guardrail_action"] == "scope_rejected":
+            # Rejected before retrieval; rank anyway so the threshold sweep
+            # knows this question's retrieval score
+            nodes = pipeline.rank(question)[0][: pipeline.top_k]
 
         ranked_files = [n.node.metadata.get("file_name", "unknown") for n in nodes]
         cosines = [
@@ -366,6 +372,9 @@ def _cache_key(entry: dict, pipeline) -> str:
             pipeline.top_k,
             pipeline.persist_dir,
         ]
+        # Hybrid retrieval changes which chunks reach the LLM. Dense keys are
+        # left as they were so existing cached answers stay valid.
+        + ([pipeline.retrieval_config()] if pipeline.hybrid is not None else [])
     )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
@@ -577,6 +586,12 @@ def main():
     parser.add_argument("--judge-model", default=DEFAULT_JUDGE_MODEL)
     parser.add_argument("--top-k", type=int, default=None)
     parser.add_argument(
+        "--retrieval",
+        choices=["hybrid", "dense"],
+        default=None,
+        help="retrieval mode (default: RETRIEVAL_MODE env var, else hybrid)",
+    )
+    parser.add_argument(
         "--persist-dir",
         default="./data/chroma_db",
         help="ChromaDB directory to evaluate (e.g. an older index to compare)",
@@ -586,7 +601,7 @@ def main():
 
     from src.indexing import vector_store
     from src.rag import guardrails as g
-    from src.rag.pipeline import DEFAULT_TOP_K, RAGPipeline
+    from src.rag.pipeline import DEFAULT_RETRIEVAL_MODE, DEFAULT_TOP_K, RAGPipeline
 
     dataset = load_eval_dataset(args.dataset)
     needs_llm = args.stage in ("generation", "all")
@@ -594,6 +609,7 @@ def main():
         top_k=args.top_k or DEFAULT_TOP_K,
         with_llm=needs_llm,
         persist_dir=args.persist_dir,
+        retrieval_mode=args.retrieval or DEFAULT_RETRIEVAL_MODE,
     )
 
     from importlib.metadata import PackageNotFoundError, version
@@ -619,6 +635,7 @@ def main():
             "index_dir": args.persist_dir,
             "index_chunks": index_chunks,
             "top_k": pipeline.top_k,
+            "retrieval": pipeline.retrieval_config(),
             "generator_model": pipeline.model,
             "judge_model": args.judge_model if needs_llm else None,
             "ragas_version": ragas_version,

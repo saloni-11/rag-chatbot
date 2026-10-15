@@ -11,14 +11,14 @@ The query flow is now:
   [Scope Check] ──── out of scope ──→ "Ask about AI/ML..."
       │ in scope
       ▼
-  [Retrieve chunks from ChromaDB]
+  [Retrieve candidates]  dense (ChromaDB) + BM25 → RRF → cross-encoder
+      │                  rerank (src/rag/hybrid.py); RETRIEVAL_MODE=dense
+      ▼                  keeps the original dense top-k only
+  [Filter low-quality chunks, then cut to top_k]
       │
       ▼
   [Confidence Check] ── low confidence ──→ "I don't have enough info..."
       │ passed
-      ▼
-  [Filter low-quality chunks]
-      │
       ▼
   [Send filtered chunks + question to Groq LLM]
       │
@@ -46,13 +46,20 @@ from llama_index.llms.groq import Groq
 from loguru import logger
 
 from src.indexing.embeddings import get_embedding_model
-from src.indexing.vector_store import DEFAULT_PERSIST_DIR, load_existing_index
+from src.indexing.vector_store import (
+    DEFAULT_COLLECTION,
+    DEFAULT_PERSIST_DIR,
+    load_existing_index,
+)
+from src.rag import hybrid
 from src.rag.guardrails import SYSTEM_PROMPT, Guardrails
 
 # ── Default config ───────────────────────────────────
 DEFAULT_MODEL = "openai/gpt-oss-20b"
 DEFAULT_TOP_K = 3
 DEFAULT_TEMPERATURE = 0.1
+# "hybrid" = dense + BM25 + rerank; "dense" = the original ChromaDB top-k
+DEFAULT_RETRIEVAL_MODE = os.getenv("RETRIEVAL_MODE", "hybrid")
 
 
 class RAGPipeline:
@@ -74,17 +81,28 @@ class RAGPipeline:
         temperature: float = DEFAULT_TEMPERATURE,
         with_llm: bool = True,
         persist_dir: str = DEFAULT_PERSIST_DIR,
+        retrieval_mode: str = DEFAULT_RETRIEVAL_MODE,
+        hybrid_options: dict = None,
     ):
         """
         with_llm=False skips the Groq setup so retrieval + guardrails can be
         run (and evaluated) offline with no API key. query() needs the LLM;
         retrieve() does not.
+
+        hybrid_options overrides HybridRetriever's keyword arguments
+        (candidates_per_retriever, rrf_k, rerank_pool, use_bm25, use_reranker).
         """
+        if retrieval_mode not in ("hybrid", "dense"):
+            raise ValueError(
+                f"retrieval_mode must be 'hybrid' or 'dense', got {retrieval_mode!r}"
+            )
         self.model = model
         self.top_k = top_k
         self.temperature = temperature
         self.with_llm = with_llm
         self.persist_dir = persist_dir
+        self.retrieval_mode = retrieval_mode
+        self.hybrid_options = hybrid_options or {}
 
         logger.info("Initialising RAG Pipeline...")
         self._setup()
@@ -139,6 +157,16 @@ class RAGPipeline:
             similarity_top_k=self.top_k,
         )
 
+        # Hybrid mode: a wider dense + BM25 pool, reranked by a cross-encoder
+        self.hybrid = None
+        if self.retrieval_mode == "hybrid":
+            self.hybrid = hybrid.HybridRetriever(
+                persist_dir=self.persist_dir,
+                collection_name=DEFAULT_COLLECTION,
+                embed_model=embed_model,
+                **self.hybrid_options,
+            )
+
         # ── 5. Response synthesizer (calls the LLM) ─
         # "compact" stuffs all chunks into one prompt.
         # The system prompt template tells the LLM how to behave.
@@ -154,7 +182,41 @@ class RAGPipeline:
         # Initialises scope checking (pre-computes reference embeddings).
         self.guardrails = Guardrails()
 
-        logger.info(f"Query engine ready (top_k={self.top_k}, with guardrails)")
+        logger.info(
+            f"Query engine ready (retrieval={self.retrieval_mode}, "
+            f"top_k={self.top_k}, with guardrails)"
+        )
+
+    def retrieval_config(self) -> dict:
+        """What decides which chunks reach the LLM (for eval cache keys and reports)."""
+        if self.hybrid is None:
+            return {"mode": "dense", "top_k": self.top_k}
+        h = self.hybrid
+        return {
+            "mode": "hybrid",
+            "top_k": self.top_k,
+            "candidates_per_retriever": h.candidates_per_retriever,
+            "rrf_k": h.rrf_k,
+            "rerank_pool": h.rerank_pool,
+            "bm25": h.bm25 is not None,
+            "reranker": h.reranker.model_name if h.reranker else None,
+        }
+
+    def rank(self, question: str) -> tuple:
+        """
+        Retrieval without guardrails: (ranked nodes, timings).
+
+        Dense mode returns the top_k chunks; hybrid mode returns the whole
+        reranked candidate pool, best first.
+        """
+        t0 = time.perf_counter()
+        if self.hybrid is None:
+            nodes, timings = self.retriever.retrieve(question), {}
+        else:
+            ranked = self.hybrid.retrieve(question)
+            nodes, timings = ranked.nodes, dict(ranked.timings)
+        timings["retrieval_ms"] = (time.perf_counter() - t0) * 1000
+        return nodes, timings
 
     def retrieve(self, question: str) -> dict:
         """
@@ -170,6 +232,9 @@ class RAGPipeline:
                 - "message":          fallback text when a guardrail fired
                 - "nodes":            chunks to send to the LLM (filtered)
                 - "retrieved_nodes":  all top_k chunks, before filtering
+                - "candidates":       hybrid mode: the whole reranked pool
+                - "displaced":        hybrid mode: top_k chunks the source
+                                      filter replaced with the next ones
                 - "timings":          per-stage latency in milliseconds
         """
         timings = {}
@@ -178,6 +243,8 @@ class RAGPipeline:
             "message": None,
             "nodes": [],
             "retrieved_nodes": [],
+            "candidates": [],
+            "displaced": 0,
             "timings": timings,
         }
 
@@ -198,19 +265,28 @@ class RAGPipeline:
             result["message"] = scope_message
             return result
 
-        # ── Retrieve chunks from ChromaDB ────────
-        # This embeds the question and fetches the top_k most similar chunks.
-        # No LLM call happens here — just vector similarity search.
-        t0 = time.perf_counter()
-        source_nodes = self.retriever.retrieve(question)
-        timings["retrieval_ms"] = (time.perf_counter() - t0) * 1000
-        result["retrieved_nodes"] = source_nodes
+        # ── Retrieve chunks ──────────────────────
+        # Dense mode: the top_k most similar chunks from ChromaDB.
+        # Hybrid mode: the reranked dense + BM25 candidate pool.
+        # No LLM call happens here.
+        source_nodes, retrieval_timings = self.rank(question)
+        timings.update(retrieval_timings)
+        result["retrieved_nodes"] = source_nodes[: self.top_k]
 
         # ── Layer 2 + 3: Confidence check + filtering ─
         # Are the chunks relevant enough? Filter out low-quality ones.
-        passed, filtered_nodes, confidence_message = self.guardrails.check_confidence(
-            source_nodes
-        )
+        if self.hybrid is None:
+            passed, filtered_nodes, confidence_message = (
+                self.guardrails.check_confidence(source_nodes)
+            )
+        else:
+            # Filter the whole reranked pool, then cut to top_k (see
+            # Guardrails.select_sources)
+            result["candidates"] = source_nodes
+            passed, filtered_nodes, confidence_message, displaced = (
+                self.guardrails.select_sources(source_nodes, self.top_k)
+            )
+            result["displaced"] = displaced
         if not passed:
             logger.info("Guardrail: low confidence")
             result["guardrail_action"] = "low_confidence"

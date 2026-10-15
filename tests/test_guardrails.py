@@ -203,6 +203,53 @@ class TestConfidenceCheck:
             score = math.exp(cosine - 1)
             assert chroma_score_to_cosine(score) == pytest.approx(cosine)
 
+    def test_cosine_to_chroma_score_is_the_inverse(self):
+        """The hybrid retriever reports cosine on ChromaDB's scale."""
+        from src.rag.guardrails import chroma_score_to_cosine, cosine_to_chroma_score
+
+        for cosine in (-1.0, 0.0, 0.25, 0.307, 1.0):
+            assert chroma_score_to_cosine(cosine_to_chroma_score(cosine)) == pytest.approx(
+                cosine
+            )
+
+    def test_select_sources_filters_before_the_cut(self, guardrails):
+        """A weak chunk in the reranked top-k is replaced by the next one."""
+        from src.rag.guardrails import cosine_to_chroma_score
+
+        g, _ = guardrails
+        ranked = [
+            make_node_with_score("A", "a.pdf", cosine_to_chroma_score(0.50)),
+            make_node_with_score("weak", "b.pdf", cosine_to_chroma_score(0.10)),
+            make_node_with_score("C", "c.pdf", cosine_to_chroma_score(0.40)),
+            make_node_with_score("D", "d.pdf", cosine_to_chroma_score(0.35)),
+        ]
+
+        passed, nodes, message, displaced = g.select_sources(ranked, top_k=3)
+
+        assert passed is True
+        assert message is None
+        assert [n.node.text for n in nodes] == ["A", "C", "D"]
+        assert displaced == 1
+
+    def test_select_sources_confidence_uses_final_top_k(self, guardrails):
+        """Confidence is judged on the chunks that would reach the LLM."""
+        from src.rag.guardrails import cosine_to_chroma_score
+
+        g, _ = guardrails
+        # The strong chunk is ranked 4th by the reranker, so it is cut
+        ranked = [
+            make_node_with_score("x", "a.pdf", cosine_to_chroma_score(0.28)),
+            make_node_with_score("y", "a.pdf", cosine_to_chroma_score(0.27)),
+            make_node_with_score("z", "a.pdf", cosine_to_chroma_score(0.26)),
+            make_node_with_score("strong", "a.pdf", cosine_to_chroma_score(0.60)),
+        ]
+
+        passed, nodes, message, _ = g.select_sources(ranked, top_k=3)
+
+        assert passed is False
+        assert nodes == []
+        assert message is not None
+
     def test_empty_nodes_rejected(self, guardrails):
         """Empty node list should fail confidence check."""
         g, _ = guardrails
