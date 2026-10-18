@@ -33,12 +33,19 @@ User Query
                  - scope check            │
                  - confidence      ┌──────┴──────┐
                    threshold       │             │
-                 - source filter  [ChromaDB]  [Groq LLM]
-                              Vector Store  (gpt-oss-20b)
+                 - source filter  [Hybrid      [Groq LLM]
+                                  retrieval]  (gpt-oss-20b)
                                    │
-                            [Embeddings]
-                   (sentence-transformers/all-MiniLM-L6-v2)
+              ┌────────────────────┼────────────────────┐
+     [ChromaDB dense]          [BM25 keyword]     same 562 chunks
+     (all-MiniLM-L6-v2)        (rank-bm25)
+              └──────► Reciprocal Rank Fusion ◄─────────┘
+                                   │
+                  [Cross-encoder rerank, top 3 to the LLM]
+                  (cross-encoder/ms-marco-MiniLM-L-6-v2)
 ```
+
+`RETRIEVAL_MODE=dense` switches back to the original dense-only top-3.
 
 ---
 
@@ -252,7 +259,7 @@ pip install -r requirements-dev.txt
 python -m pytest --cov=src --cov-report=term-missing
 ```
 
-43 tests across three suites: ingestion (unit), guardrails (unit with mocks), and API (integration with test client).
+57 tests across four suites: ingestion (unit), guardrails (unit with mocks), hybrid retrieval (unit with fake retrievers and reranker), and API (integration with test client).
 
 ---
 
@@ -260,12 +267,58 @@ python -m pytest --cov=src --cov-report=term-missing
 
 📄 **Full methodology, commands, raw counts and per-question results: [EVAL_REPORT.md](EVAL_REPORT.md).**
 
-There are two labelled question sets, covering all 9 source papers:
+There are three labelled question sets:
 
 | Set | File | Questions | Role |
 |---|---|---|---|
-| **Tuning set** | `tests/eval_dataset.json` | 24 answerable, 3 unanswerable, 5 out-of-scope | Used to choose the guardrail thresholds, so its guardrail results are **in-sample** |
-| **Held-out set** | `tests/eval_heldout.json` | 12 answerable, 4 unanswerable, 4 out-of-scope | New questions, frozen in commit `31c4819` before any evaluation ran on them, then evaluated once at fixed thresholds |
+| **Tuning set** | `tests/eval_dataset.json` | 24 answerable, 3 unanswerable, 5 out-of-scope | Used to choose the guardrail thresholds and the hybrid-retrieval settings, so its results are **in-sample** |
+| **Held-out set** | `tests/eval_heldout.json` | 12 answerable, 4 unanswerable, 4 out-of-scope | New questions, frozen in commit `31c4819` before any evaluation ran on them, then evaluated once at fixed thresholds (dense pipeline) |
+| **Fresh held-out set** | `tests/eval_heldout_fresh.json` | 7 answerable, 2 unanswerable, 1 out-of-scope | Frozen in commit `79ea4c4` before hybrid retrieval was built; used once to measure it. Now spent |
+
+### Hybrid retrieval + reranking: fresh held-out results (headline)
+
+> ⚠️ **Small sample.** There are only 7 answerable questions, so one judge verdict moves a mean by about **0.14**. Read the result as "roughly 0.45 → 0.71 precision, about 3 of 7 questions materially better", not as precise decimals.
+
+The baseline is the previous dense-only pipeline (ChromaDB top 3). Hybrid retrieval takes the top 15 from dense search and the top 15 from BM25, fuses them with Reciprocal Rank Fusion (k = 60), reranks the first 10 fused chunks with a cross-encoder, and sends the best 3 to the LLM. Both pipelines ran on the same questions, 3 times each, because ChromaDB's HNSW search is not deterministic. All 3 runs retrieved identical chunks for every question, so each range is a single value. The range covers retrieval variation only: each context was judged once, so judge noise is not in it. The set's sha256 was checked before and after every run.
+
+| Answerable, n = 7 | Dense baseline | Hybrid + rerank |
+|---|---|---|
+| Context precision | ≈ 0.45 | ≈ 0.71 |
+| Context recall | ≈ 0.57 | ≈ 0.71 |
+
+| Question | Precision, base → hybrid | Recall, base → hybrid |
+|---|---|---|
+| Q1 GPT-3 context window | 0.00 → 0.00 | 0.00 → 0.00 |
+| Q2 GPT-3 limitations | 1.00 → 1.00 | 1.00 → 1.00 |
+| Q3 DataPerf acquisition | 0.33 → **1.00** | 1.00 → 1.00 |
+| Q4 DataPerf speech selection | 0.83 → **1.00** | 1.00 → 1.00 |
+| Q5 RAG retrieval granularity | 0.00 → **1.00** | 0.00 → **1.00** |
+| Q6 RAG survey training categories | 0.00 → 0.00 | 0.00 → 0.00 |
+| Q7 BERT input representation | 1.00 → 1.00 | 1.00 → 1.00 |
+
+**Where the gain comes from.** The reranker surfaces better passages from a wider pool. In Q3 and Q4, dense search had already found relevant passages but ranked irrelevant ones above them; after reranking, the relevant ones come first. In Q5, dense search missed the answer passage entirely, and hybrid retrieval found it. That is the only recall gain.
+
+**What it is, honestly.** Hybrid + rerank is a precision intervention. It reorders and filters what reaches the LLM. It improves recall only when a passage was missed entirely, as in Q5. The tuning set shows the same pattern: precision 0.785 → 0.865, recall unchanged at 0.833 (n = 24).
+
+**Negatives (same in all 3 runs, both pipelines):** Q9 (Gini coefficient, unanswerable) was declined by the confidence check, and Q10 (a leaky tap, out of scope) by the scope check. **Q8 (t-SNE, unanswerable) was not declined.** See the known limitations below.
+
+**Tuning (tuning set only).** `scripts/tune_hybrid.py` simulated 47 configurations from one retrieval per question and scored them with the same RAGAS judge. Judge verdicts were cached per (question, chunk), so a chunk shared by two configurations got the same verdict. Results:
+- The RRF constant k (10, 30, 60) made no difference at all.
+- Candidates per retriever (10, 15, 20) and rerank pool size (10, 15, all) made no meaningful difference (precision 0.851–0.868), so the cheapest top setting was chosen.
+- Top-5 instead of top-3 raised recall by 0.021, two questions up and two down. Top-5 contains top-3, so the downs are judge noise. It cost 0.035 precision and two more chunks per prompt, so top-3 was kept.
+
+**Latency cost.** Reranking adds a model inference per candidate chunk. With 10 chunks and torch limited to 2 threads (to approximate the 2-vCPU free tier), retrieval went from about 20 ms to **about 0.9–1.2 s per query** (median, 32 tuning questions, measured on a laptop). That roughly doubles the previous ~1.1 s end-to-end median. It is an estimate for the Space, not a measurement of it. Reranking all ~24 fused chunks would cost 2.0–2.7 s, which is why the rerank pool is capped at 10 (`RERANK_POOL`).
+
+**The source filter now does real work.** It runs on the reranked pool before the top-3 cut. In tuning question rag-03, the reranker ranked the RAG survey's title-and-author page 2nd (cosine 0.183). The filter removed it, and the next passage took its place. It removed nothing on the fresh set.
+
+### Remaining failure: right paper, wrong passage (Q1, Q6)
+
+Q1 and Q6 fail in both pipelines. In both, the answer passage is clean prose and is in the reranked candidate pool, but the final stage ranks it out of the top 3:
+
+- **Q1** ("What is the GPT-3 context window, and how many in-context examples fit?"). The passage stating "K in the range of 10 to 100 … context window (n_ctx = 2048)" is ranked 2nd by BM25 and makes the 10-chunk pool, but the reranker places it 4th. Above it are chunks that begin with figure captions about in-context examples ("Figure 3.8: Performance on SuperGLUE … number of examples in context"). Its dense cosine is only 0.221, so even ranked into the top 3 it would be removed by the source filter (0.25). The Section 2.4 passage that also states 2048 is ranked 6th by BM25 but does not survive the pool cap.
+- **Q6** ("What four training approaches does the survey review?"). The passage naming all four ("training-free, independent training, sequential training, and joint training") has cosine 0.456 and is in the pool, but the reranker ranks it 8th. The top 3 are dominated by chunks that begin with the survey's repeated page header ("A Survey on RAG Meeting LLMs … KDD '24").
+
+So the failures are in final-stage ranking, and parsing contamination feeds them: captions and page headers that the PDF parser leaves inline make the wrong chunks look relevant to the reranker. That gives the parser work a concrete target. Strip running headers and figure captions from chunk text, then re-check whether Q1 and Q6's answer passages reach the top 3. Q1 also shows that the cosine-based source filter can block a passage that BM25 found correctly. Because the fresh set is now spent, the parser change has to be measured on new frozen questions.
 
 "Unanswerable" means on-topic for AI/ML but not covered by the corpus, so the bot should decline. "Out-of-scope" means off-topic.
 
@@ -282,9 +335,9 @@ python src/evaluation/ragas_eval.py --stage generation --dataset tests/eval_held
 
 Stage 2 scores answers with RAGAS (faithfulness, answer relevancy, context precision, context recall). The judge (`gpt-oss-120b`) is a separate, larger model than the generator (`gpt-oss-20b`), so the model never grades its own answers. Embeddings come from HuggingFace, so no OpenAI key is needed.
 
-### Held-out results (headline)
+### Held-out results (dense pipeline, before hybrid retrieval)
 
-Thresholds: scope 0.2, confidence 0.5, source minimum 0.35 (the production values). Local 562-chunk index, top_k = 3.
+Thresholds: scope 0.2, confidence 0.5, source minimum 0.35 (the production values at the time, on ChromaDB's score scale). Local 562-chunk index, dense top_k = 3.
 
 | Guardrail metric | Result |
 |---|---|
@@ -338,7 +391,9 @@ Back-to-back queries exceed Groq's free-tier limit of 8,000 tokens per minute, a
 - **Position-encoding miss.** "How does the Transformer encode position?" retrieves BERT chunks ahead of the Attention paper. That is a limit of the small embedding model and a candidate for a reranker or hybrid BM25 search.
 - **Right paper, wrong passage.** For "How many parameters do BERT-base and BERT-large have?", the right paper is retrieved but not the passage with the numbers. The bot correctly says it doesn't know rather than guessing.
 - **LLM-security paper.** Its PDF extracts with the spaces between words missing ("Asurveyonlargelanguagemodel..."), and its two questions score lowest (faithfulness 0.40, context recall 0.0). A layout-aware PDF parser would likely fix it.
-- **Passage-level retrieval.** On held-out questions, 5 of 12 retrieved the right paper but not the answer passage (context recall 0.458). A reranker or hybrid BM25 search is the next thing to try.
+- **Passage-level retrieval.** On the first held-out set (dense pipeline), 5 of 12 questions retrieved the right paper but not the answer passage (context recall 0.458). Hybrid retrieval + reranking fixed some of these cases on the fresh set (see above). Q1 and Q6 still fail, because captions and page headers help the wrong chunks win the rerank.
+- **Thin-margin confidence check.** The fresh set's t-SNE question (unanswerable) got through in both pipelines. Its best chunk scored cosine 0.334 against the 0.307 threshold. Like the earlier held-out misses, a plausibly phrased on-topic question can sit just above the line. The threshold was deliberately **not** changed to catch it: the question is on the now-spent fresh set, and tuning to it would contaminate that result. Any fix will be a separate change, measured on new questions.
+- **Reranker latency.** The cross-encoder adds about a second per query on a 2-thread CPU (see above), which matters on the free CPU tier.
 - **Small held-out set.** Only 4 unanswerable and 4 out-of-scope held-out questions, so 2/4 and 4/4 are rough estimates. The confidence threshold sits close to the boundary: the two misses scored 0.510 and 0.512 against 0.5.
 - **Local vs deployed index.** The Docker build rebuilds the index, and the deployed chunk scores differ slightly from the local ones, so production retrieval can differ from what was measured.
 - **Shared rate limits.** Evaluation runs and the live demo share one Groq organisation's quota, so heavy evaluation can exhaust the daily token budget for the live app.
@@ -352,7 +407,7 @@ Two active guardrails decide whether a question is answered at all. Both run bef
 - **Scope check** (`SCOPE_THRESHOLD = 0.2`) — embeds the question and compares it against reference AI/ML phrases using cosine similarity. Off-topic questions are rejected before ChromaDB or the LLM are touched.
 - **Confidence check** (`CONFIDENCE_MIN_COSINE = 0.307`) — after retrieval, if the best chunk's cosine similarity is below the threshold, the bot returns a fallback response instead of calling the LLM.
 
-A third stage, the **source-quality filter** (`SOURCE_MIN_COSINE = 0.25`), drops individual chunks below the threshold before they reach the LLM. At the current `top_k = 3` it is intentionally a no-op: any question that passes the confidence check has all three chunks well above 0.25 (the lowest observed across the evaluation sets is 0.294). The filter is designed for wider retrieval: once a reranker draws on a larger candidate pool (`top_k` 5–10), low-quality candidates will reach it, and the threshold will be re-tuned against that pool. It is kept below the confidence threshold so it can only trim weak chunks, never refuse a question by itself.
+A third stage, the **source-quality filter** (`SOURCE_MIN_COSINE = 0.25`), removes individual chunks below the threshold before they reach the LLM. With hybrid retrieval it runs on the whole reranked candidate pool *before* the top-3 cut, so a weak chunk the reranker liked is replaced by the next one instead of just shrinking the context. In tuning question rag-03, it removed the RAG survey's title page (cosine 0.183), which the reranker had ranked 2nd. The confidence check then runs on the 3 chunks that would actually reach the LLM. Every candidate's cosine, including chunks only BM25 found, is computed exactly from the stored embeddings. In dense-only mode (`RETRIEVAL_MODE=dense`), the filter is a no-op at top_k = 3, as before. It is kept below the confidence threshold so it can only trim weak chunks, never refuse a question by itself.
 
 All thresholds are true cosine similarity and configurable via environment variables (`SCOPE_THRESHOLD`, `CONFIDENCE_MIN_COSINE`, `SOURCE_MIN_COSINE`). ChromaDB reports retrieval scores as e^(cosine − 1); the guardrails convert them back to cosine before comparing (see `chroma_score_to_cosine` in `src/rag/guardrails.py`). The old `CONFIDENCE_THRESHOLD` / `SOURCE_MIN_SCORE` variables held values on ChromaDB's scale and are now ignored, with a warning.
 
