@@ -298,6 +298,9 @@ def main():
     parser.add_argument("--recollect", action="store_true")
     parser.add_argument("--precision", action="store_true", help="judge precision")
     parser.add_argument("--recall", default="", help="comma-separated config names")
+    parser.add_argument(
+        "--questions", default="", help="limit --recall to these comma-separated ids"
+    )
     parser.add_argument("--max-calls", type=int, default=400)
     parser.add_argument("--judge-model", default=DEFAULT_JUDGE_MODEL)
     parser.add_argument("--output", default="data/hybrid_tuning.json")
@@ -385,8 +388,11 @@ def main():
                     with open(p_path, "a", encoding="utf-8") as f:
                         f.write(json.dumps(rec) + "\n")
                     logger.info(f"    {q} {c[:8]} -> {rec['verdict']} (tokens so far {judge.tokens})")
+            only = {q for q in args.questions.split(",") if q}
             for name in recall_configs:
                 for q in answerable:
+                    if only and q not in only:
+                        continue
                     ctx = results[name][q]["contexts"]
                     if not ctx or r_key(q, ctx) in r_cache:
                         continue
