@@ -1,0 +1,647 @@
+{
+ "dataset": "tests/eval_heldout_fresh.json",
+ "sha256": "9c23efed97020baf1975252ac5ef99fc02bd162897cecb62eb6dab2a07fa3158",
+ "judge_model": "openai/gpt-oss-120b",
+ "config": {
+  "mode": "hybrid",
+  "top_k": 3,
+  "candidates_per_retriever": 15,
+  "rrf_k": 60,
+  "rerank_pool": 10,
+  "bm25": true,
+  "reranker": "cross-encoder/ms-marco-MiniLM-L-6-v2"
+ },
+ "per_run": [
+  {
+   "run": 1,
+   "baseline": {
+    "cp": 0.4524,
+    "cp_n": 7,
+    "cr": 0.5714,
+    "cr_n": 7
+   },
+   "hybrid": {
+    "cp": 0.7143,
+    "cp_n": 7,
+    "cr": 0.7143,
+    "cr_n": 7
+   }
+  },
+  {
+   "run": 2,
+   "baseline": {
+    "cp": 0.4524,
+    "cp_n": 7,
+    "cr": 0.5714,
+    "cr_n": 7
+   },
+   "hybrid": {
+    "cp": 0.7143,
+    "cp_n": 7,
+    "cr": 0.7143,
+    "cr_n": 7
+   }
+  },
+  {
+   "run": 3,
+   "baseline": {
+    "cp": 0.4524,
+    "cp_n": 7,
+    "cr": 0.5714,
+    "cr_n": 7
+   },
+   "hybrid": {
+    "cp": 0.7143,
+    "cp_n": 7,
+    "cr": 0.7143,
+    "cr_n": 7
+   }
+  }
+ ],
+ "per_question": {
+  "fr-gpt3-01": {
+   "baseline": [
+    {
+     "run": 1,
+     "action": "passed",
+     "cp": 0.0,
+     "cr": 0.0,
+     "contexts": [
+      "83306f4d-d006-41c0-8a43-b159ffefabc7",
+      "ac28ad52-7a75-4102-82a1-160e9c0335e7",
+      "7abb5119-e707-447f-8506-520b231be9ce"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 2,
+     "action": "passed",
+     "cp": 0.0,
+     "cr": 0.0,
+     "contexts": [
+      "83306f4d-d006-41c0-8a43-b159ffefabc7",
+      "ac28ad52-7a75-4102-82a1-160e9c0335e7",
+      "7abb5119-e707-447f-8506-520b231be9ce"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 3,
+     "action": "passed",
+     "cp": 0.0,
+     "cr": 0.0,
+     "contexts": [
+      "83306f4d-d006-41c0-8a43-b159ffefabc7",
+      "ac28ad52-7a75-4102-82a1-160e9c0335e7",
+      "7abb5119-e707-447f-8506-520b231be9ce"
+     ],
+     "displaced": 0
+    }
+   ],
+   "hybrid": [
+    {
+     "run": 1,
+     "action": "passed",
+     "cp": 0.0,
+     "cr": 0.0,
+     "contexts": [
+      "cc0ec5c5-4f02-45bf-a999-514e8b9bc96b",
+      "7ffa4bb5-1c24-4594-93ae-e142b88dcdf8",
+      "ac28ad52-7a75-4102-82a1-160e9c0335e7"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 2,
+     "action": "passed",
+     "cp": 0.0,
+     "cr": 0.0,
+     "contexts": [
+      "cc0ec5c5-4f02-45bf-a999-514e8b9bc96b",
+      "7ffa4bb5-1c24-4594-93ae-e142b88dcdf8",
+      "ac28ad52-7a75-4102-82a1-160e9c0335e7"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 3,
+     "action": "passed",
+     "cp": 0.0,
+     "cr": 0.0,
+     "contexts": [
+      "cc0ec5c5-4f02-45bf-a999-514e8b9bc96b",
+      "7ffa4bb5-1c24-4594-93ae-e142b88dcdf8",
+      "ac28ad52-7a75-4102-82a1-160e9c0335e7"
+     ],
+     "displaced": 0
+    }
+   ]
+  },
+  "fr-gpt3-02": {
+   "baseline": [
+    {
+     "run": 1,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "5caa841b-b917-4ed9-b402-a28e808506ad",
+      "30da205c-8153-441b-ac81-986a962c9995",
+      "d6591af3-2686-4047-937e-9d6af0df1a17"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 2,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "5caa841b-b917-4ed9-b402-a28e808506ad",
+      "30da205c-8153-441b-ac81-986a962c9995",
+      "d6591af3-2686-4047-937e-9d6af0df1a17"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 3,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "5caa841b-b917-4ed9-b402-a28e808506ad",
+      "30da205c-8153-441b-ac81-986a962c9995",
+      "d6591af3-2686-4047-937e-9d6af0df1a17"
+     ],
+     "displaced": 0
+    }
+   ],
+   "hybrid": [
+    {
+     "run": 1,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "5caa841b-b917-4ed9-b402-a28e808506ad",
+      "30da205c-8153-441b-ac81-986a962c9995",
+      "6397b6e0-50ad-4609-95ea-468e5e65b3ae"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 2,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "5caa841b-b917-4ed9-b402-a28e808506ad",
+      "30da205c-8153-441b-ac81-986a962c9995",
+      "6397b6e0-50ad-4609-95ea-468e5e65b3ae"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 3,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "5caa841b-b917-4ed9-b402-a28e808506ad",
+      "30da205c-8153-441b-ac81-986a962c9995",
+      "6397b6e0-50ad-4609-95ea-468e5e65b3ae"
+     ],
+     "displaced": 0
+    }
+   ]
+  },
+  "fr-dataperf-01": {
+   "baseline": [
+    {
+     "run": 1,
+     "action": "passed",
+     "cp": 0.3333333333,
+     "cr": 1.0,
+     "contexts": [
+      "22e24182-1951-4e74-9c06-393ac9262fdc",
+      "fd817fd2-df43-4729-af66-756f719780a7",
+      "b48696dc-9e8e-4bb2-9fb9-c92a82276a1a"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 2,
+     "action": "passed",
+     "cp": 0.3333333333,
+     "cr": 1.0,
+     "contexts": [
+      "22e24182-1951-4e74-9c06-393ac9262fdc",
+      "fd817fd2-df43-4729-af66-756f719780a7",
+      "b48696dc-9e8e-4bb2-9fb9-c92a82276a1a"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 3,
+     "action": "passed",
+     "cp": 0.3333333333,
+     "cr": 1.0,
+     "contexts": [
+      "22e24182-1951-4e74-9c06-393ac9262fdc",
+      "fd817fd2-df43-4729-af66-756f719780a7",
+      "b48696dc-9e8e-4bb2-9fb9-c92a82276a1a"
+     ],
+     "displaced": 0
+    }
+   ],
+   "hybrid": [
+    {
+     "run": 1,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "b48696dc-9e8e-4bb2-9fb9-c92a82276a1a",
+      "03719439-4bd0-4061-afed-dfab66756649",
+      "22e24182-1951-4e74-9c06-393ac9262fdc"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 2,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "b48696dc-9e8e-4bb2-9fb9-c92a82276a1a",
+      "03719439-4bd0-4061-afed-dfab66756649",
+      "22e24182-1951-4e74-9c06-393ac9262fdc"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 3,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "b48696dc-9e8e-4bb2-9fb9-c92a82276a1a",
+      "03719439-4bd0-4061-afed-dfab66756649",
+      "22e24182-1951-4e74-9c06-393ac9262fdc"
+     ],
+     "displaced": 0
+    }
+   ]
+  },
+  "fr-dataperf-02": {
+   "baseline": [
+    {
+     "run": 1,
+     "action": "passed",
+     "cp": 0.8333333332916666,
+     "cr": 1.0,
+     "contexts": [
+      "51c50329-7a52-4bfd-9529-11c89735cbfe",
+      "749af0b4-7a21-4b5c-aea9-4b4f5a716014",
+      "8e755032-573b-4c6e-8cc3-b5ab271dc132"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 2,
+     "action": "passed",
+     "cp": 0.8333333332916666,
+     "cr": 1.0,
+     "contexts": [
+      "51c50329-7a52-4bfd-9529-11c89735cbfe",
+      "749af0b4-7a21-4b5c-aea9-4b4f5a716014",
+      "8e755032-573b-4c6e-8cc3-b5ab271dc132"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 3,
+     "action": "passed",
+     "cp": 0.8333333332916666,
+     "cr": 1.0,
+     "contexts": [
+      "51c50329-7a52-4bfd-9529-11c89735cbfe",
+      "749af0b4-7a21-4b5c-aea9-4b4f5a716014",
+      "8e755032-573b-4c6e-8cc3-b5ab271dc132"
+     ],
+     "displaced": 0
+    }
+   ],
+   "hybrid": [
+    {
+     "run": 1,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "51c50329-7a52-4bfd-9529-11c89735cbfe",
+      "749af0b4-7a21-4b5c-aea9-4b4f5a716014",
+      "510b94d3-6bc3-41d7-b7c3-5961e9f2aa69"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 2,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "51c50329-7a52-4bfd-9529-11c89735cbfe",
+      "749af0b4-7a21-4b5c-aea9-4b4f5a716014",
+      "510b94d3-6bc3-41d7-b7c3-5961e9f2aa69"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 3,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "51c50329-7a52-4bfd-9529-11c89735cbfe",
+      "749af0b4-7a21-4b5c-aea9-4b4f5a716014",
+      "510b94d3-6bc3-41d7-b7c3-5961e9f2aa69"
+     ],
+     "displaced": 0
+    }
+   ]
+  },
+  "fr-rag-01": {
+   "baseline": [
+    {
+     "run": 1,
+     "action": "passed",
+     "cp": 0.0,
+     "cr": 0.0,
+     "contexts": [
+      "1c092534-b54b-467d-a4b0-4a51f9748ac6",
+      "e9712f00-2144-4409-9ddd-cf734cb1415d",
+      "49ade60f-e5b8-4e96-9319-a0a84f902647"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 2,
+     "action": "passed",
+     "cp": 0.0,
+     "cr": 0.0,
+     "contexts": [
+      "1c092534-b54b-467d-a4b0-4a51f9748ac6",
+      "e9712f00-2144-4409-9ddd-cf734cb1415d",
+      "49ade60f-e5b8-4e96-9319-a0a84f902647"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 3,
+     "action": "passed",
+     "cp": 0.0,
+     "cr": 0.0,
+     "contexts": [
+      "1c092534-b54b-467d-a4b0-4a51f9748ac6",
+      "e9712f00-2144-4409-9ddd-cf734cb1415d",
+      "49ade60f-e5b8-4e96-9319-a0a84f902647"
+     ],
+     "displaced": 0
+    }
+   ],
+   "hybrid": [
+    {
+     "run": 1,
+     "action": "passed",
+     "cp": 0.99999999995,
+     "cr": 1.0,
+     "contexts": [
+      "897f0206-0bf7-446c-8e8e-b935efa6a8bb",
+      "0eb020ee-7edc-40be-abc1-20aeb7a76327",
+      "250d49de-1135-45d7-b2d0-ef459fbff279"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 2,
+     "action": "passed",
+     "cp": 0.99999999995,
+     "cr": 1.0,
+     "contexts": [
+      "897f0206-0bf7-446c-8e8e-b935efa6a8bb",
+      "0eb020ee-7edc-40be-abc1-20aeb7a76327",
+      "250d49de-1135-45d7-b2d0-ef459fbff279"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 3,
+     "action": "passed",
+     "cp": 0.99999999995,
+     "cr": 1.0,
+     "contexts": [
+      "897f0206-0bf7-446c-8e8e-b935efa6a8bb",
+      "0eb020ee-7edc-40be-abc1-20aeb7a76327",
+      "250d49de-1135-45d7-b2d0-ef459fbff279"
+     ],
+     "displaced": 0
+    }
+   ]
+  },
+  "fr-rag-02": {
+   "baseline": [
+    {
+     "run": 1,
+     "action": "passed",
+     "cp": 0.0,
+     "cr": 0.0,
+     "contexts": [
+      "0cb96a0c-c36a-4a96-a537-d71352c7ea2d",
+      "4a3148b9-1d69-49ad-a7a8-cea8cad755c7",
+      "d40bcfd7-a3d6-4c81-a52f-fb4c5008319c"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 2,
+     "action": "passed",
+     "cp": 0.0,
+     "cr": 0.0,
+     "contexts": [
+      "0cb96a0c-c36a-4a96-a537-d71352c7ea2d",
+      "4a3148b9-1d69-49ad-a7a8-cea8cad755c7",
+      "d40bcfd7-a3d6-4c81-a52f-fb4c5008319c"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 3,
+     "action": "passed",
+     "cp": 0.0,
+     "cr": 0.0,
+     "contexts": [
+      "0cb96a0c-c36a-4a96-a537-d71352c7ea2d",
+      "4a3148b9-1d69-49ad-a7a8-cea8cad755c7",
+      "d40bcfd7-a3d6-4c81-a52f-fb4c5008319c"
+     ],
+     "displaced": 0
+    }
+   ],
+   "hybrid": [
+    {
+     "run": 1,
+     "action": "passed",
+     "cp": 0.0,
+     "cr": 0.0,
+     "contexts": [
+      "2170354c-9254-4f10-b23d-3180a45e90ca",
+      "4a3148b9-1d69-49ad-a7a8-cea8cad755c7",
+      "772a03f1-d618-477f-a159-308455a29d9b"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 2,
+     "action": "passed",
+     "cp": 0.0,
+     "cr": 0.0,
+     "contexts": [
+      "2170354c-9254-4f10-b23d-3180a45e90ca",
+      "4a3148b9-1d69-49ad-a7a8-cea8cad755c7",
+      "772a03f1-d618-477f-a159-308455a29d9b"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 3,
+     "action": "passed",
+     "cp": 0.0,
+     "cr": 0.0,
+     "contexts": [
+      "2170354c-9254-4f10-b23d-3180a45e90ca",
+      "4a3148b9-1d69-49ad-a7a8-cea8cad755c7",
+      "772a03f1-d618-477f-a159-308455a29d9b"
+     ],
+     "displaced": 0
+    }
+   ]
+  },
+  "fr-bert-01": {
+   "baseline": [
+    {
+     "run": 1,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "7fb3c907-1463-4410-b660-93d68ca19966",
+      "01308a57-8383-4dd0-9129-ab25d98c7ead",
+      "843716f6-6529-4133-a343-d0e8f1e8c95f"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 2,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "7fb3c907-1463-4410-b660-93d68ca19966",
+      "01308a57-8383-4dd0-9129-ab25d98c7ead",
+      "843716f6-6529-4133-a343-d0e8f1e8c95f"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 3,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "7fb3c907-1463-4410-b660-93d68ca19966",
+      "01308a57-8383-4dd0-9129-ab25d98c7ead",
+      "843716f6-6529-4133-a343-d0e8f1e8c95f"
+     ],
+     "displaced": 0
+    }
+   ],
+   "hybrid": [
+    {
+     "run": 1,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "7fb3c907-1463-4410-b660-93d68ca19966",
+      "01308a57-8383-4dd0-9129-ab25d98c7ead",
+      "843716f6-6529-4133-a343-d0e8f1e8c95f"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 2,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "7fb3c907-1463-4410-b660-93d68ca19966",
+      "01308a57-8383-4dd0-9129-ab25d98c7ead",
+      "843716f6-6529-4133-a343-d0e8f1e8c95f"
+     ],
+     "displaced": 0
+    },
+    {
+     "run": 3,
+     "action": "passed",
+     "cp": 0.9999999999,
+     "cr": 1.0,
+     "contexts": [
+      "7fb3c907-1463-4410-b660-93d68ca19966",
+      "01308a57-8383-4dd0-9129-ab25d98c7ead",
+      "843716f6-6529-4133-a343-d0e8f1e8c95f"
+     ],
+     "displaced": 0
+    }
+   ]
+  }
+ },
+ "negatives": {
+  "fr-unans-01": {
+   "baseline": [
+    "passed",
+    "passed",
+    "passed"
+   ],
+   "hybrid": [
+    "passed",
+    "passed",
+    "passed"
+   ]
+  },
+  "fr-unans-02": {
+   "baseline": [
+    "low_confidence",
+    "low_confidence",
+    "low_confidence"
+   ],
+   "hybrid": [
+    "low_confidence",
+    "low_confidence",
+    "low_confidence"
+   ]
+  },
+  "fr-oos-01": {
+   "baseline": [
+    "scope_rejected",
+    "scope_rejected",
+    "scope_rejected"
+   ],
+   "hybrid": [
+    "scope_rejected",
+    "scope_rejected",
+    "scope_rejected"
+   ]
+  }
+ }
+}
