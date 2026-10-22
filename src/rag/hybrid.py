@@ -180,9 +180,9 @@ class HybridRetriever:
         self.use_bm25 = use_bm25
         self.use_reranker = use_reranker
 
-        self.collection = chromadb.PersistentClient(path=str(persist_dir)).get_collection(
-            collection_name
-        )
+        self.collection = chromadb.PersistentClient(
+            path=str(persist_dir)
+        ).get_collection(collection_name)
         data = self.collection.get(include=["documents", "metadatas", "embeddings"])
         self.ids: List[str] = list(data["ids"])
         self.texts: Dict[str, str] = dict(zip(self.ids, data["documents"]))
@@ -190,13 +190,17 @@ class HybridRetriever:
 
         # Rebuild LlamaIndex nodes the same way the Chroma adapter does
         self.nodes = {}
-        for doc_id, text, metadata in zip(self.ids, data["documents"], data["metadatas"]):
+        for doc_id, text, metadata in zip(
+            self.ids, data["documents"], data["metadatas"]
+        ):
             node = metadata_dict_to_node(metadata)
             node.set_content(text)
             self.nodes[doc_id] = node
 
         matrix = np.asarray(data["embeddings"], dtype=np.float32)
-        self.embeddings = matrix / (np.linalg.norm(matrix, axis=1, keepdims=True) + 1e-10)
+        self.embeddings = matrix / (
+            np.linalg.norm(matrix, axis=1, keepdims=True) + 1e-10
+        )
 
         self.bm25 = None
         if use_bm25:
@@ -216,7 +220,9 @@ class HybridRetriever:
     # ── Individual stages (also used by the tuning script) ─
 
     def embed_query(self, question: str) -> np.ndarray:
-        vector = np.asarray(self.embed_model.get_query_embedding(question), dtype=np.float32)
+        vector = np.asarray(
+            self.embed_model.get_query_embedding(question), dtype=np.float32
+        )
         return vector / (np.linalg.norm(vector) + 1e-10)
 
     def dense_search(self, query_vector: np.ndarray, n: int) -> List[str]:
@@ -271,7 +277,9 @@ class HybridRetriever:
                 bm25_rank=bm25_rank.get(doc_id),
                 rrf_score=rrf_score,
             )
-            for (doc_id, rrf_score), cos in zip(fused, self.cosines(query_vector, fused_ids))
+            for (doc_id, rrf_score), cos in zip(
+                fused, self.cosines(query_vector, fused_ids)
+            )
         ]
 
         if self.reranker is not None:
@@ -283,7 +291,9 @@ class HybridRetriever:
             candidates.sort(key=lambda c: -c.rerank_score)
 
         nodes = [
-            NodeWithScore(node=self.nodes[c.node_id], score=cosine_to_chroma_score(c.cosine))
+            NodeWithScore(
+                node=self.nodes[c.node_id], score=cosine_to_chroma_score(c.cosine)
+            )
             for c in candidates
         ]
         return HybridResult(nodes=nodes, candidates=candidates, timings=timings)

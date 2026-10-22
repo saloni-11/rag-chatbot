@@ -208,9 +208,9 @@ class TestConfidenceCheck:
         from src.rag.guardrails import chroma_score_to_cosine, cosine_to_chroma_score
 
         for cosine in (-1.0, 0.0, 0.25, 0.307, 1.0):
-            assert chroma_score_to_cosine(cosine_to_chroma_score(cosine)) == pytest.approx(
-                cosine
-            )
+            assert chroma_score_to_cosine(
+                cosine_to_chroma_score(cosine)
+            ) == pytest.approx(cosine)
 
     def test_select_sources_filters_before_the_cut(self, guardrails):
         """A weak chunk in the reranked top-k is replaced by the next one."""

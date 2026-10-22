@@ -67,7 +67,10 @@ def make_retriever(dense_ids, rerank_table=None, use_bm25=True, candidates=2, po
     r.ids = list(TEXTS)
     r.texts = dict(TEXTS)
     r._row = {d: i for i, d in enumerate(r.ids)}
-    r.nodes = {d: TextNode(id_=d, text=t, metadata={"file_name": f"{d}.pdf"}) for d, t in TEXTS.items()}
+    r.nodes = {
+        d: TextNode(id_=d, text=t, metadata={"file_name": f"{d}.pdf"})
+        for d, t in TEXTS.items()
+    }
     # Embeddings chosen so cosine with the query vector [1, 0] is known
     cosines = {"d1": 0.6, "d2": 0.3, "d3": 0.1, "d4": -0.2}
     r.embeddings = np.array(
@@ -87,7 +90,8 @@ def make_retriever(dense_ids, rerank_table=None, use_bm25=True, candidates=2, po
     if rerank_table is not None:
         r.reranker = MagicMock(model_name="fake")
         r.reranker.score.side_effect = lambda q, texts: [
-            rerank_table[next(d for d, t in TEXTS.items() if t == text)] for text in texts
+            rerank_table[next(d for d, t in TEXTS.items() if t == text)]
+            for text in texts
         ]
     return r
 
