@@ -63,11 +63,17 @@ ENV NLTK_DATA=/app/nltk_data
 # No need to run ingestion at startup or commit binary DB files.
 ENV HF_HUB_OFFLINE=0
 RUN python scripts/ingest_data.py
+
+# The hybrid retriever's cross-encoder reranker is fetched now, while the
+# network is allowed, into a cache under /app that appuser can read.
+ENV HF_HOME=/app/hf_cache
+RUN python -c "from sentence_transformers import CrossEncoder; CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')"
 ENV HF_HUB_OFFLINE=1
 
 # Create non-root user with write access to data and logs dirs
 RUN useradd --create-home appuser \
     && chown -R appuser:appuser /app/data \
+    && chown -R appuser:appuser /app/hf_cache \
     && mkdir -p /app/nltk_data && chown -R appuser:appuser /app/nltk_data \
     && mkdir -p /app/logs && chown -R appuser:appuser /app/logs
 USER appuser

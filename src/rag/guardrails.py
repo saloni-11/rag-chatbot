@@ -25,7 +25,7 @@ Layer 1 — SCOPE CHECK (before retrieval):
 Layer 2 — CONFIDENCE CHECK (after retrieval, before LLM):
   "Are the retrieved chunks actually relevant to this question?"
   ChromaDB always returns top_k results even if nothing matches well.
-  If the highest similarity score is below CONFIDENCE_THRESHOLD,
+  If the highest similarity score is below CONFIDENCE_MIN_COSINE (true cosine),
   return a fallback response without calling the LLM.
 
   This saves API credits and prevents the LLM from generating
@@ -35,7 +35,7 @@ Layer 3 — SOURCE FILTERING (after retrieval, before LLM):
   "Which of the retrieved chunks are good enough to use?"
   Even if the top chunk passes the confidence check, some of the
   lower-ranked chunks might be noise. We filter out any chunk
-  below SOURCE_MIN_SCORE so the LLM only sees high-quality context.
+  below SOURCE_MIN_COSINE (true cosine) so the LLM only sees high-quality context.
 
   This is why your sources sometimes showed garbled PDF figure text —
   those chunks had low similarity but still got passed to the LLM.
@@ -43,10 +43,11 @@ Layer 3 — SOURCE FILTERING (after retrieval, before LLM):
 Tuning guide:
   If too many valid questions get rejected → lower SCOPE_THRESHOLD
   If off-topic questions slip through     → raise SCOPE_THRESHOLD
-  If answers say "I don't know" too often → lower CONFIDENCE_THRESHOLD
-  If answers hallucinate                  → raise CONFIDENCE_THRESHOLD
+  If answers say "I don't know" too often → lower CONFIDENCE_MIN_COSINE
+  If answers hallucinate                  → raise CONFIDENCE_MIN_COSINE
 """
 
+import math
 import os
 from typing import List, Optional, Tuple
 
@@ -63,9 +64,68 @@ from src.indexing.embeddings import get_embedding_model
 # and off-topic questions overlap around 0.2–0.25 similarity; the confidence
 # check separates them far more cleanly (off-topic / unanswerable questions
 # retrieve at <= 0.50, answerable ones at >= 0.53).
+#
+# All three thresholds are TRUE COSINE SIMILARITY (-1..1), so they can be
+# compared with each other directly.
+#
+# The scope check computes cosine itself. The confidence check and source
+# filter read the score ChromaDB attaches to each retrieved chunk, which is
+# NOT cosine: llama-index's Chroma adapter reports exp(-cosine_distance),
+# i.e. exp(cosine - 1). See chroma_score_to_cosine() below.
+#
+# The confidence/source variables were renamed from CONFIDENCE_THRESHOLD and
+# SOURCE_MIN_SCORE (which held exp-scale values) so a value written for the
+# old scale can never be silently read as a cosine. Old -> new equivalents:
+#   CONFIDENCE_THRESHOLD=0.5  ->  CONFIDENCE_MIN_COSINE=0.307  (1 + ln 0.5)
+#   SOURCE_MIN_SCORE=0.35     ->  SOURCE_MIN_COSINE=-0.05      (1 + ln 0.35)
+#
+# SOURCE_MIN_COSINE was then raised from -0.05 to 0.25 (a deliberate no-op at
+# top_k=3). Across the 52 eval questions, every chunk that reaches this filter
+# (i.e. passed scope + confidence) scored >= 0.355 on the tuning set; chunks
+# below 0.25 only appear for questions already refused. It is kept below
+# CONFIDENCE_MIN_COSINE on purpose: above 0.307 the filter would start refusing
+# questions (all chunks removed), duplicating the confidence check. Re-tune it
+# against the wider candidate pool if top_k is increased (e.g. with a reranker).
 SCOPE_THRESHOLD = float(os.getenv("SCOPE_THRESHOLD", "0.2"))
-CONFIDENCE_THRESHOLD = float(os.getenv("CONFIDENCE_THRESHOLD", "0.5"))
-SOURCE_MIN_SCORE = float(os.getenv("SOURCE_MIN_SCORE", "0.35"))
+CONFIDENCE_MIN_COSINE = float(os.getenv("CONFIDENCE_MIN_COSINE", "0.307"))
+SOURCE_MIN_COSINE = float(os.getenv("SOURCE_MIN_COSINE", "0.25"))
+
+for _old_name in ("CONFIDENCE_THRESHOLD", "SOURCE_MIN_SCORE"):
+    if os.getenv(_old_name) is not None:
+        logger.warning(
+            f"{_old_name} is set but no longer used: it was on ChromaDB's "
+            "exp(cosine - 1) scale. Use CONFIDENCE_MIN_COSINE / "
+            "SOURCE_MIN_COSINE (true cosine) instead."
+        )
+
+
+def chroma_score_to_cosine(score: float) -> float:
+    """
+    Convert a ChromaDB retrieval score back to true cosine similarity.
+
+    The collection uses cosine distance (d = 1 - cosine), and
+    llama_index.vector_stores.chroma reports similarity as exp(-d):
+
+        score  = exp(-(1 - cosine)) = exp(cosine - 1)
+        cosine = ln(score) + 1
+
+    The transform is monotonic, so it never changes the ranking of chunks;
+    it only puts the score on the same scale as the scope check. Scores lie
+    in [e^-2, 1] ~= [0.135, 1], which maps back to cosine [-1, 1].
+    """
+    if score <= 0:
+        return -1.0
+    return math.log(score) + 1.0
+
+
+def cosine_to_chroma_score(cosine: float) -> float:
+    """
+    Inverse of chroma_score_to_cosine(): put a cosine on ChromaDB's
+    exp(cosine - 1) scale. The hybrid retriever computes cosine itself
+    (BM25-only chunks have no ChromaDB score) and reports it on this scale
+    so every chunk's .score means the same thing as before.
+    """
+    return math.exp(cosine - 1.0)
 
 
 # ── Reference phrases for scope checking ─────────────
@@ -233,8 +293,9 @@ class Guardrails:
         """
         Layer 2 + 3: Are the retrieved chunks relevant enough?
 
-        Checks the best chunk's score against CONFIDENCE_THRESHOLD,
-        then filters out any chunks below SOURCE_MIN_SCORE.
+        Converts each chunk's ChromaDB score to true cosine, checks the best
+        one against CONFIDENCE_MIN_COSINE, then filters out any chunks below
+        SOURCE_MIN_COSINE.
 
         Args:
             source_nodes: list of NodeWithScore from the retriever
@@ -255,20 +316,24 @@ class Guardrails:
                 ),
             )
 
-        # Get the best similarity score
-        scores = [node.score for node in source_nodes if node.score is not None]
-        if not scores:
+        # Get the best similarity, as true cosine (see chroma_score_to_cosine)
+        cosines = [
+            chroma_score_to_cosine(node.score)
+            for node in source_nodes
+            if node.score is not None
+        ]
+        if not cosines:
             # No scores available — let the LLM decide
             return True, source_nodes, None
 
-        best_score = max(scores)
-        logger.debug(f"Confidence check: best score = {best_score:.4f}")
+        best_cosine = max(cosines)
+        logger.debug(f"Confidence check: best cosine = {best_cosine:.4f}")
 
         # Layer 2: Is the best chunk relevant enough?
-        if best_score < CONFIDENCE_THRESHOLD:
+        if best_cosine < CONFIDENCE_MIN_COSINE:
             logger.info(
-                f"Low confidence (best={best_score:.4f} "
-                f"< threshold={CONFIDENCE_THRESHOLD})"
+                f"Low confidence (best cosine={best_cosine:.4f} "
+                f"< threshold={CONFIDENCE_MIN_COSINE})"
             )
             return (
                 False,
@@ -285,7 +350,10 @@ class Guardrails:
         filtered = []
         removed = 0
         for node in source_nodes:
-            if node.score is not None and node.score >= SOURCE_MIN_SCORE:
+            if (
+                node.score is not None
+                and chroma_score_to_cosine(node.score) >= SOURCE_MIN_COSINE
+            ):
                 filtered.append(node)
             else:
                 removed += 1
@@ -293,7 +361,7 @@ class Guardrails:
         if removed > 0:
             logger.info(
                 f"Source filtering: kept {len(filtered)}/{len(source_nodes)} "
-                f"chunks (removed {removed} below {SOURCE_MIN_SCORE})"
+                f"chunks (removed {removed} below cosine {SOURCE_MIN_COSINE})"
             )
 
         # Edge case: all chunks were filtered out
@@ -309,6 +377,38 @@ class Guardrails:
             )
 
         return True, filtered, None
+
+    def select_sources(
+        self, ranked_nodes: List[NodeWithScore], top_k: int
+    ) -> Tuple[bool, List[NodeWithScore], Optional[str], int]:
+        """
+        Layers 2 + 3 for a reranked candidate pool (hybrid retrieval).
+
+        The source filter runs on the whole pool BEFORE the top-k cut, so a
+        weak chunk the reranker liked is replaced by the next one instead of
+        just shrinking the context. The confidence check then runs on the
+        top-k chunks that would actually reach the LLM.
+
+        Returns (passed, nodes, message, displaced): displaced counts the
+        chunks in the reranked top-k that the source filter removed.
+        """
+        kept = [
+            node
+            for node in ranked_nodes
+            if node.score is not None
+            and chroma_score_to_cosine(node.score) >= SOURCE_MIN_COSINE
+        ]
+        kept_ids = {node.node.node_id for node in kept}
+        displaced = sum(
+            1 for node in ranked_nodes[:top_k] if node.node.node_id not in kept_ids
+        )
+        if displaced:
+            logger.info(
+                f"Source filtering: removed {displaced} of the reranked top "
+                f"{top_k} (cosine < {SOURCE_MIN_COSINE})"
+            )
+        passed, nodes, message = self.check_confidence(kept[:top_k])
+        return passed, nodes, message, displaced
 
     @staticmethod
     def _cosine_similarity(vector: np.ndarray, matrix: np.ndarray) -> np.ndarray:

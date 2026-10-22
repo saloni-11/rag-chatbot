@@ -11,7 +11,7 @@ STAGE 1 — Retrieval + guardrails (offline, deterministic, no API key)
     Guardrails  answerable questions let through, unanswerable and
                 out-of-scope questions declined (and by which layer)
     Latency     scope check and retrieval, p50 / p95
-  --sweep adds a grid search over SCOPE_THRESHOLD and CONFIDENCE_THRESHOLD.
+  --sweep adds a grid search over SCOPE_THRESHOLD and CONFIDENCE_MIN_COSINE (true cosine).
 
 STAGE 2 — Generation quality with RAGAS (needs GROQ_API_KEY)
   Runs the full pipeline on the answerable questions and scores the
@@ -34,6 +34,7 @@ HOW TO RUN:
   python src/evaluation/ragas_eval.py --stage retrieval # offline only
   python src/evaluation/ragas_eval.py --stage retrieval --sweep
   python src/evaluation/ragas_eval.py --judge-model qwen/qwen3.8-27b
+  python src/evaluation/ragas_eval.py --retrieval dense # the pre-hybrid pipeline
 """
 
 import argparse
@@ -145,9 +146,10 @@ def evaluate_retrieval(pipeline, dataset: list) -> dict:
     """
     Score the retriever and guardrails against the labelled dataset.
 
-    Retrieval metrics call the retriever directly, so they measure retriever
-    quality on its own; the guardrail decision is measured separately via
-    pipeline.retrieve(), which runs the three guardrail layers.
+    Retrieval metrics use the ranked chunks before the guardrails filter
+    them, so they measure retriever quality on its own; the guardrail
+    decision comes from the same pipeline.retrieve() call, so both are
+    measured on one retrieval (HNSW can return different chunks per call).
     """
     from src.rag import guardrails as g
 
@@ -156,11 +158,17 @@ def evaluate_retrieval(pipeline, dataset: list) -> dict:
         question = entry["question"]
 
         scope_sim, scope_match = pipeline.guardrails.scope_score(question)
-        nodes = pipeline.retriever.retrieve(question)
         stage = pipeline.retrieve(question)
+        nodes = stage["retrieved_nodes"]
+        if stage["guardrail_action"] == "scope_rejected":
+            # Rejected before retrieval; rank anyway so the threshold sweep
+            # knows this question's retrieval score
+            nodes = pipeline.rank(question)[0][: pipeline.top_k]
 
         ranked_files = [n.node.metadata.get("file_name", "unknown") for n in nodes]
-        scores = [n.score for n in nodes if n.score is not None]
+        cosines = [
+            g.chroma_score_to_cosine(n.score) for n in nodes if n.score is not None
+        ]
         expected = set(entry.get("source_files", []))
 
         first_hit = next(
@@ -175,7 +183,7 @@ def evaluate_retrieval(pipeline, dataset: list) -> dict:
                 "guardrail_action": stage["guardrail_action"],
                 "scope_similarity": round(scope_sim, 4),
                 "scope_best_match": scope_match,
-                "best_retrieval_score": round(max(scores), 4) if scores else None,
+                "best_retrieval_cosine": round(max(cosines), 4) if cosines else None,
                 "retrieved_files": ranked_files,
                 "expected_files": sorted(expected),
                 "first_relevant_rank": first_hit,
@@ -232,8 +240,8 @@ def evaluate_retrieval(pipeline, dataset: list) -> dict:
             ),
             "thresholds": {
                 "scope": g.SCOPE_THRESHOLD,
-                "confidence": g.CONFIDENCE_THRESHOLD,
-                "source_min_score": g.SOURCE_MIN_SCORE,
+                "confidence_min_cosine": g.CONFIDENCE_MIN_COSINE,
+                "source_min_cosine": g.SOURCE_MIN_COSINE,
             },
         },
         "latency": {
@@ -252,13 +260,13 @@ def evaluate_retrieval(pipeline, dataset: list) -> dict:
     return {"summary": summary, "per_question": rows}
 
 
-def sweep_thresholds(rows: list, source_min_score: float) -> list:
+def sweep_thresholds(rows: list, source_min_cosine: float) -> list:
     """
-    Grid-search SCOPE_THRESHOLD x CONFIDENCE_THRESHOLD using the scores
-    recorded in stage 1 — no re-embedding needed.
+    Grid-search SCOPE_THRESHOLD x CONFIDENCE_MIN_COSINE using the scores
+    recorded in stage 1 — no re-embedding needed. All values are true cosine.
 
     A question gets through when scope_similarity >= scope threshold and
-    best_retrieval_score >= confidence threshold (and >= source_min_score,
+    best_retrieval_cosine >= confidence threshold (and >= source_min_cosine,
     so at least one chunk survives filtering). Ranked by balanced accuracy:
     the mean of the answerable pass rate and the negative decline rate.
     """
@@ -266,16 +274,18 @@ def sweep_thresholds(rows: list, source_min_score: float) -> list:
     negatives = [r for r in rows if r["category"] != "answerable"]
 
     def passes(r, scope_t, conf_t):
-        best = r["best_retrieval_score"] or 0.0
+        best = r["best_retrieval_cosine"]
+        if best is None:
+            best = -1.0
         return (
             r["scope_similarity"] >= scope_t
             and best >= conf_t
-            and best >= source_min_score
+            and best >= source_min_cosine
         )
 
     results = []
     for scope_t in [round(0.10 + 0.05 * i, 2) for i in range(8)]:
-        for conf_t in [round(0.25 + 0.05 * i, 2) for i in range(8)]:
+        for conf_t in [round(0.10 + 0.05 * i, 2) for i in range(8)]:
             pass_rate = sum(passes(r, scope_t, conf_t) for r in answerable) / len(
                 answerable
             )
@@ -357,11 +367,14 @@ def _cache_key(entry: dict, pipeline) -> str:
             g.SYSTEM_PROMPT.get_template(),
             # The thresholds decide which chunks reach the LLM, so an answer
             # generated under different thresholds must not be reused.
-            [g.SCOPE_THRESHOLD, g.CONFIDENCE_THRESHOLD, g.SOURCE_MIN_SCORE],
+            [g.SCOPE_THRESHOLD, g.CONFIDENCE_MIN_COSINE, g.SOURCE_MIN_COSINE],
             pipeline.model,
             pipeline.top_k,
             pipeline.persist_dir,
         ]
+        # Hybrid retrieval changes which chunks reach the LLM. Dense keys are
+        # left as they were so existing cached answers stay valid.
+        + ([pipeline.retrieval_config()] if pipeline.hybrid is not None else [])
     )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
@@ -573,6 +586,12 @@ def main():
     parser.add_argument("--judge-model", default=DEFAULT_JUDGE_MODEL)
     parser.add_argument("--top-k", type=int, default=None)
     parser.add_argument(
+        "--retrieval",
+        choices=["hybrid", "dense"],
+        default=None,
+        help="retrieval mode (default: RETRIEVAL_MODE env var, else hybrid)",
+    )
+    parser.add_argument(
         "--persist-dir",
         default="./data/chroma_db",
         help="ChromaDB directory to evaluate (e.g. an older index to compare)",
@@ -582,7 +601,7 @@ def main():
 
     from src.indexing import vector_store
     from src.rag import guardrails as g
-    from src.rag.pipeline import DEFAULT_TOP_K, RAGPipeline
+    from src.rag.pipeline import DEFAULT_RETRIEVAL_MODE, DEFAULT_TOP_K, RAGPipeline
 
     dataset = load_eval_dataset(args.dataset)
     needs_llm = args.stage in ("generation", "all")
@@ -590,6 +609,7 @@ def main():
         top_k=args.top_k or DEFAULT_TOP_K,
         with_llm=needs_llm,
         persist_dir=args.persist_dir,
+        retrieval_mode=args.retrieval or DEFAULT_RETRIEVAL_MODE,
     )
 
     from importlib.metadata import PackageNotFoundError, version
@@ -615,6 +635,7 @@ def main():
             "index_dir": args.persist_dir,
             "index_chunks": index_chunks,
             "top_k": pipeline.top_k,
+            "retrieval": pipeline.retrieval_config(),
             "generator_model": pipeline.model,
             "judge_model": args.judge_model if needs_llm else None,
             "ragas_version": ragas_version,
@@ -627,7 +648,7 @@ def main():
         if args.sweep:
             report["threshold_sweep"] = sweep_thresholds(
                 report["retrieval_and_guardrails"]["per_question"],
-                g.SOURCE_MIN_SCORE,
+                g.SOURCE_MIN_COSINE,
             )
 
     if needs_llm:

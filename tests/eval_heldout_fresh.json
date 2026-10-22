@@ -1,0 +1,93 @@
+[
+  {
+    "id": "fr-gpt3-01",
+    "category": "answerable",
+    "question": "What is the context window size of the GPT-3 models, and roughly how many in-context examples does it typically fit?",
+    "ground_truth": "All GPT-3 models use a context window of n_ctx = 2048 tokens, which typically fits 10 to 100 examples (K) for few-shot evaluation.",
+    "source_files": [
+      "Language models are few shot learners.pdf"
+    ],
+    "source_location": "Section 2.4 (Evaluation), p. 10; also stated in clean chunks on pp. 6, 8 and 43"
+  },
+  {
+    "id": "fr-gpt3-02",
+    "category": "answerable",
+    "question": "What weaknesses does GPT-3 still show in text synthesis?",
+    "ground_truth": "GPT-3 samples sometimes repeat themselves semantically at the document level, lose coherence over sufficiently long passages, contradict themselves, and occasionally contain non-sequitur sentences or paragraphs.",
+    "source_files": [
+      "Language models are few shot learners.pdf"
+    ],
+    "source_location": "Section 5 (Limitations), p. 33; the answer appears in exactly one chunk"
+  },
+  {
+    "id": "fr-dataperf-01",
+    "category": "answerable",
+    "question": "What is the goal of DataPerf's data acquisition benchmark?",
+    "ground_truth": "Participants observe the pricing mechanisms, dataset summaries and evaluation datasets, and must design a data acquisition strategy within a budget constraint that maximises the trained classifier's performance on an evaluation dataset. Evaluation runs automatically on the DataPerf server.",
+    "source_files": [
+      "DataPerf Benchmarks for data centric AI Dev.pdf"
+    ],
+    "source_location": "Data acquisition benchmark design, pp. 8-9"
+  },
+  {
+    "id": "fr-dataperf-02",
+    "category": "answerable",
+    "question": "What must participants do in DataPerf's speech selection benchmark, and which languages does it cover?",
+    "ground_truth": "Participants design a training-set-selection algorithm that proposes the fewest possible samples from a large, noisy multilingual corpus of spoken words, to train keyword-spotting models for five target words in each of three languages: English, Portuguese and Indonesian (high-, medium- and low-resource). It is evaluated on mean F1 score.",
+    "source_files": [
+      "DataPerf Benchmarks for data centric AI Dev.pdf"
+    ],
+    "source_location": "Section 2.3.1 (Selection for Speech), 'Benchmark Design', p. 5"
+  },
+  {
+    "id": "fr-rag-01",
+    "category": "answerable",
+    "question": "What is retrieval granularity in a RAG system, and why does it matter?",
+    "ground_truth": "Retrieval granularity is the retrieval unit in which the corpus is indexed: document, passage, token, or other levels such as entity. It significantly affects effectiveness and efficiency, because it determines the storage space for the database and the computational cost of searching.",
+    "source_files": [
+      "Survey on RAG meeting LLMs.pdf"
+    ],
+    "source_location": "Section 2.1.2 (Retrieval Granularity), p. 3"
+  },
+  {
+    "id": "fr-rag-02",
+    "category": "answerable",
+    "question": "What four categories of training approaches for retrieval-augmented LLMs does the survey review?",
+    "ground_truth": "Training-free methods, independent training, sequential training, and joint training.",
+    "source_files": [
+      "Survey on RAG meeting LLMs.pdf"
+    ],
+    "source_location": "Section 3 (opening and 3.1 Training-free), p. 5"
+  },
+  {
+    "id": "fr-bert-01",
+    "category": "answerable",
+    "question": "What vocabulary does BERT use for its input embeddings, and what is the first token of every sequence?",
+    "ground_truth": "BERT uses WordPiece embeddings with a 30,000-token vocabulary. The first token of every sequence is the special classification token [CLS], whose final hidden state is used as the aggregate sequence representation for classification tasks.",
+    "source_files": [
+      "BERT- Pre-training of Deep Bidirectional Transformers for.pdf"
+    ],
+    "source_location": "Section 3 (Input/Output Representations), p. 4"
+  },
+  {
+    "id": "fr-unans-01",
+    "category": "unanswerable",
+    "question": "How does t-SNE reduce high-dimensional data to two dimensions for visualisation?",
+    "ground_truth": "",
+    "source_files": []
+  },
+  {
+    "id": "fr-unans-02",
+    "category": "unanswerable",
+    "question": "How is Gini impurity calculated when splitting a node in a decision tree?",
+    "ground_truth": "",
+    "source_files": []
+  },
+  {
+    "id": "fr-oos-01",
+    "category": "out_of_scope",
+    "question": "How do I fix a leaky tap in my kitchen?",
+    "ground_truth": "",
+    "source_files": []
+  }
+]
