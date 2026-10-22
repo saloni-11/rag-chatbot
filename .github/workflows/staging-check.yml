@@ -1,0 +1,109 @@
+# ============================================================
+# staging-check.yml — staging test of the production Docker image
+# ============================================================
+# Lives ONLY on the staging-check branch; never merge it.
+# Stands in for a staging HF Space (a second free Docker Space is
+# not available on this account). Builds the same Dockerfile, runs it
+# with HF_HUB_OFFLINE=1 and the Hugging Face hosts blocked, and checks
+# that a real query returns a reranked answer.
+#
+# Does not trigger CI or deploy: ci.yml runs on main / PRs to main,
+# deploy.yml only after "CI Pipeline" succeeds on main.
+# ============================================================
+
+name: Staging check
+
+on:
+  push:
+    branches: [staging-check]
+  workflow_dispatch:
+
+jobs:
+  staging:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image (same Dockerfile as the Space)
+        run: docker build --progress=plain -t sc:test . 2>&1 | tee build.log
+
+      - name: Reranker is baked into the image cache
+        run: |
+          docker run --rm --entrypoint sh sc:test -c '
+            echo "HF_HOME=$HF_HOME HF_HUB_OFFLINE=$HF_HUB_OFFLINE user=$(id -un)";
+            ls -ld /app/hf_cache;
+            ls /app/hf_cache/hub;
+            du -sh /app/hf_cache/hub/models--cross-encoder--ms-marco-MiniLM-L-6-v2' | tee cache.log
+
+      - name: Start container (2 CPUs, Hugging Face hosts blocked)
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          docker run -d --name app --cpus=2 --memory=16g -p 8000:8000 \
+            -e GROQ_API_KEY \
+            --add-host huggingface.co:127.0.0.1 \
+            --add-host hf.co:127.0.0.1 \
+            --add-host cdn-lfs.huggingface.co:127.0.0.1 \
+            --add-host cdn-lfs.hf.co:127.0.0.1 \
+            --add-host cdn-lfs-us-1.hf.co:127.0.0.1 \
+            --add-host cas-bridge.xethub.hf.co:127.0.0.1 \
+            sc:test
+          for i in $(seq 1 60); do
+            if curl -sf localhost:8000/api/health | tee health.json | grep -q '"healthy"'; then
+              echo; echo "healthy after ~$((i * 5)) s"; break
+            fi
+            sleep 5
+          done
+          docker logs app > startup.log 2>&1
+          grep -q '"healthy"' health.json || { cat startup.log; exit 1; }
+          grep "Hybrid retriever ready" startup.log
+          grep -q "reranker=cross-encoder/ms-marco-MiniLM-L-6-v2" startup.log
+
+      - name: In-container check (offline load, reranker active, retrieval latency)
+        run: |
+          python3 -c "
+          import json
+          d = json.load(open('tests/eval_dataset.json', encoding='utf-8'))
+          json.dump([e['question'] for e in d if e['category'] == 'answerable'][:10], open('q.json', 'w'))
+          "
+          docker cp q.json app:/tmp/questions.json
+          docker exec app python scripts/staging_check.py /tmp/questions.json | tee check.log
+
+      - name: Real queries through the API (end-to-end, paced)
+        run: |
+          python3 - <<'EOF' | tee e2e.log
+          import json, statistics, time, urllib.request
+          d = json.load(open("tests/eval_dataset.json", encoding="utf-8"))
+          qs = [e["question"] for e in d if e["category"] == "answerable"][:10]
+          qs.append(next(e["question"] for e in d if e["category"] == "out_of_scope"))
+          times = []
+          for q in qs:
+              req = urllib.request.Request(
+                  "http://localhost:8000/api/query",
+                  data=json.dumps({"question": q}).encode(),
+                  headers={"Content-Type": "application/json"},
+              )
+              t0 = time.perf_counter()
+              r = json.load(urllib.request.urlopen(req, timeout=180))
+              ms = (time.perf_counter() - t0) * 1000
+              if r["guardrail_action"] == "passed":
+                  times.append(ms)
+              print(f"{ms:8.0f} ms  {r['guardrail_action']:15s} "
+                    f"{[s['file_name'][:25] for s in r['sources']]}  {q[:50]}")
+              print("          answer:", r["answer"][:120].replace("\n", " "))
+              time.sleep(8)  # stay under Groq's per-minute token limit
+          print(f"\nend-to-end p50 {statistics.median(times):.0f} ms over {len(times)} answered queries")
+          EOF
+
+      - name: Runtime made no Hugging Face fetch
+        if: always()
+        run: |
+          docker logs app > runtime.log 2>&1 || true
+          ! grep -iE "Max retries exceeded.*huggingface|Connection refused.*hf|OfflineModeIsEnabled" runtime.log
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: staging-check-logs
+          path: "*.log"
