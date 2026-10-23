@@ -307,7 +307,21 @@ The baseline is the previous dense-only pipeline (ChromaDB top 3). Hybrid retrie
 - Candidates per retriever (10, 15, 20) and rerank pool size (10, 15, all) made no meaningful difference (precision 0.851–0.868), so the cheapest top setting was chosen.
 - Top-5 instead of top-3 raised recall by 0.021, two questions up and two down. Top-5 contains top-3, so the downs are judge noise. It cost 0.035 precision and two more chunks per prompt, so top-3 was kept.
 
-**Latency cost.** Reranking adds a model inference per candidate chunk. With 10 chunks and torch limited to 2 threads (to approximate the 2-vCPU free tier), retrieval went from about 20 ms to **about 0.9–1.2 s per query** (median, 32 tuning questions, measured on a laptop). That roughly doubles the previous ~1.1 s end-to-end median. It is an estimate for the Space, not a measurement of it. Reranking all ~24 fused chunks would cost 2.0–2.7 s, which is why the rerank pool is capped at 10 (`RERANK_POOL`).
+**Latency cost (measured on the live Space).** These are 10 paced queries to the deployed Space (free CPU tier) on 2026-10-23, all answered, with no rate-limit retries:
+
+| Live Space, n = 10 | Min | Median | Max |
+|---|---|---|---|
+| End-to-end, as a user experiences it (includes network) | 1.95 s | **2.3 s** | 2.66 s |
+| Server-side compute (the app's own per-query total) | 1.26 s | **1.6 s** | 1.98 s |
+
+Hybrid + rerank adds roughly **0.5 s of compute per query** over the dense pipeline: 1.09 s → 1.6 s server-side. It does not double response time. About 0.7 s of the 2.3 s a user waits is network and Hugging Face's proxy; that gap was steady on every query (0.67–0.77 s).
+
+The 0.5 s is approximate, for three reasons:
+- The dense baseline was measured on a different day, by running the pipeline on a local machine. Dense retrieval itself takes about 20 ms, so the hardware difference matters little.
+- Both figures include Groq's response time, which varies.
+- The end-to-end figures were measured from one location; users nearer Hugging Face's servers will see a smaller network gap.
+
+Reranking time can't be isolated on the Space, because its logs record only each query's total. Reranking all ~24 fused chunks instead of 10 roughly doubled the added time in local 2-thread tests, which is why the rerank pool is capped at 10 (`RERANK_POOL`).
 
 **The source filter now does real work.** It runs on the reranked pool before the top-3 cut. In tuning question rag-03, the reranker ranked the RAG survey's title-and-author page 2nd (cosine 0.183). The filter removed it, and the next passage took its place. It removed nothing on the fresh set.
 
@@ -393,7 +407,7 @@ Back-to-back queries exceed Groq's free-tier limit of 8,000 tokens per minute, a
 - **LLM-security paper.** Its PDF extracts with the spaces between words missing ("Asurveyonlargelanguagemodel..."), and its two questions score lowest (faithfulness 0.40, context recall 0.0). A layout-aware PDF parser would likely fix it.
 - **Passage-level retrieval.** On the first held-out set (dense pipeline), 5 of 12 questions retrieved the right paper but not the answer passage (context recall 0.458). Hybrid retrieval + reranking fixed some of these cases on the fresh set (see above). Q1 and Q6 still fail, because captions and page headers help the wrong chunks win the rerank.
 - **Thin-margin confidence check.** The fresh set's t-SNE question (unanswerable) got through in both pipelines. Its best chunk scored cosine 0.334 against the 0.307 threshold. Like the earlier held-out misses, a plausibly phrased on-topic question can sit just above the line. The threshold was deliberately **not** changed to catch it: the question is on the now-spent fresh set, and tuning to it would contaminate that result. Any fix will be a separate change, measured on new questions.
-- **Reranker latency.** The cross-encoder adds about a second per query on a 2-thread CPU (see above), which matters on the free CPU tier.
+- **Reranker latency.** On the live Space, hybrid retrieval with reranking adds about 0.5 s of compute per query, for a 2.3 s median wait (see above).
 - **Small held-out set.** Only 4 unanswerable and 4 out-of-scope held-out questions, so 2/4 and 4/4 are rough estimates. The confidence threshold sits close to the boundary: the two misses scored 0.510 and 0.512 against 0.5.
 - **Local vs deployed index.** All evaluation numbers in this README were measured on the local 562-chunk index. The deployed index is not that index: the Docker build re-runs ingestion and builds its own, and it is not identical. A build of the same Dockerfile on 2026-10-22 produced 553 chunks, and the deployed chunk scores differ slightly from the local ones. Production retrieval can therefore differ from what was measured. The cause of the 9-chunk difference is still being investigated.
 - **Shared rate limits.** Evaluation runs and the live demo share one Groq organisation's quota, so heavy evaluation can exhaust the daily token budget for the live app.
