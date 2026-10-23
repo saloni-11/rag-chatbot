@@ -1,3 +1,16 @@
+import ReactMarkdown from "react-markdown";
+import rehypeKatex from "rehype-katex";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import "katex/dist/katex.min.css";
+
+import { normalizeMathDelimiters } from "../lib/math";
+
+// Bot answers are markdown (bold, lists, tables) with LaTeX math.
+// Raw HTML in answers is not rendered (react-markdown's default).
+const REMARK_PLUGINS = [remarkGfm, [remarkMath, { singleDollarTextMath: false }]];
+const REHYPE_PLUGINS = [[rehypeKatex, { throwOnError: false, strict: "ignore" }]];
+
 const GUARDRAIL_BADGES = {
   passed: null,
   scope_rejected: {
@@ -49,7 +62,18 @@ export default function ChatMessage({ message }) {
             </span>
           )}
 
-          <div className="whitespace-pre-wrap">{message.content}</div>
+          {isUser ? (
+            <div className="whitespace-pre-wrap">{message.content}</div>
+          ) : (
+            <div className="markdown">
+              <ReactMarkdown
+                remarkPlugins={REMARK_PLUGINS}
+                rehypePlugins={REHYPE_PLUGINS}
+              >
+                {normalizeMathDelimiters(message.content)}
+              </ReactMarkdown>
+            </div>
+          )}
 
           {!isUser && message.sources && message.sources.length > 0 && (
             <div className="mt-2.5 flex items-center gap-1.5 text-xs text-slate-400">
