@@ -68,7 +68,7 @@ User Query
 | Keyword retrieval | rank-bm25 (BM25) | Indexes the same chunks as ChromaDB; fused with dense results by Reciprocal Rank Fusion |
 | Reranker | cross-encoder/ms-marco-MiniLM-L-6-v2 | Runs locally on CPU; reranks the top 10 fused candidates |
 | Backend API | FastAPI + Uvicorn | With Pydantic schemas |
-| Frontend | React (Vite + Tailwind CSS) | Chat UI with source panel |
+| Frontend | React (Vite + Tailwind CSS) | Chat UI with source panel; markdown + LaTeX math rendering (react-markdown, KaTeX) |
 | Containerisation | Docker + Docker Compose | Multi-stage build, health check |
 | CI/CD | GitHub Actions | Lint → test → Docker build → deploy |
 | Deployment | HuggingFace Spaces | Docker-based, auto-deploy on push |
@@ -211,9 +211,10 @@ pip install -r requirements-phase10.txt
 
 # 4. Set up environment variables
 cp .env.example .env
-# Edit .env and add:
+# Edit .env and set:
 #   GROQ_API_KEY=your-key-here
-#   HF_HUB_OFFLINE=1
+#   HF_HUB_OFFLINE=0   (first run, so the embedding model and reranker download;
+#                       set 1 afterwards to load them from the local cache)
 
 # 5. Add source documents to data/raw/
 #    (PDFs, markdown, or text files about AI/ML topics)
