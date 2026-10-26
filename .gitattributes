@@ -1,0 +1,7 @@
+# Evaluation data is checked out with LF line endings on every platform.
+# The frozen test sets are verified by sha256 of the file bytes; a Windows
+# checkout (core.autocrlf=true) would otherwise rewrite them to CRLF and the
+# on-disk hash would no longer match the recorded freeze hash.
+# Verify a freeze with:  sha256sum tests/eval_heldout_fresh.json   (expect 9c23efed…3158)
+tests/*.json text eol=lf
+data/*.json text eol=lf

@@ -303,7 +303,7 @@ There are three labelled question sets:
 
 > ⚠️ **Small sample.** There are only 7 answerable questions, so one judge verdict moves a mean by about **0.14**. Read the result as "roughly 0.45 → 0.71 precision, about 3 of 7 questions materially better", not as precise decimals.
 
-The baseline is the previous dense-only pipeline (ChromaDB top 3). Hybrid retrieval takes the top 15 from dense search and the top 15 from BM25, fuses them with Reciprocal Rank Fusion (k = 60), reranks the first 10 fused chunks with a cross-encoder, and sends the best 3 to the LLM. Both pipelines ran on the same questions, 3 times each, because ChromaDB's HNSW search is not deterministic. All 3 runs retrieved identical chunks for every question, so each range is a single value. The range covers retrieval variation only: each context was judged once, so judge noise is not in it. The set's sha256 was checked before and after every run.
+The baseline is the previous dense-only pipeline (ChromaDB top 3). Hybrid retrieval takes the top 15 from dense search and the top 15 from BM25, fuses them with Reciprocal Rank Fusion (k = 60), reranks the first 10 fused chunks with a cross-encoder, and sends the best 3 to the LLM. Both pipelines ran on the same questions, 3 times each, because ChromaDB's HNSW search is not deterministic. All 3 runs retrieved identical chunks for every answerable question, so each range is a single value. The range covers retrieval variation only: each context was judged once, so judge noise is not in it. The set's sha256 was checked before and after every run.
 
 | Answerable, n = 7 | Dense baseline | Hybrid + rerank |
 |---|---|---|
